@@ -93,7 +93,7 @@ function DropdownItem({ icon, label, badge, danger, onClick }: DropdownItemProps
           : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
       }`}
     >
-      <span className="opacity-60 flex-shrink-0">{icon}</span>
+      <span className="opacity-60 shrink-0">{icon}</span>
       <span className="flex-1">{label}</span>
       {badge && (
         <span className="bg-blue-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full leading-tight">
@@ -223,7 +223,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center h-14 gap-2">
             {/* Brand */}
-            <a href="#" className="flex items-center gap-2 flex-shrink-0 group mr-2">
+            <a href="#" className="flex items-center gap-2 shrink-0 group mr-2">
               <div className="w-8 h-8 bg-blue-600 group-hover:bg-blue-700 rounded-lg flex items-center justify-center text-white transition-colors duration-200">
                 <ViewInArOutlinedIcon fontSize="small" />
               </div>
@@ -300,9 +300,7 @@ export default function Navbar() {
                       href="#"
                       className="flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-100"
                     >
-                      <div
-                        className={`${bg} ${color} w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0`}
-                      >
+                      <div className={`${bg} ${color} w-8 h-8 rounded-lg flex items-center justify-center shrink-0`}>
                         {icon}
                       </div>
                       <div>
@@ -333,7 +331,7 @@ export default function Navbar() {
                     : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 w-32"
                 }`}
               >
-                <SearchIcon fontSize="small" className="text-gray-400 flex-shrink-0" style={{ fontSize: 16 }} />
+                <SearchIcon fontSize="small" className="text-gray-400 shrink-0" style={{ fontSize: 16 }} />
                 <input
                   type="text"
                   placeholder="Search..."
@@ -398,7 +396,7 @@ export default function Navbar() {
                   }
                 >
                   <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-gray-100 dark:border-gray-800 mb-1">
-                    <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-sm font-semibold text-blue-700 dark:text-blue-300 flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-sm font-semibold text-blue-700 dark:text-blue-300 shrink-0">
                       JD
                     </div>
                     <div>
@@ -443,7 +441,7 @@ export default function Navbar() {
         {/* Mobile menu */}
         <div
           className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out border-t border-gray-100 dark:border-gray-800 ${
-            mobileOpen ? "max-h-[700px] opacity-100" : "max-h-0 opacity-0"
+            mobileOpen ? "max-h-175 opacity-100" : "max-h-0 opacity-0"
           }`}
         >
           <div className="px-3 py-3 space-y-0.5 bg-white dark:bg-gray-950">

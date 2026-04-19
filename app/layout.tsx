@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${roboto.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        {/* 🔥 CLAVE: MUI Provider */}
+        {/* CLAVE: MUI Provider */}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeRegistry>{children}</ThemeRegistry>
         </AppRouterCacheProvider>

@@ -25,6 +25,7 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     localStorage.setItem("theme", mode);
+    document.documentElement.classList.toggle("dark", mode === "dark");
   }, [mode]);
 
   const theme = useMemo(() => getTheme(mode), [mode]);
@@ -32,13 +33,6 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
   const toggleTheme = () => {
     setMode((prev) => (prev === "light" ? "dark" : "light"));
   };
-
-  //! aplica en componentes tailwind
-  useEffect(() => {
-    localStorage.setItem("theme", mode);
-
-    document.documentElement.classList.toggle("dark", mode === "dark");
-  }, [mode]);
 
   return (
     <ThemeContext.Provider value={{ mode, toggleTheme }}>
