@@ -7,6 +7,6 @@ export const getTheme = (mode: "light" | "dark") =>
       dark: true,
     },
     palette: {
-      mode, // 🔥 clave para control manual
+      mode,
     },
   });

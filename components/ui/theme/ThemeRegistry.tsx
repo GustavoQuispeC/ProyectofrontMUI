@@ -33,10 +33,10 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
     setMode((prev) => (prev === "light" ? "dark" : "light"));
   };
 
+  //! aplica en componentes tailwind
   useEffect(() => {
     localStorage.setItem("theme", mode);
 
-    // 🔥 ESTO ES LO QUE TE FALTA
     document.documentElement.classList.toggle("dark", mode === "dark");
   }, [mode]);
 

@@ -147,11 +147,6 @@ export default function Navbar() {
   const navRef = useRef<HTMLDivElement>(null);
   const { mode, toggleTheme } = useThemeMode();
 
-  // Apply dark class to <html>
-  // useEffect(() => {
-  //   document.documentElement.classList.toggle("dark", darkMode);
-  // }, [darkMode]);
-
   // Close dropdowns on outside click
   useEffect(() => {
     function handleOutsideClick(e: MouseEvent) {
