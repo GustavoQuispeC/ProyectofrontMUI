@@ -146,6 +146,15 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // swap to true once auth is wired
   const navRef = useRef<HTMLDivElement>(null);
   const { mode, toggleTheme } = useThemeMode();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 8);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -218,8 +227,12 @@ export default function Navbar() {
   ];
 
   return (
-    <div ref={navRef}>
-      <nav className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 transition-colors duration-200">
+    <div ref={navRef} className="sticky top-0 z-40">
+      <nav
+        className={`bg-background border-b border-border-base transition-all duration-200 ${
+          scrolled ? "shadow-md" : "shadow-none"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center h-14 gap-2">
             {/* Brand */}
@@ -227,7 +240,7 @@ export default function Navbar() {
               <div className="w-8 h-8 bg-blue-600 group-hover:bg-blue-700 rounded-lg flex items-center justify-center text-white transition-colors duration-200">
                 <ViewInArOutlinedIcon fontSize="small" />
               </div>
-              <span className="text-[15px] font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+              <span className="text-[15px] font-semibold text-text-primary group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
                 AcmePro
               </span>
             </a>
@@ -264,7 +277,7 @@ export default function Navbar() {
                 <DropdownItem icon={<MonitorOutlinedIcon fontSize="small" />} label="Software suite" />
                 <DropdownItem icon={<StorageOutlinedIcon fontSize="small" />} label="Cloud services" />
                 <DropdownItem icon={<PhoneAndroidOutlinedIcon fontSize="small" />} label="Mobile apps" />
-                <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
+                <div className="my-1 border-t border-border-base" />
                 <DropdownItem icon={<StarBorderOutlinedIcon fontSize="small" />} label="Featured products" />
               </Dropdown>
 
@@ -304,8 +317,8 @@ export default function Navbar() {
                         {icon}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-800 dark:text-gray-200">{label}</div>
-                        <div className="text-[11px] text-gray-400 mt-0.5">{sub}</div>
+                        <div className="text-sm font-medium text-text-primary dark:text-text-secondary">{label}</div>
+                        <div className="text-[11px] text-text-tertiary mt-0.5">{sub}</div>
                       </div>
                     </a>
                   ))}
@@ -327,7 +340,7 @@ export default function Navbar() {
               <div
                 className={`hidden md:flex items-center gap-2 px-3 h-8 rounded-lg border transition-all duration-200 ${
                   searchFocused
-                    ? "border-blue-500 bg-white dark:bg-gray-900 w-48"
+                    ? "border-blue-500 bg-background w-48"
                     : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 w-32"
                 }`}
               >

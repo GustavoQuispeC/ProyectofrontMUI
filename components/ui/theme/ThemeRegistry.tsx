@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider, CssBaseline } from "@mui/material";
+import { ThemeProvider } from "@mui/material";
 import { useMemo, useState, useEffect, createContext, useContext } from "react";
 import { getTheme } from "./Theme";
 
@@ -36,10 +36,7 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
 
   return (
     <ThemeContext.Provider value={{ mode, toggleTheme }}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
     </ThemeContext.Provider>
   );
 }

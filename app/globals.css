@@ -3,17 +3,61 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@layer mui {
+  body {
+    background-color: inherit;
+    color: inherit;
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Superficies */
+  --surface: #ffffff;
+  --surface-secondary: #f9fafb; /* gray-50 */
+
+  /* Bordes */
+  --border: #f3f4f6; /* gray-100 */
+
+  /* Texto */
+  --text-primary: #111827; /* gray-900 */
+  --text-secondary: #6b7280; /* gray-500 */
+
+  /* Imagen placeholder */
+  --surface-image: #f3f4f6; /* gray-100 */
+}
+
+.dark {
+  --background: #121212;
+  --foreground: #ffffff;
+
+  --surface: #1e1e1e;
+  --surface-secondary: #121212;
+
+  --border: rgba(255, 255, 255, 0.08);
+
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af; /* gray-400 */
+
+  --surface-image: #2a2a2a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-border-base: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-surface-image: var(--surface-image);
   --font-sans: var(--font-roboto);
 }
 
 body {
   font-family: var(--font-roboto);
+  background-color: var(--background);
+  color: var(--foreground);
 }
