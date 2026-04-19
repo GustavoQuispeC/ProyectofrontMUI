@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@mui/material/styles";
 import { Roboto } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import theme from "./theme";
-import { CssBaseline } from "@mui/material";
+import ThemeRegistry from "@/components/ui/theme/ThemeRegistry";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -28,10 +26,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {/* 🔥 CLAVE: MUI Provider */}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            {children}
-          </ThemeProvider>
+          <ThemeRegistry>{children}</ThemeRegistry>
         </AppRouterCacheProvider>
       </body>
     </html>
