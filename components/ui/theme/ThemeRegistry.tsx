@@ -18,24 +18,19 @@ export const useThemeMode = () => {
   return context;
 };
 
-export default function ThemeRegistry({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<"light" | "dark">("light");
-  const [isHydrated, setIsHydrated] = useState(false);
+type ThemeRegistryProps = {
+  children: React.ReactNode;
+  initialMode: "light" | "dark";
+};
+
+export default function ThemeRegistry({ children, initialMode }: ThemeRegistryProps) {
+  const [mode, setMode] = useState<"light" | "dark">(initialMode);
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem("theme");
-    if (storedTheme === "dark" || storedTheme === "light") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setMode(storedTheme);
-    }
-    setIsHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isHydrated) return;
     localStorage.setItem("theme", mode);
+    document.cookie = `theme=${mode}; path=/; max-age=31536000; samesite=lax`;
     document.documentElement.classList.toggle("dark", mode === "dark");
-  }, [mode, isHydrated]);
+  }, [mode]);
 
   const theme = useMemo(() => getTheme(mode), [mode]);
 

@@ -2,7 +2,7 @@ import Stack from "@mui/material/Stack";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import NavbarBreadcrumbs from "./NavbarBreadcrumbs";
 import MenuButton from "./MenuButton";
-import ColorModeIconDropdown from "@/components/ui/theme/ColorModeIconDropdown";
+import ColorModeToggleButton from "@/components/ui/theme/ColorModeToggleButton";
 import dayjs from "dayjs";
 
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -44,7 +44,7 @@ export default function Header() {
           <NotificationsRoundedIcon />
         </MenuButton>
 
-        <ColorModeIconDropdown />
+        <ColorModeToggleButton />
       </Stack>
     </Stack>
   );
