@@ -34,7 +34,7 @@ export default function Footer() {
                     width={160}
                     height={60}
                     priority
-                    className="h-auto transition-transform duration-300 group-hover:scale-105 dark:brightness-110"
+                    className="h-auto w-auto transition-transform duration-300 group-hover:scale-105 dark:brightness-110"
                   />
                   <div className="absolute inset-0 bg-orange-500/0 transition-all duration-300 group-hover:bg-orange-500/10 rounded-xl blur-xl" />
                 </div>

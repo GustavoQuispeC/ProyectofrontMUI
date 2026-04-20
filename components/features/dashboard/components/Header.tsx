@@ -2,7 +2,7 @@ import Stack from "@mui/material/Stack";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import NavbarBreadcrumbs from "./NavbarBreadcrumbs";
 import MenuButton from "./MenuButton";
-import ColorModeIconDropdown from "../shared-theme/ColorModeIconDropdown";
+import ColorModeIconDropdown from "@/components/ui/theme/ColorModeIconDropdown";
 import dayjs from "dayjs";
 
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";

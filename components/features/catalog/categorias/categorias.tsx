@@ -43,8 +43,7 @@ function Card({ title, img, description }: CardProps) {
   return (
     <button
       type="button"
-      className="group relative flex flex-col overflow-hidden rounded-2xl text-left w-full h-full bg-surface border border-border-base"
-      shadow-sm
+      className="group relative flex flex-col overflow-hidden rounded-2xl text-left w-full h-full bg-surface border border-border-base shadow-sm"
     >
       {/* Imagen — Aumentada a h-36 (144px) para mejor visualización */}
       {/* Mantenemos el shrink-0 para que no se comprima */}

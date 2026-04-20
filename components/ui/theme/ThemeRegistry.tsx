@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
 import { useMemo, useState, useEffect, createContext, useContext } from "react";
 import { getTheme } from "./Theme";
 
@@ -18,15 +19,23 @@ export const useThemeMode = () => {
 };
 
 export default function ThemeRegistry({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<"light" | "dark">(() => {
-    if (typeof window === "undefined") return "light";
-    return localStorage.getItem("theme") === "dark" ? "dark" : "light";
-  });
+  const [mode, setMode] = useState<"light" | "dark">("light");
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme === "dark" || storedTheme === "light") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMode(storedTheme);
+    }
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
     localStorage.setItem("theme", mode);
     document.documentElement.classList.toggle("dark", mode === "dark");
-  }, [mode]);
+  }, [mode, isHydrated]);
 
   const theme = useMemo(() => getTheme(mode), [mode]);
 
@@ -36,7 +45,10 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
 
   return (
     <ThemeContext.Provider value={{ mode, toggleTheme }}>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline enableColorScheme />
+        {children}
+      </ThemeProvider>
     </ThemeContext.Provider>
   );
 }
