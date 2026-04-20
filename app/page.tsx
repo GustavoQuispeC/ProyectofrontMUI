@@ -89,7 +89,7 @@ export default function Home() {
                 {/* Panel */}
                 <div className="relative z-50 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                   {/* Header verde */}
-                  <div className="bg-gradient-to-r from-green-500 to-green-600 px-4 py-3 flex items-center justify-between">
+                  <div className="bg-linear-to-r from-green-500 to-green-600 px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-white">
                       <svg className="w-5 h-5" viewBox="0 0 32 32" fill="currentColor">
                         <path d="M16 0a16 16 0 0 0-13.84 24.08L0 32l8.16-2.16A16 16 0 1 0 16 0zm0 29.33a13.22 13.22 0 0 1-6.72-1.8l-.48-.28-4.84 1.28 1.3-4.78-.32-.5A13.27 13.27 0 1 1 16 29.33zm7.38-9.38c-.4-.2-2.36-1.17-2.73-1.3s-.63-.2-.9.2-1.04 1.3-1.28 1.56-.48.3-.84.1a10.94 10.94 0 0 1-3.36-2.06 12.7 12.7 0 0 1-2.36-3.02c-.24-.4 0-.62.18-.84s.42-.52.63-.8c.2-.28.26-.46.38-.76s.06-.58 0-.8c-.1-.24-.94-2.4-1.3-3.3s-.7-.7-.96-.7h-.82a1.6 1.6 0 0 0-1.18.56 4.93 4.93 0 0 0-1.44 3.66c0 2.16 1.56 4.27 1.76 4.56s3.1 4.72 7.55 6.6a25.37 25.37 0 0 0 2.52.94 6 6 0 0 0 2.76.18c.84-.12 2.5-1 2.85-1.9s.35-1.7.25-1.88-.36-.28-.75-.48z" />
@@ -106,7 +106,7 @@ export default function Home() {
                   </div>
 
                   {/* Lista tiendas */}
-                  <div className="p-2 min-w-[280px] max-w-[320px]">
+                  <div className="p-2 min-w-70 max-w-[320px]">
                     {TIENDAS.map((tienda) => (
                       <button
                         key={tienda.id}
@@ -131,7 +131,7 @@ export default function Home() {
             <button
               onClick={() => setShowMenu(!showMenu)}
               className={[
-                "bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-full",
+                "bg-linear-to-br from-green-500 to-green-600 text-white p-4 rounded-full",
                 "shadow-2xl transition-all hover:scale-110 active:scale-95 group relative",
                 showMenu ? "ring-4 ring-green-400/50" : "",
               ].join(" ")}
