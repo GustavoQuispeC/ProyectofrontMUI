@@ -31,11 +31,12 @@ export default function ThemeRegistry({ children, initialMode }: ThemeRegistryPr
     // Determinar el modo real en el cliente
     const stored = localStorage.getItem("theme");
     const clientMode = stored === "dark" ? "dark" : "light";
-    
+
     if (clientMode !== initialMode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMode(clientMode);
     }
-    
+
     setHydrated(true);
   }, [initialMode]);
 

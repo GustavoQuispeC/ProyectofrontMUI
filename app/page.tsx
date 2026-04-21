@@ -1,7 +1,6 @@
 "use client";
+import { Carousel, Navbar, Footer, Categorias, Marcas, Productos, Contactenos } from "@/components";
 
-import { Carousel, Navbar, Footer, Categorias, Marcas } from "@/components";
-import Productos from "@/components/features/catalog/productos/productos";
 import { ArrowUpward, FmdGood, Close } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 
@@ -62,6 +61,7 @@ export default function Home() {
         <Categorias />
         <Productos />
         <Marcas />
+        <Contactenos />
 
         {/* CONTROLES FLOTANTES */}
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
