@@ -1,6 +1,7 @@
 "use client";
 
 import { Carousel, Navbar, Footer, Categorias, Marcas } from "@/components";
+import Productos from "@/components/features/catalog/productos/productos";
 import { ArrowUpward, FmdGood, Close } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 
@@ -55,11 +56,11 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
-
       <main className="grow">
+        <Navbar />
         <Carousel images={imagenesBanner} />
         <Categorias />
+        <Productos />
         <Marcas />
 
         {/* CONTROLES FLOTANTES */}

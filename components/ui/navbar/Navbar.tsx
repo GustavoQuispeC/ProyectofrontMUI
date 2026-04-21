@@ -26,7 +26,9 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import ViewInArOutlinedIcon from "@mui/icons-material/ViewInArOutlined";
+import CartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { useThemeMode } from "../theme/ThemeRegistry";
+import { CartButton } from "@/components/features/catalog/cartdrawer/Cartdrawer";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -336,6 +338,8 @@ export default function Navbar() {
 
             {/* Right actions */}
             <div className="flex items-center gap-1 ml-auto">
+              <CartButton />
+
               {/* Search input */}
               <div
                 className={`hidden md:flex items-center gap-2 px-3 h-8 rounded-lg border transition-all duration-200 ${
