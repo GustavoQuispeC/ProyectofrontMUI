@@ -25,12 +25,27 @@ type ThemeRegistryProps = {
 
 export default function ThemeRegistry({ children, initialMode }: ThemeRegistryProps) {
   const [mode, setMode] = useState<"light" | "dark">(initialMode);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("theme", mode);
-    document.cookie = `theme=${mode}; path=/; max-age=31536000; samesite=lax`;
-    document.documentElement.classList.toggle("dark", mode === "dark");
-  }, [mode]);
+    // Determinar el modo real en el cliente
+    const stored = localStorage.getItem("theme");
+    const clientMode = stored === "dark" ? "dark" : "light";
+    
+    if (clientMode !== initialMode) {
+      setMode(clientMode);
+    }
+    
+    setHydrated(true);
+  }, [initialMode]);
+
+  useEffect(() => {
+    if (hydrated) {
+      localStorage.setItem("theme", mode);
+      document.cookie = `theme=${mode}; path=/; max-age=31536000; samesite=lax`;
+      document.documentElement.classList.toggle("dark", mode === "dark");
+    }
+  }, [mode, hydrated]);
 
   const theme = useMemo(() => getTheme(mode), [mode]);
 
@@ -38,9 +53,11 @@ export default function ThemeRegistry({ children, initialMode }: ThemeRegistryPr
     setMode((prev) => (prev === "light" ? "dark" : "light"));
   };
 
+  const currentMode = hydrated ? mode : initialMode;
+
   return (
-    <ThemeContext.Provider value={{ mode, toggleTheme }}>
-      <ThemeProvider theme={theme}>
+    <ThemeContext.Provider value={{ mode: currentMode, toggleTheme }}>
+      <ThemeProvider theme={getTheme(currentMode)}>
         <CssBaseline enableColorScheme />
         {children}
       </ThemeProvider>

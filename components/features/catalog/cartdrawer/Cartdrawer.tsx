@@ -98,18 +98,23 @@ export function CartButton() {
 /* ─── DrawerComponent ────────────────────────────────────── */
 export default function DrawerComponent() {
   const [isOpen, setIsOpen] = useState(false);
-  const [items, setItems] = useState<CartItem[]>(() => {
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [badgeQty, setBadgeQty] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    // Inicializar con datos del cliente
     const cart = readCart();
-    return cartToArray(cart);
-  });
-  const [badgeQty, setBadgeQty] = useState(() => {
-    const cart = readCart();
-    return getTotalQty(cart);
-  });
+    setItems(cartToArray(cart));
+    setBadgeQty(getTotalQty(cart));
+    setHydrated(true);
+  }, []);
 
   const onClose = () => setIsOpen(false);
 
   useEffect(() => {
+    if (!hydrated) return; // Evitar ejecutar hasta que esté hidratado
+
     const refresh = () => {
       const cart = readCart();
       setItems(cartToArray(cart));
@@ -131,7 +136,7 @@ export default function DrawerComponent() {
       window.removeEventListener(CART_EVENT, refresh);
       window.removeEventListener(DRAWER_OPEN_EVENT, onOpen);
     };
-  }, []);
+  }, [hydrated]);
 
   // Cerrar con Escape
   useEffect(() => {

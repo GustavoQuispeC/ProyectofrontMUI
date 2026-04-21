@@ -30,7 +30,6 @@ export default async function RootLayout({
     <html
       lang="en"
       className={`${roboto.variable} h-full antialiased ${initialMode === "dark" ? "dark" : ""}`}
-      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         {/* CLAVE: MUI Provider */}
