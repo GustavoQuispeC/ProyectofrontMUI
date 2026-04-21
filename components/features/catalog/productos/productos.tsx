@@ -7,6 +7,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import { DRAWER_OPEN_EVENT } from "../cartdrawer/Cartdrawer";
 
 interface Producto {
   id: number;
@@ -366,7 +367,7 @@ function AddToCartModal({ isOpen, onClose, producto }: AddToCartModalProps) {
           <button
             onClick={() => {
               onClose();
-              window.dispatchEvent(new Event("drawer:open"));
+              window.dispatchEvent(new Event(DRAWER_OPEN_EVENT));
             }}
             className="flex items-center justify-center gap-2 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition-all"
           >

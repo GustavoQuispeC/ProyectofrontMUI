@@ -4,6 +4,7 @@ import { Roboto } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { cookies } from "next/headers";
 import ThemeRegistry from "@/components/ui/theme/ThemeRegistry";
+import CartDrawer from "@/components/features/catalog/cartdrawer/Cartdrawer";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -34,7 +35,10 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         {/* CLAVE: MUI Provider */}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <ThemeRegistry initialMode={initialMode}>{children}</ThemeRegistry>
+          <ThemeRegistry initialMode={initialMode}>
+            {children}
+            <CartDrawer />
+          </ThemeRegistry>
         </AppRouterCacheProvider>
       </body>
     </html>

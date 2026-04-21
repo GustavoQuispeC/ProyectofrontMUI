@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 const CART_KEY = "shopping_cart";
 const CART_EVENT = "cart:updated";
-const DRAWER_OPEN_EVENT = "drawer:open";
+export const DRAWER_OPEN_EVENT = "drawer:open";
 
 type CartItem = {
   id: number;
