@@ -2,6 +2,7 @@
 import { AccessTime, Facebook, Instagram, Mail, X } from "@mui/icons-material";
 import Image from "next/image";
 import React from "react";
+import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
 
 export default function Footer() {
   const WHATSAPP_NUMBER = "51904193374";
@@ -11,7 +12,7 @@ export default function Footer() {
 
   return (
     <footer className="relative w-full border-t border-slate-200 bg-gray-200 text-slate-900 transition-colors duration-300 dark:border-transparent dark:bg-linear-to-br dark:from-slate-950 dark:via-slate-950 dark:to-blue-950 dark:text-slate-200">
-      {/* Patrón decorativo (Solo visible en Dark Mode) */}
+      {/* Patrón decorativo */}
       <div className="absolute inset-0 opacity-5 hidden dark:block pointer-events-none">
         <div
           className="absolute inset-0"
@@ -24,7 +25,7 @@ export default function Footer() {
       <div className="relative mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 2xl:px-12">
         <div className="py-12 sm:py-14">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
-            {/* Brand Section */}
+            {/* Brand */}
             <div className="lg:col-span-5">
               <a href="#" className="inline-block group">
                 <div className="relative">
@@ -36,7 +37,6 @@ export default function Footer() {
                     priority
                     className="h-auto w-auto transition-transform duration-300 group-hover:scale-105 dark:brightness-110"
                   />
-                  <div className="absolute inset-0 bg-orange-500/0 transition-all duration-300 group-hover:bg-orange-500/10 rounded-xl blur-xl" />
                 </div>
               </a>
 
@@ -65,7 +65,7 @@ export default function Footer() {
                         href="#"
                         className={`group inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-transparent hover:text-white hover:shadow-lg dark:border-white/20 dark:bg-white/5 ${s.color}`}
                       >
-                        <span className="transition-transform duration-300 group-hover:scale-110">{s.icon}</span>
+                        {s.icon}
                       </a>
                     </li>
                   ))}
@@ -73,12 +73,13 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Links Section */}
+            {/* Links */}
             <div className="lg:col-span-3">
               <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
                 <div className="h-6 w-1 rounded-full bg-linear-to-b from-orange-500 to-orange-600" />
                 Enlaces rápidos
               </h3>
+
               <ul className="space-y-3">
                 {[
                   { label: "Inicio", href: "#" },
@@ -93,20 +94,32 @@ export default function Footer() {
                       href={l.href}
                       className="group inline-flex items-center gap-2 px-1 text-slate-600 transition-all duration-200 hover:text-orange-600 dark:text-slate-300 dark:hover:text-white"
                     >
-                      <span className="h-1.5 w-1.5 rounded-full bg-slate-300 transition-colors group-hover:bg-orange-500 dark:bg-slate-600" />
-                      <span className="transition-transform duration-200 group-hover:translate-x-1">{l.label}</span>
+                      <span className="h-1.5 w-1.5 rounded-full bg-slate-300 group-hover:bg-orange-500 dark:bg-slate-600" />
+                      <span className="group-hover:translate-x-1 transition">{l.label}</span>
                     </a>
                   </li>
                 ))}
               </ul>
+
+              {/* 🔥 Acceso interno discreto */}
+              <div className="mt-4 pt-3 border-t border-dashed border-slate-300/40 dark:border-white/10">
+                <a
+                  href="/login-usuario"
+                  className="group inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-orange-500 dark:text-slate-500 dark:hover:text-orange-400 transition-all duration-200"
+                >
+                  <GridViewOutlinedIcon className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+                  <span className="opacity-70 group-hover:opacity-100">Acceso interno</span>
+                </a>
+              </div>
             </div>
 
-            {/* Contact Section */}
+            {/* Contacto */}
             <div className="lg:col-span-4">
               <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
                 <div className="h-6 w-1 rounded-full bg-linear-to-b from-orange-500 to-orange-600" />
                 Contacto directo
               </h3>
+
               <ul className="space-y-3">
                 <FooterContactItem label="Tienda Libertad" value="904 193 374" href={WA_LINK} variant="whatsapp" />
                 <FooterContactItem label="Tienda Salamanca" value="904 193 374" href={WA_LINK} variant="whatsapp" />
@@ -118,8 +131,7 @@ export default function Footer() {
                 />
               </ul>
 
-              {/* Horario con estilo reactivo */}
-              <div className="mt-4 border border-slate-200 bg-white p-3 shadow-sm transition-colors dark:border-blue-700/30 dark:bg-blue-900/30 rounded-xl">
+              <div className="mt-4 border border-slate-200 bg-white p-3 shadow-sm dark:border-blue-700/30 dark:bg-blue-900/30 rounded-xl">
                 <div className="mb-1.5 flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 dark:bg-blue-600/30">
                     <AccessTime className="h-4 w-4 text-orange-600 dark:text-blue-300" />
@@ -133,27 +145,22 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom */}
         <div className="border-t border-slate-200 py-6 dark:border-white/10">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:justify-between">
             <ul className="flex flex-wrap justify-center gap-5 text-sm md:justify-start">
               {["Privacidad", "Términos", "Seguridad"].map((label) => (
                 <li key={label}>
-                  <a
-                    href="#"
-                    className="text-slate-500 transition-colors hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-400"
-                  >
+                  <a href="#" className="text-slate-500 hover:text-orange-600 dark:text-slate-400">
                     {label}
                   </a>
                 </li>
               ))}
             </ul>
-            <div className="text-center md:text-right">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                © {new Date().getFullYear()}{" "}
-                <span className="font-semibold text-slate-700 dark:text-slate-300">Grupo Famet SAC</span>
-              </p>
-            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 text-center md:text-right">
+              © {new Date().getFullYear()}{" "}
+              <span className="font-semibold text-slate-700 dark:text-slate-300">Grupo Famet SAC</span>
+            </p>
           </div>
         </div>
       </div>

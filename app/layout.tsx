@@ -5,6 +5,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { cookies } from "next/headers";
 import ThemeRegistry from "@/components/ui/theme/ThemeRegistry";
 import CartDrawer from "@/components/cartdrawer/Cartdrawer";
+import ToastProvider from "@/components/ui/toast-provider/toast-provider";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -32,6 +33,8 @@ export default async function RootLayout({
         {/* CLAVE: MUI Provider */}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeRegistry initialMode={initialMode}>
+            <ToastProvider />
+
             {children}
             <CartDrawer />
           </ThemeRegistry>

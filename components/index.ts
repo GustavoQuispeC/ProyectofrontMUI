@@ -6,3 +6,4 @@ export { default as Marcas } from "./marcas/Marcas";
 export { default as Productos } from "./productos/Productos";
 export { default as CartDrawer } from "./cartdrawer/Cartdrawer";
 export { default as Contactenos } from "./contactenos/Contactenos";
+export { default as LoginUsuario } from "./usuario/login-usuario/LoginUsuario";
