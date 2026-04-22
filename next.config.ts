@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/v0/b/**",
       },
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com", // 👈 AGREGAR ESTE
+      },
+      {
+        protocol: "https",
+        hostname: "media.falabella.com", // 👈 NUEVO
+      },
     ],
   },
 };

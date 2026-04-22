@@ -28,7 +28,7 @@ import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import ViewInArOutlinedIcon from "@mui/icons-material/ViewInArOutlined";
 import CartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { useThemeMode } from "../theme/ThemeRegistry";
-import { CartButton } from "@/components/features/catalog/cartdrawer/Cartdrawer";
+import { CartButton } from "@/components/cartdrawer/Cartdrawer";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 

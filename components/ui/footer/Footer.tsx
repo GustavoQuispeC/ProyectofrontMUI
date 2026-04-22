@@ -10,7 +10,7 @@ export default function Footer() {
   )}`;
 
   return (
-    <footer className="relative w-full border-t border-slate-200 bg-slate-50 text-slate-900 transition-colors duration-300 dark:border-transparent dark:bg-linear-to-br dark:from-slate-950 dark:via-slate-950 dark:to-blue-950 dark:text-slate-200">
+    <footer className="relative w-full border-t border-slate-200 bg-gray-200 text-slate-900 transition-colors duration-300 dark:border-transparent dark:bg-linear-to-br dark:from-slate-950 dark:via-slate-950 dark:to-blue-950 dark:text-slate-200">
       {/* Patrón decorativo (Solo visible en Dark Mode) */}
       <div className="absolute inset-0 opacity-5 hidden dark:block pointer-events-none">
         <div
