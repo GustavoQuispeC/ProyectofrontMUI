@@ -19,7 +19,7 @@ const mainListItems = [
   { text: "Inicio", icon: <HomeRoundedIcon />, href: "/dashboard/Inicio" },
   { text: "Productos", icon: <ProductionQuantityLimitsIcon />, href: "/dashboard/productos" },
   { text: "Usuarios", icon: <GroupIcon />, href: "/dashboard/usuarios/listar" },
-  { text: "Empleados", icon: <AnalyticsRoundedIcon />, href: "/dashboard/empleados" },
+  { text: "Empleados", icon: <AnalyticsRoundedIcon />, href: "/dashboard/empleados/listar" },
   { text: "Clients", icon: <AccountBoxIcon />, href: "/dashboard/clientes" },
   { text: "Tasks", icon: <AssignmentRoundedIcon />, href: "/dashboard/tasks" },
 ];

@@ -11,7 +11,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 
 import { toastError, toastSuccess } from "@/shared/utils/toast";
-import { loginUsuarioApi } from "@/components/features/dashboard/usuario/usuario.service";
+import { loginUsuarioApi } from "@/features/dashboard/usuarios/usuario.service";
 
 type LoginPageProps = {
   forgotHref?: string;

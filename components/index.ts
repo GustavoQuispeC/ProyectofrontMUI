@@ -8,3 +8,4 @@ export { default as CartDrawer } from "./cartdrawer/Cartdrawer";
 export { default as Contactenos } from "./contactenos/Contactenos";
 export { default as LoginUsuario } from "./usuario/login-usuario/LoginUsuario";
 export { default as ListarUsuarios } from "./usuario/listar-usuarios/ListarUsuarios";
+export { default as ListarEmpleados } from "./empleados/listar-empleados/ListarEmpleados";

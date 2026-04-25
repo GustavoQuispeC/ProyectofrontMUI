@@ -39,6 +39,7 @@ export function useUsuarios() {
     queryFn: fetchUsuarios,
     staleTime: 1000 * 60 * 5, // 5 minutos
     retry: 1,
+    enabled: true,
   });
 
   return {
