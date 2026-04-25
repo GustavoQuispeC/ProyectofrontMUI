@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import ThemeRegistry from "@/components/ui/theme/ThemeRegistry";
 import CartDrawer from "@/components/cartdrawer/Cartdrawer";
 import ToastProvider from "@/components/ui/toast-provider/toast-provider";
+import { ReactQueryProvider } from "@/components/ui/providers/QueryClientProvider";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -32,12 +33,14 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         {/* CLAVE: MUI Provider */}
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <ThemeRegistry initialMode={initialMode}>
-            <ToastProvider />
+          <ReactQueryProvider>
+            <ThemeRegistry initialMode={initialMode}>
+              <ToastProvider />
 
-            {children}
-            <CartDrawer />
-          </ThemeRegistry>
+              {children}
+              <CartDrawer />
+            </ThemeRegistry>
+          </ReactQueryProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

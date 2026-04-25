@@ -12,17 +12,24 @@ export async function apiUsuario(url: string, options: RequestInit = {}) {
     headers.Authorization = `Bearer ${auth.token}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    const msg = error?.message || error?.error || error?.title || "Error en la petición";
+    if (!response.ok) {
+      const error = await response.json().catch(() => null);
+      const msg = error?.message || error?.error || error?.title || "Error en la petición";
+      throw new Error(msg);
+    }
 
-    throw new Error(msg);
+    return response.json();
+  } catch (err) {
+    // Relanza el error si es un AbortError (es normal cuando se desmonta)
+    if (err instanceof Error && err.name === "AbortError") {
+      throw err;
+    }
+    throw err;
   }
-
-  return response.json();
 }

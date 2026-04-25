@@ -7,7 +7,11 @@ import AppNavbar from "./components/AppNavbar";
 import Header from "./components/Header";
 import SideMenu from "./components/SideMenu";
 
-export default function Dashboard() {
+interface DashboardProps {
+  children?: React.ReactNode;
+}
+
+export default function Dashboard({ children }: DashboardProps) {
   return (
     <Box sx={{ display: "flex" }}>
       <SideMenu />
@@ -33,6 +37,7 @@ export default function Dashboard() {
           }}
         >
           <Header />
+          {children}
         </Stack>
       </Box>
     </Box>

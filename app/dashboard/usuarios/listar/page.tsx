@@ -4,7 +4,7 @@ import { ListarUsuarios } from "@/components";
 
 export default function ListarUsuariosPage() {
   return (
-    <div>
+    <div style={{ height: "100%", width: "100%" }}>
       <ListarUsuarios />
     </div>
   );

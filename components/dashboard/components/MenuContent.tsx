@@ -13,20 +13,21 @@ import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import GroupIcon from "@mui/icons-material/Group";
 import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
+import Link from "next/link";
 
 const mainListItems = [
-  { text: "Inicio", icon: <HomeRoundedIcon /> },
-  { text: "Productos", icon: <ProductionQuantityLimitsIcon /> },
-  { text: "Usuarios", icon: <GroupIcon /> },
-  { text: "Empleados", icon: <AnalyticsRoundedIcon /> },
-  { text: "Clients", icon: <AccountBoxIcon /> },
-  { text: "Tasks", icon: <AssignmentRoundedIcon /> },
+  { text: "Inicio", icon: <HomeRoundedIcon />, href: "/dashboard/Inicio" },
+  { text: "Productos", icon: <ProductionQuantityLimitsIcon />, href: "/dashboard/productos" },
+  { text: "Usuarios", icon: <GroupIcon />, href: "/dashboard/usuarios/listar" },
+  { text: "Empleados", icon: <AnalyticsRoundedIcon />, href: "/dashboard/empleados" },
+  { text: "Clients", icon: <AccountBoxIcon />, href: "/dashboard/clientes" },
+  { text: "Tasks", icon: <AssignmentRoundedIcon />, href: "/dashboard/tasks" },
 ];
 
 const secondaryListItems = [
-  { text: "Configuraciones", icon: <SettingsRoundedIcon /> },
-  { text: "Acerca de", icon: <InfoRoundedIcon /> },
-  { text: "Ayuda", icon: <HelpRoundedIcon /> },
+  { text: "Configuraciones", icon: <SettingsRoundedIcon />, href: "/dashboard/configuraciones" },
+  { text: "Acerca de", icon: <InfoRoundedIcon />, href: "/dashboard/acerca" },
+  { text: "Ayuda", icon: <HelpRoundedIcon />, href: "/dashboard/ayuda" },
 ];
 
 export default function MenuContent() {
@@ -35,20 +36,24 @@ export default function MenuContent() {
       <List dense>
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton selected={index === 0}>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
+            <Link href={item.href} passHref>
+              <ListItemButton selected={index === 0}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </Link>
           </ListItem>
         ))}
       </List>
       <List dense>
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
+            <Link href={item.href} passHref>
+              <ListItemButton>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </Link>
           </ListItem>
         ))}
       </List>
