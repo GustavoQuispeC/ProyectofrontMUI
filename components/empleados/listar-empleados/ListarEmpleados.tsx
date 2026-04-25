@@ -19,6 +19,35 @@ const getColumns = (): GridColDef[] => [
     headerName: "Código",
     width: 100,
   },
+  {
+    field: "fotoUrl",
+    headerName: "Foto",
+    width: 100,
+    sortable: false,
+    filterable: false,
+    renderCell: (params) => (
+      <Box
+        sx={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <img
+          src={params.value || "/Avatar.png"}
+          alt="foto empleado"
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+      </Box>
+    ),
+  },
   { field: "nombreCompleto", headerName: "Nombre y Apellidos", flex: 2, minWidth: 200 },
   {
     field: "fechaNacimiento",
