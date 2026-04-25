@@ -6,16 +6,20 @@ import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
-import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
+import GroupIcon from "@mui/icons-material/Group";
+import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
+import AccountBoxIcon from "@mui/icons-material/AccountBox";
 
 const mainListItems = [
   { text: "Inicio", icon: <HomeRoundedIcon /> },
-  { text: "Productos", icon: <AnalyticsRoundedIcon /> },
-  { text: "Clients", icon: <PeopleRoundedIcon /> },
+  { text: "Productos", icon: <ProductionQuantityLimitsIcon /> },
+  { text: "Usuarios", icon: <GroupIcon /> },
+  { text: "Empleados", icon: <AnalyticsRoundedIcon /> },
+  { text: "Clients", icon: <AccountBoxIcon /> },
   { text: "Tasks", icon: <AssignmentRoundedIcon /> },
 ];
 

@@ -4,15 +4,15 @@ import { jwtDecode } from "jwt-decode";
 const AUTH_KEY = "auth_usuario";
 const ROL_KEY = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
 
+//! Función para verificar si el código se está ejecutando en el cliente (navegador)
 type JwtPayload = {
-  [ROL_KEY]?: string | string[];
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string | string[];
   exp?: number;
 };
 
-// ── Utilidades privadas ──────────────────────────────────────────────────────
-
 const isClient = () => typeof window !== "undefined";
 
+//! Función para extraer el rol del token JWT
 const extractRolFromToken = (token: string): string => {
   try {
     const decoded = jwtDecode<JwtPayload>(token);
@@ -23,8 +23,7 @@ const extractRolFromToken = (token: string): string => {
   }
 };
 
-// ── API pública ──────────────────────────────────────────────────────────────
-
+//! Función para guardar los datos de autenticación
 export const saveAuthData = (data: ILoginResponse): void => {
   if (!isClient()) return;
 
@@ -41,6 +40,7 @@ export const saveAuthData = (data: ILoginResponse): void => {
   }
 };
 
+//! Función para obtener los datos del usuario autenticado
 export const getAuthUser = (): IUserData | null => {
   if (!isClient()) return null;
 
@@ -50,34 +50,41 @@ export const getAuthUser = (): IUserData | null => {
 
     const parsed: IUserData = JSON.parse(raw);
 
-    // Fallback: si el rol no fue guardado, lo extraemos del token
-    if (!parsed.rol && parsed.token) {
-      parsed.rol = extractRolFromToken(parsed.token);
-    }
-
-    return parsed;
+    return {
+      ...parsed,
+      rol: parsed.rol ?? extractRolFromToken(parsed.token),
+    };
   } catch (error) {
     console.error("❌ Error al leer sesión:", error);
     return null;
   }
 };
 
+//! Función para verificar si el usuario está autenticado
 export const isAuthenticated = (): boolean => {
-  const user = getAuthUser();
-  if (!user) return false;
+  if (!isClient()) return false;
+
+  const raw = localStorage.getItem(AUTH_KEY);
+  if (!raw) return false;
 
   try {
-    const decoded = jwtDecode<JwtPayload>(user.token);
-    if (!decoded.exp) return false;
+    const { token } = JSON.parse(raw) as IUserData;
+    const decoded = jwtDecode<JwtPayload>(token);
 
-    return decoded.exp * 1000 > Date.now();
+    return !!decoded.exp && decoded.exp * 1000 > Date.now();
   } catch {
     return false;
   }
 };
 
+//! Función para obtener el token de autenticación
+export const getToken = (): string | null => {
+  const user = getAuthUser();
+  return user?.token ?? null;
+};
+
+//! Función para cerrar sesión
 export const logout = (): void => {
   if (!isClient()) return;
   localStorage.removeItem(AUTH_KEY);
-  window.location.href = "/";
 };

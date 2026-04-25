@@ -1,5 +1,5 @@
 import { apiUsuario } from "@/lib/api-usuario";
-import { ListarUsuarios } from "@/features/usuario/usuario.types";
+import { ListarUsuarios } from "./usuario.types";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 

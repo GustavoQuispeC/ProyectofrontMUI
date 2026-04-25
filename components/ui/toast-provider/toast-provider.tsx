@@ -1,21 +1,13 @@
 "use client";
 
 import { Toaster, ToastBar } from "react-hot-toast";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 export default function ToastProvider() {
-  const { theme } = useTheme();
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    setIsDark(theme === "dark");
-  }, [theme]);
-
-  const bg = isDark ? "#1e1e2e" : "#ffffff";
-  const color = isDark ? "#e2e8f0" : "#1e293b";
-  const border = isDark ? "1px solid #334155" : "1px solid #e2e8f0";
-  const shadow = isDark ? "0 4px 20px rgba(0,0,0,0.4)" : "0 4px 20px rgba(0,0,0,0.08)";
+  // 🎯 Estilos FIJOS (modo claro siempre)
+  const bg = "#ffffff";
+  const color = "#1e293b";
+  const border = "1px solid #e2e8f0";
+  const shadow = "0 4px 20px rgba(0,0,0,0.08)";
 
   return (
     <>

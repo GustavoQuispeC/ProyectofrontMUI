@@ -40,7 +40,7 @@ export default function Header() {
               textField: {
                 size: "small",
                 sx: {
-                  width: 150,
+                  width: 155,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "8px",
                     fontSize: "0.8125rem", // 13px — igual que los breadcrumbs
@@ -61,7 +61,12 @@ export default function Header() {
               // icono del calendario alineado
               openPickerButton: {
                 size: "small",
-                sx: { color: "text.secondary" },
+                sx: {
+                  color: "text.secondary",
+                  "&:hover": {
+                    color: "text.primary",
+                  },
+                },
               },
             }}
           />
