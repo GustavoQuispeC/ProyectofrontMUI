@@ -1,3 +1,4 @@
+"use client";
 import { styled } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
@@ -9,6 +10,9 @@ import Tooltip from "@mui/material/Tooltip";
 import SelectContent from "./SelectContent";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { IUserData } from "@/shared/auth/types/IAuth";
+import { useEffect, useState } from "react";
 
 const drawerWidth = 240;
 
@@ -26,6 +30,17 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export default function SideMenu() {
+  const [usuario, setUsuario] = useState<IUserData | null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const data = getAuthUser();
+      setUsuario(data);
+    };
+
+    loadUser();
+  }, []);
+
   return (
     <Drawer
       variant="permanent"
@@ -75,8 +90,8 @@ export default function SideMenu() {
       >
         <Tooltip title="Ver perfil" placement="top">
           <Avatar
-            alt="Riley Carter"
-            src="./Avatar.png"
+            alt={usuario?.nombreCompleto || "Usuario"}
+            src={usuario?.fotoUrl || "/Avatar.png"}
             sx={{
               width: 32,
               height: 32,
@@ -85,12 +100,16 @@ export default function SideMenu() {
               cursor: "pointer",
               border: "1px solid",
               borderColor: "divider",
-              // fallback con iniciales si no carga la imagen
+
               bgcolor: "primary.100",
               color: "primary.800",
             }}
           >
-            RC
+            {usuario?.nombreCompleto
+              ?.split(" ")
+              .map((n) => n[0])
+              .slice(0, 2)
+              .join("") || "US"}
           </Avatar>
         </Tooltip>
 
@@ -105,7 +124,7 @@ export default function SideMenu() {
               textOverflow: "ellipsis",
             }}
           >
-            Riley Carter
+            {usuario?.nombreCompleto ?? "Usuario"}
           </Typography>
           <Typography
             variant="caption"
@@ -117,7 +136,7 @@ export default function SideMenu() {
               display: "block",
             }}
           >
-            riley@email.com
+            {usuario?.email ?? "usuario@email.com"}
           </Typography>
         </Box>
 

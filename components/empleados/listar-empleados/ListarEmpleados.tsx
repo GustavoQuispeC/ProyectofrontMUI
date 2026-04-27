@@ -11,7 +11,7 @@ import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { esES } from "@mui/x-data-grid/locales";
 import { useEffect, useMemo, useState } from "react";
 import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
-import Image from "next/image";
+
 const getColumns = (): GridColDef[] => [
   {
     field: "codigoEmpleado",
@@ -24,22 +24,27 @@ const getColumns = (): GridColDef[] => [
     width: 100,
     sortable: false,
     filterable: false,
+    headerAlign: "center",
     renderCell: (params) => (
       <Box
         sx={{
-          width: 40,
-          height: 40,
-          position: "relative", // 👈 necesario para fill
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <Image
+        <Box
+          component="img"
           src={params.value || "/Avatar.png"}
           alt="foto empleado"
-          fill // ocupa todo el contenedor
-          sizes="40px"
-          style={{
+          sx={{
+            width: 40,
+            height: 40,
             borderRadius: "50%",
             objectFit: "cover",
+            display: "block",
           }}
         />
       </Box>
@@ -50,7 +55,6 @@ const getColumns = (): GridColDef[] => [
     field: "fechaNacimiento",
     headerName: "F. Nacimiento",
     minWidth: 120,
-    //flex: 1,
   },
   {
     field: "edad",

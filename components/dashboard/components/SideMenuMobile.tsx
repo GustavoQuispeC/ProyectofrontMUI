@@ -1,4 +1,4 @@
-import Avatar from "@mui/material/Avatar";
+"use client";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Drawer, { drawerClasses } from "@mui/material/Drawer";
@@ -8,6 +8,11 @@ import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import MenuButton from "./MenuButton";
 import MenuContent from "./MenuContent";
+import { IUserData } from "@/shared/auth/types/IAuth";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Box from "@mui/material/Box";
 
 interface SideMenuMobileProps {
   open: boolean | undefined;
@@ -15,6 +20,17 @@ interface SideMenuMobileProps {
 }
 
 export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobileProps) {
+  const [usuario, setUsuario] = useState<IUserData | null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const data = getAuthUser();
+      setUsuario(data);
+    };
+
+    loadUser();
+  }, []);
+
   return (
     <Drawer
       anchor="right"
@@ -36,11 +52,30 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
       >
         <Stack direction="row" sx={{ p: 2, pb: 0, gap: 1 }}>
           <Stack direction="row" sx={{ gap: 1, alignItems: "center", flexGrow: 1, p: 1 }}>
-            <Avatar sizes="small" alt="Riley Carter" src="/Avatar.png" sx={{ width: 24, height: 24 }} />
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                position: "relative",
+              }}
+            >
+              <Image
+                src={usuario?.fotoUrl || "/Avatar.png"}
+                alt="usuario"
+                fill
+                sizes="32px"
+                style={{
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+            </Box>
+
             <Typography component="p" variant="h6">
-              Riley Carter
+              {usuario?.rol ?? "Usuario"}
             </Typography>
           </Stack>
+
           <MenuButton showBadge>
             <NotificationsRoundedIcon />
           </MenuButton>
@@ -52,7 +87,7 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
         </Stack>
         <Stack sx={{ p: 2 }}>
           <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
-            Logout
+            Cerrar sesión
           </Button>
         </Stack>
       </Stack>

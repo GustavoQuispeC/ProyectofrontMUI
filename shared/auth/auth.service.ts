@@ -48,11 +48,11 @@ export const getAuthUser = (): IUserData | null => {
     const raw = localStorage.getItem(AUTH_KEY);
     if (!raw) return null;
 
-    const parsed: IUserData = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as ILoginResponse;
 
     return {
       ...parsed,
-      rol: parsed.rol ?? extractRolFromToken(parsed.token),
+      rol: extractRolFromToken(parsed.token),
     };
   } catch (error) {
     console.error("❌ Error al leer sesión:", error);
