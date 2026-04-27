@@ -10,43 +10,58 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { esES } from "@mui/x-data-grid/locales";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const getColumns = (): GridColDef[] => [
   {
     field: "numeroDocumento",
-    headerName: "N° Documento",
+    headerName: "N° DOCUMENTO",
     width: 130,
   },
   {
     field: "nombreEmpleado",
-    headerName: "Nombre",
+    headerName: "NOMBRES Y APELLIDOS",
     width: 220,
     flex: 1,
   },
   {
     field: "email",
-    headerName: "Correo",
+    headerName: "CORREO",
     width: 220,
     flex: 1,
   },
   {
     field: "roles",
-    headerName: "Roles",
+    headerName: "ROL",
     width: 150,
     renderCell: (params) => params.value?.join(", "),
   },
   {
     field: "isActive",
-    headerName: "Estado",
+    headerName: "ESTADO",
     width: 120,
-    renderCell: (params) => (
-      <Chip label={params.value ? "Activo" : "Inactivo"} color={params.value ? "success" : "error"} size="small" />
-    ),
+    renderCell: (params) => {
+      const isActive = params.value;
+
+      return (
+        <Chip
+          label={isActive ? "Activo" : "Inactivo"}
+          size="small"
+          sx={{
+            width: 90,
+            justifyContent: "center",
+            fontWeight: 500,
+            // estilo tipo Alert
+            bgcolor: isActive ? "success.light" : "error.light",
+            color: isActive ? "success.contrastText" : "error.contrastText",
+          }}
+        />
+      );
+    },
   },
   {
     field: "actions",
-    headerName: "Acciones",
+    headerName: "ACCIONES",
     width: 130,
     sortable: false,
     disableColumnMenu: true,
@@ -72,14 +87,25 @@ const getColumns = (): GridColDef[] => [
   },
 ];
 
-const paginationModel = { page: 0, pageSize: 5 };
+const paginationModel = { page: 0, pageSize: 10 };
+const gridInitialState = { pagination: { paginationModel } };
 
 export default function ListarUsuariosDataTable() {
   const { usuarios, loading } = useUsuarios();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      setMounted(true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const localeText = useMemo(() => esES.components.MuiDataGrid.defaultProps.localeText, []);
 
   const columns = useMemo(() => getColumns(), []);
+
+  if (!mounted) return null;
 
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>
@@ -88,7 +114,7 @@ export default function ListarUsuariosDataTable() {
         columns={columns}
         getRowId={(row) => row.numeroDocumento}
         loading={loading}
-        initialState={{ pagination: { paginationModel } }}
+        initialState={gridInitialState}
         pageSizeOptions={[5, 10]}
         localeText={localeText}
         sx={{

@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "media.falabella.com", // 👈 NUEVO
       },
+      {
+        protocol: "https",
+        hostname: "st2.depositphotos.com",
+      },
     ],
   },
 };
