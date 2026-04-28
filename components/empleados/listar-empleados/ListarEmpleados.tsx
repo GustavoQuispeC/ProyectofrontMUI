@@ -20,7 +20,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { useEliminarEmpleado } from "@/features/dashboard/empleado/hooks/useEliminarEmpleado";
-
+import { useRouter } from "next/navigation";
 //! Componente para mostrar la imagen con un loader mientras se carga
 interface Props {
   src?: string;
@@ -73,7 +73,10 @@ export function ImageWithLoader({ src, alt }: Props) {
 }
 
 //! Función para obtener las columnas de la tabla de empleados
-const getColumns = (onDelete: (row: EmpleadosListar) => void): GridColDef<EmpleadosListar>[] => [
+const getColumns = (
+  onDelete: (row: EmpleadosListar) => void,
+  onView: (row: EmpleadosListar) => void,
+): GridColDef<EmpleadosListar>[] => [
   {
     field: "codigoEmpleado",
     headerName: "CÓDIGO",
@@ -147,7 +150,7 @@ const getColumns = (onDelete: (row: EmpleadosListar) => void): GridColDef<Emplea
     renderCell: (params: GridRenderCellParams<EmpleadosListar>) => (
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%" }}>
         <Tooltip title="Ver">
-          <IconButton size="small" color="info" onClick={() => console.log("Ver", params.row)}>
+          <IconButton size="small" color="info" onClick={() => onView(params.row)}>
             <RemoveRedEyeOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -179,7 +182,8 @@ export default function ListarEmpleadosDataTable() {
   const [mounted, setMounted] = useState(false); // Estado para controlar el montaje del componente y evitar renderizados prematuros
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<EmpleadosListar | null>(null);
-  const { eliminarEmpleado, loading: deleting } = useEliminarEmpleado();
+  const { eliminarEmpleado } = useEliminarEmpleado();
+  const router = useRouter();
 
   const handleOpenDialog = (row: EmpleadosListar) => {
     setSelectedRow(row);
