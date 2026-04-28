@@ -1,30 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
-import { EmpleadosListar } from "../empleado.types";
 import { listarEmpleadosApi } from "../empleado.service";
+import { useQuery } from "@tanstack/react-query";
 
 export function useEmpleados() {
-  const [empleados, setEmpleados] = useState<EmpleadosListar[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: empleados = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["empleados"],
+    queryFn: listarEmpleadosApi,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    retry: 1,
+    enabled: true,
+  });
 
-  const fetchEmpleados = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const data = await listarEmpleadosApi();
-      setEmpleados(data ?? []);
-    } catch (err) {
-      console.error("Error al obtener empleados:", err);
-      setError("Error al cargar empleados");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchEmpleados();
-  }, [fetchEmpleados]);
-
-  return { empleados, loading, error, refetch: fetchEmpleados };
+  return {
+    empleados,
+    loading,
+    error: error?.message || null,
+    refetch,
+  };
 }

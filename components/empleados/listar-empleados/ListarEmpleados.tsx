@@ -1,5 +1,5 @@
 "use client";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
@@ -11,8 +11,69 @@ import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { esES } from "@mui/x-data-grid/locales";
 import { useEffect, useMemo, useState } from "react";
 import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
+import CircularProgress from "@mui/material/CircularProgress";
+import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import { useEliminarEmpleado } from "@/features/dashboard/empleado/hooks/useEliminarEmpleado";
 
-const getColumns = (): GridColDef[] => [
+//! Componente para mostrar la imagen con un loader mientras se carga
+interface Props {
+  src?: string;
+  alt?: string;
+}
+//! Componente para mostrar la imagen con un loader mientras se carga
+export function ImageWithLoader({ src, alt }: Props) {
+  const [loading, setLoading] = useState(true);
+
+  return (
+    <Box
+      sx={{
+        width: 40,
+        height: 40,
+        position: "relative",
+      }}
+    >
+      {loading && (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "rgba(255,255,255,0.6)",
+            borderRadius: "50%",
+          }}
+        >
+          <CircularProgress size={20} />
+        </Box>
+      )}
+
+      <Box
+        component="img"
+        src={src || "/Avatar.png"}
+        alt={alt}
+        onLoad={() => setLoading(false)}
+        onError={() => setLoading(false)}
+        sx={{
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          objectFit: "cover",
+          display: loading ? "none" : "block",
+        }}
+      />
+    </Box>
+  );
+}
+
+//! Función para obtener las columnas de la tabla de empleados
+const getColumns = (onDelete: (row: EmpleadosListar) => void): GridColDef<EmpleadosListar>[] => [
   {
     field: "codigoEmpleado",
     headerName: "CÓDIGO",
@@ -35,18 +96,7 @@ const getColumns = (): GridColDef[] => [
           justifyContent: "center",
         }}
       >
-        <Box
-          component="img"
-          src={params.value || "/Avatar.png"}
-          alt="foto empleado"
-          sx={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            objectFit: "cover",
-            display: "block",
-          }}
-        />
+        <ImageWithLoader src={params.value} alt="foto empleado" />
       </Box>
     ),
   },
@@ -94,7 +144,7 @@ const getColumns = (): GridColDef[] => [
     width: 130,
     sortable: false,
     disableColumnMenu: true,
-    renderCell: (params) => (
+    renderCell: (params: GridRenderCellParams<EmpleadosListar>) => (
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%" }}>
         <Tooltip title="Ver">
           <IconButton size="small" color="info" onClick={() => console.log("Ver", params.row)}>
@@ -106,23 +156,42 @@ const getColumns = (): GridColDef[] => [
             <ModeEditOutlineOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Eliminar">
-          <IconButton size="small" color="error" onClick={() => console.log("Eliminar", params.row)}>
-            <DeleteForeverOutlinedIcon fontSize="small" />
-          </IconButton>
+        <Tooltip title={params.row.isActive ? "Eliminar" : "No se puede eliminar un empleado inactivo"}>
+          <span>
+            <IconButton size="small" color="error" disabled={!params.row.isActive} onClick={() => onDelete(params.row)}>
+              <DeleteForeverOutlinedIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
       </Box>
     ),
   },
 ];
 
-const paginationModel = { page: 0, pageSize: 10 };
+//! Componente principal para listar los empleados en una tabla
+const paginationModel = { page: 0, pageSize: 20 };
+
+//! Se define el estado inicial de la paginación para el DataGrid
 const gridInitialState = { pagination: { paginationModel } };
 
 export default function ListarEmpleadosDataTable() {
   const { empleados, loading } = useEmpleados();
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false); // Estado para controlar el montaje del componente y evitar renderizados prematuros
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<EmpleadosListar | null>(null);
+  const { eliminarEmpleado, loading: deleting } = useEliminarEmpleado();
 
+  const handleOpenDialog = (row: EmpleadosListar) => {
+    setSelectedRow(row);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedRow(null);
+  };
+
+  //! useEffect para establecer el estado de montaje después del primer renderizado, utilizando requestAnimationFrame para asegurar que se ejecute después de que el componente esté completamente montado
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       setMounted(true);
@@ -132,19 +201,19 @@ export default function ListarEmpleadosDataTable() {
 
   const localeText = useMemo(() => esES.components.MuiDataGrid.defaultProps.localeText, []);
 
-  const columns = useMemo(() => getColumns(), []);
+  const columns = useMemo(() => getColumns(handleOpenDialog), []); //useMemo para memorizar las columnas y evitar que se vuelvan a crear en cada renderizado
 
   if (!mounted) return null;
 
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>
-      <DataGrid
+      <DataGrid<EmpleadosListar>
         rows={empleados}
         columns={columns}
         getRowId={(row) => row.numeroDocumento}
         loading={loading}
         initialState={gridInitialState}
-        pageSizeOptions={[5, 10]}
+        pageSizeOptions={[5, 10, 20]}
         localeText={localeText}
         sx={{
           border: 0,
@@ -157,6 +226,31 @@ export default function ListarEmpleadosDataTable() {
           },
         }}
       />
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            ¿Seguro que deseas eliminar a <strong>{selectedRow?.nombreCompleto}</strong>?
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancelar</Button>
+
+          <Button
+            color="error"
+            onClick={() => {
+              if (!selectedRow) return;
+
+              eliminarEmpleado(selectedRow.id);
+              handleCloseDialog();
+            }}
+          >
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

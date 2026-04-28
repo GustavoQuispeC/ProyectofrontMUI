@@ -5,14 +5,14 @@ export interface EmpleadosListar {
   apellidos: string;
   tipoDocumento: string;
   numeroDocumento: string;
-  fechaNacimiento: Date;
+  fechaNacimiento: string | Date;
   edad: number;
   genero: string;
   estadoCivil: string;
   correo: string;
   telefonoMovil: string;
   direccion: string;
-  fotoUrl: null;
+  fotoUrl: string | null;
   codigoEmpleado: string;
   cargoActual: string;
   salarioActual: number;

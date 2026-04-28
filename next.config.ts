@@ -11,11 +11,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "encrypted-tbn0.gstatic.com", // 👈 AGREGAR ESTE
+        hostname: "encrypted-tbn0.gstatic.com",
       },
       {
         protocol: "https",
-        hostname: "media.falabella.com", // 👈 NUEVO
+        hostname: "media.falabella.com",
       },
       {
         protocol: "https",
