@@ -197,7 +197,7 @@ export default function ListarEmpleadosDataTable() {
 
   const handleView = useCallback(
     (row: EmpleadosListar) => {
-      router.push(`/dashboard/empleados/${row.numeroDocumento}`);
+      router.push(`/dashboard/empleados/${row.id}`);
     },
     [router],
   );

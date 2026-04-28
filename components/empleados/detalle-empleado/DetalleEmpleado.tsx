@@ -355,5 +355,3 @@ export default function DetalleEmpleado({ id }: Props) {
     </Box>
   );
 }
-
-//! Componente para mostrar el detalle completo de un empleado, con secciones bien definidas y diseño limpio. Incluye manejo de carga y errores.
