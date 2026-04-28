@@ -9,7 +9,7 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { esES } from "@mui/x-data-grid/locales";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
 import CircularProgress from "@mui/material/CircularProgress";
 import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
@@ -185,15 +185,22 @@ export default function ListarEmpleadosDataTable() {
   const { eliminarEmpleado } = useEliminarEmpleado();
   const router = useRouter();
 
-  const handleOpenDialog = (row: EmpleadosListar) => {
+  const handleOpenDialog = useCallback((row: EmpleadosListar) => {
     setSelectedRow(row);
     setOpenDialog(true);
-  };
+  }, []);
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedRow(null);
   };
+
+  const handleView = useCallback(
+    (row: EmpleadosListar) => {
+      router.push(`/dashboard/empleados/${row.numeroDocumento}`);
+    },
+    [router],
+  );
 
   //! useEffect para establecer el estado de montaje después del primer renderizado, utilizando requestAnimationFrame para asegurar que se ejecute después de que el componente esté completamente montado
   useEffect(() => {
@@ -205,7 +212,7 @@ export default function ListarEmpleadosDataTable() {
 
   const localeText = useMemo(() => esES.components.MuiDataGrid.defaultProps.localeText, []);
 
-  const columns = useMemo(() => getColumns(handleOpenDialog), []); //useMemo para memorizar las columnas y evitar que se vuelvan a crear en cada renderizado
+  const columns = useMemo(() => getColumns(handleOpenDialog, handleView), [handleOpenDialog, handleView]);
 
   if (!mounted) return null;
 
