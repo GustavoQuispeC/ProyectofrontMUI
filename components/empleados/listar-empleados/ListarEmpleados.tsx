@@ -218,6 +218,7 @@ export default function ListarEmpleadosDataTable() {
 
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>
+      <Button variant="contained">Agregar</Button>
       <DataGrid<EmpleadosListar>
         rows={empleados}
         columns={columns}
