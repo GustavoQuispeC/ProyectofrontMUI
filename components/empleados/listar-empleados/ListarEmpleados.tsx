@@ -21,6 +21,9 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { useEliminarEmpleado } from "@/features/dashboard/empleado/hooks/useEliminarEmpleado";
 import { useRouter } from "next/navigation";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import Link from "next/link";
+
 //! Componente para mostrar la imagen con un loader mientras se carga
 interface Props {
   src?: string;
@@ -218,7 +221,12 @@ export default function ListarEmpleadosDataTable() {
 
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>
-      <Button variant="contained">Agregar</Button>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
+        <Button component={Link} href="/dashboard/empleados/registrar" variant="contained" startIcon={<GroupAddIcon />}>
+          Nuevo Empleado
+        </Button>
+      </Box>
+
       <DataGrid<EmpleadosListar>
         rows={empleados}
         columns={columns}

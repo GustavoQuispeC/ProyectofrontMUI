@@ -1,7 +1,7 @@
 "use client";
 
-import { RegistrarEmpleados } from "@/components";
+import { RegistrarEmpleado } from "@/components";
 
 export default function NuevoEmpleadoPage() {
-  return <RegistrarEmpleados />;
+  return <RegistrarEmpleado />;
 }

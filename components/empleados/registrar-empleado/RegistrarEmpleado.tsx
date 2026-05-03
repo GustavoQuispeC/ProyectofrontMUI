@@ -12,14 +12,41 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { RegistarEmpleado } from "@/features/dashboard/empleado/empleado.types";
 import { toastPromise } from "@/shared/utils/toast";
 import { registrarEmpleado } from "@/features/dashboard/empleado/empleado.logic";
-import Accordion from "@mui/material/Accordion";
-import AccordionActions from "@mui/material/AccordionActions";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Button from "@mui/material/Button";
+import TextField, { TextFieldProps } from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import { styled } from "@mui/material/styles";
+import Paper from "@mui/material/Paper";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import InputLabel from "@mui/material/InputLabel";
+import Input from "@mui/material/Input";
+import InputAdornment from "@mui/material/InputAdornment";
+import { AccountCircle } from "@mui/icons-material";
 
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: "center",
+  color: (theme.vars ?? theme).palette.text.secondary,
+  ...theme.applyStyles("dark", {
+    backgroundColor: "#1A2027",
+  }),
+}));
 const defaultValues: EmpleadoForm = {
   nombre: "",
   apellidos: "",
@@ -56,8 +83,26 @@ const defaultValues: EmpleadoForm = {
   fechaIngreso: "",
   observaciones: null,
 };
+type InputCardProps = TextFieldProps;
 
-export default function RegistrarEmpleados() {
+export const InputCard = (props: InputCardProps) => {
+  return (
+    <TextField
+      fullWidth
+      size="small"
+      {...props}
+      sx={{
+        "& .MuiOutlinedInput-root": {
+          borderRadius: 3,
+          backgroundColor: "#f4f5f7",
+        },
+        ...props.sx, // permite sobrescribir estilos desde fuera
+      }}
+    />
+  );
+};
+
+export default function RegistrarEmpleado() {
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dniBusqueda, setDniBusqueda] = useState("");
@@ -147,39 +192,42 @@ export default function RegistrarEmpleados() {
   };
   return (
     <>
-      <div>
-        <Accordion>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1-content" id="panel1-header">
-            <Typography component="span">Accordion 1</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit
-            leo lobortis eget.
-          </AccordionDetails>
-        </Accordion>
-        <Accordion>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2-content" id="panel2-header">
-            <Typography component="span">Accordion 2</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit
-            leo lobortis eget.
-          </AccordionDetails>
-        </Accordion>
-        <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel3-content" id="panel3-header">
-            <Typography component="span">Accordion Actions</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex, sit amet blandit
-            leo lobortis eget.
-          </AccordionDetails>
-          <AccordionActions>
-            <Button>Cancel</Button>
-            <Button>Agree</Button>
-          </AccordionActions>
-        </Accordion>
-      </div>
+      <Box sx={{ width: "100%", px: "10px", boxSizing: "border-box" }}>
+        <Typography variant="h6" align="left">
+          Registrar Empleado
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid size={3}>
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload files
+              <VisuallyHiddenInput type="file" onChange={(event) => console.log(event.target.files)} multiple />
+            </Button>
+          </Grid>
+          <Grid size={3}>
+            <InputLabel htmlFor="input-with-icon-adornment">Nombres</InputLabel>
+            <Input
+              id="input-with-icon-adornment"
+              startAdornment={
+                <InputAdornment position="start">
+                  <AccountCircle />
+                </InputAdornment>
+              }
+            />
+          </Grid>
+          <Grid size={3}>
+            <Item>size=3</Item>
+          </Grid>
+          <Grid size={3}>
+            <Item>size=3</Item>
+          </Grid>
+        </Grid>
+      </Box>
     </>
   );
 }
