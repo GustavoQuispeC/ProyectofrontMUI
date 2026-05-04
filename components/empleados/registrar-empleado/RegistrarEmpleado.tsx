@@ -20,10 +20,17 @@ import Box from "@mui/material/Box";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import InputLabel from "@mui/material/InputLabel";
-import Input from "@mui/material/Input";
-import InputAdornment from "@mui/material/InputAdornment";
 import { AccountCircle } from "@mui/icons-material";
+import dayjs, { Dayjs } from "dayjs";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import Container from "@mui/material/Container";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -110,10 +117,12 @@ export default function RegistrarEmpleado() {
   const [resetKey, setResetKey] = useState(0);
   const { ubigeoData, loadingUbigeo } = useUbigeo();
   const { catalogos, loading } = useCatalogos();
+  const [tipoDocumento, setTipoDocumento] = useState<number | "">("");
+  const [genero, setGenero] = useState<number | "">("");
   const { cargos } = useCargos();
   const { dniData, loadingDni, errorDni, consultarDni, resetDni } = useDni();
   const { uploading, progress, error: uploadError, uploadFile } = useFirebaseStorage();
-
+  const [dateValue, setDateValue] = React.useState<Dayjs | null>(dayjs());
   const {
     control,
     handleSubmit,
@@ -210,21 +219,50 @@ export default function RegistrarEmpleado() {
             </Button>
           </Grid>
           <Grid size={3}>
-            <InputLabel htmlFor="input-with-icon-adornment">Nombres</InputLabel>
-            <Input
-              id="input-with-icon-adornment"
-              startAdornment={
-                <InputAdornment position="start">
-                  <AccountCircle />
-                </InputAdornment>
-              }
-            />
+            <TextField size="small" id="outlined-basic" label="Nombres" variant="outlined" />
           </Grid>
           <Grid size={3}>
-            <Item>size=3</Item>
+            <TextField size="small" id="outlined-basic" label="Apellidos" variant="outlined" />
           </Grid>
           <Grid size={3}>
-            <Item>size=3</Item>
+            <TextField size="small" id="outlined-basic" label="Apellidos" variant="outlined" />
+          </Grid>
+
+          <Grid size={3}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Fecha de Nacimiento"
+                value={dateValue}
+                onChange={(newValue) => setDateValue(newValue)}
+                slotProps={{ textField: { size: "small" } }}
+              />
+            </LocalizationProvider>
+          </Grid>
+          <Grid size={3}>
+            <Container maxWidth="sm">
+              <Box sx={{ bgcolor: "#cfe8fc", height: "10vh" }} />
+            </Container>
+          </Grid>
+          <Grid size={3}>
+            <FormControl fullWidth size="small">
+              <InputLabel id="tipo-doc-label">Tipo de Documento</InputLabel>
+              <Select
+                labelId="tipo-doc-label"
+                value={tipoDocumento}
+                label="Tipo de Documento"
+                onChange={(e) => setTipoDocumento(e.target.value as number)}
+                displayEmpty
+              >
+                {catalogos.tiposDocumentos.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.nombre}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid size={3}>
+            <TextField label="DNI" size="small" />
           </Grid>
         </Grid>
       </Box>
