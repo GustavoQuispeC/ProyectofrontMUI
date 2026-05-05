@@ -1,4 +1,5 @@
 "use client";
+"use no memo";
 import { useCargos } from "@/features/dashboard/cargo/hooks/useCargos";
 import { useCatalogos } from "@/features/dashboard/catalogo";
 import { EmpleadoForm, empleadoSchema } from "@/features/dashboard/empleado/empleado.schema";
@@ -6,7 +7,7 @@ import { useDni } from "@/features/dashboard/identidad";
 import { useFirebaseStorage } from "@/shared/hooks/useFirebaseStorage";
 import { useUbigeo } from "@/shared/hooks/useUbigeo";
 import { useRouter } from "next/navigation";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegistarEmpleado } from "@/features/dashboard/empleado/empleado.types";
@@ -17,51 +18,41 @@ import Button from "@mui/material/Button";
 import TextField, { TextFieldProps } from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
+import Divider from "@mui/material/Divider";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { AccountCircle } from "@mui/icons-material";
-import dayjs, { Dayjs } from "dayjs";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { PhotoCamera } from "@mui/icons-material";
+import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import Container from "@mui/material/Container";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
+import Stack from "@mui/material/Stack";
+import Avatar from "@mui/material/Avatar";
+import Chip from "@mui/material/Chip";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+import BadgeIcon from "@mui/icons-material/Badge";
+import HomeIcon from "@mui/icons-material/Home";
+import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
+import WorkIcon from "@mui/icons-material/Work";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import SaveIcon from "@mui/icons-material/Save";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 
-const VisuallyHiddenInput = styled("input")({
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  height: 1,
-  overflow: "hidden",
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  whiteSpace: "nowrap",
-  width: 1,
-});
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: (theme.vars ?? theme).palette.text.secondary,
-  ...theme.applyStyles("dark", {
-    backgroundColor: "#1A2027",
-  }),
-}));
+// ─── Estilos base del TextField ──────────────────────────────────────────────
 const defaultValues: EmpleadoForm = {
   nombre: "",
   apellidos: "",
-  tipoDocumento: 0,
+  tipoDocumento: "",
   numeroDocumento: "",
   fechaNacimiento: "",
-  genero: 0,
-  estadoCivil: 0,
+  genero: "",
+  estadoCivil: "",
   nacionalidad: null,
   correo: "",
   telefonoMovil: "",
@@ -70,66 +61,106 @@ const defaultValues: EmpleadoForm = {
   provincia: "",
   departamento: "",
   contactoEmergenciaNombre: null,
-  contactoEmergenciaParentesco: 0,
+  contactoEmergenciaParentesco: "",
   contactoEmergenciaTelefono: null,
   numeroCuentaBancaria: null,
   bancoNombre: null,
-  tiposCuentaBancaria: 0,
+  tiposCuentaBancaria: "",
   cci: null,
   ruc: null,
   numeroESSalud: null,
-  sistemaPensiones: 0,
+  sistemaPensiones: "",
   cuspp: null,
-  nivelEducativo: 0,
+  nivelEducativo: "",
   profesionOficio: null,
   fotoUrl: null,
-  cargoId: 0,
+  cargoId: "",
   salario: 0.0,
-  tipoContrato: 0,
-  tipoJornada: 0,
+  tipoContrato: "",
+  tipoJornada: "",
   fechaIngreso: "",
   observaciones: null,
 };
+
 type InputCardProps = TextFieldProps;
+export const InputCard = (props: InputCardProps) => (
+  <TextField
+    fullWidth
+    size="small"
+    {...props}
+    sx={{
+      "& .MuiOutlinedInput-root": { borderRadius: 2, backgroundColor: "#f8fafc" },
+      ...props.sx,
+    }}
+  />
+);
 
-export const InputCard = (props: InputCardProps) => {
-  return (
-    <TextField
-      fullWidth
-      size="small"
-      {...props}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 3,
-          backgroundColor: "#f4f5f7",
-        },
-        ...props.sx, // permite sobrescribir estilos desde fuera
-      }}
-    />
-  );
-};
+// ─── Sección con encabezado ───────────────────────────────────────────────────
+interface SectionProps {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}
+const Section = ({ icon, title, children }: SectionProps) => (
+  <Paper
+    elevation={0}
+    sx={{
+      border: "1px solid",
+      borderColor: "divider",
+      borderRadius: 3,
+      p: { xs: 2, sm: 3 },
+      mb: 2,
+    }}
+  >
+    <Stack direction="row" sx={{ mb: 2, gap: 1, alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 32,
+          height: 32,
+          borderRadius: 2,
+          bgcolor: "primary.main",
+          color: "white",
+          "& svg": { fontSize: 18 },
+        }}
+      >
+        {icon}
+      </Box>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+        {title}
+      </Typography>
+    </Stack>
+    <Divider sx={{ mb: 2 }} />
+    <Grid container spacing={2}>
+      {children}
+    </Grid>
+  </Paper>
+);
 
+// ─── Componente principal ─────────────────────────────────────────────────────
 export default function RegistrarEmpleado() {
+  "use no memo";
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dniBusqueda, setDniBusqueda] = useState("");
-  // resetKey controla el remount de DatePickers y Selects para limpiarlos visualmente
   const [resetKey, setResetKey] = useState(0);
-  const { ubigeoData, loadingUbigeo } = useUbigeo();
-  const { catalogos, loading } = useCatalogos();
-  const [tipoDocumento, setTipoDocumento] = useState<number | "">("");
-  const [genero, setGenero] = useState<number | "">("");
+
+  const { loadingUbigeo, departamentos, getProvincias, getDistritos } = useUbigeo();
+  const { catalogos } = useCatalogos();
   const { cargos } = useCargos();
   const { dniData, loadingDni, errorDni, consultarDni, resetDni } = useDni();
-  const { uploading, progress, error: uploadError, uploadFile } = useFirebaseStorage();
-  const [dateValue, setDateValue] = React.useState<Dayjs | null>(dayjs());
+  const { uploading, uploadFile } = useFirebaseStorage();
+  const router = useRouter();
+
   const {
     control,
     handleSubmit,
     reset,
     setValue,
     watch,
-    formState: { errors, isSubmitted },
+    formState: { errors },
   } = useForm<EmpleadoForm>({
     resolver: zodResolver(empleadoSchema),
     defaultValues,
@@ -137,12 +168,16 @@ export default function RegistrarEmpleado() {
     reValidateMode: "onChange",
     shouldFocusError: true,
   });
-  const router = useRouter();
 
   const departamento = watch("departamento");
   const provincia = watch("provincia");
 
-  // ── DNI ──────────────────────────────────────────────────────────────────────
+  // ── Ubigeo encadenado ─────────────────────────────────────────────────────
+
+  const provincias = useMemo(() => getProvincias(departamento), [departamento, getProvincias]);
+  const distritos = useMemo(() => getDistritos(departamento, provincia), [departamento, provincia, getDistritos]);
+
+  // ── DNI ───────────────────────────────────────────────────────────────────
   const handleBuscarDni = async () => {
     if (!dniBusqueda.trim() || dniBusqueda.trim().length !== 8) return;
     const response = await consultarDni(dniBusqueda.trim());
@@ -153,43 +188,39 @@ export default function RegistrarEmpleado() {
     }
   };
 
-  // ── Imagen ───────────────────────────────────────────────────────────────────
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result as string);
-      reader.readAsDataURL(file);
-    }
+  // ── Imagen ────────────────────────────────────────────────────────────────
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    setPreview(URL.createObjectURL(file));
   };
 
-  // ── Reset completo del formulario ────────────────────────────────────────────
-  const resetForm = () => {
-    reset(defaultValues);
-    // Incrementar resetKey fuerza el remount de DatePickers y Selects controlados por key
-    setResetKey((k) => k + 1);
+  const handleRemoveImage = () => {
     setPreview(null);
     setSelectedFile(null);
-    setDniBusqueda("");
-    resetDni();
-    // Limpiar el input file para que se pueda volver a seleccionar la misma imagen
     const fileInput = document.getElementById("foto-input") as HTMLInputElement;
     if (fileInput) fileInput.value = "";
   };
 
-  // ── Submit ───────────────────────────────────────────────────────────────────
+  // ── Reset ─────────────────────────────────────────────────────────────────
+  const resetForm = () => {
+    reset(defaultValues);
+    setResetKey((k) => k + 1);
+    setPreview(null);
+    setSelectedFile(null);
+    resetDni();
+  };
+
+  // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (data: EmpleadoForm) => {
     let fotoUrl: string | null = data.fotoUrl ?? null;
-
     if (selectedFile) {
       const result = await uploadFile(selectedFile, "empleados");
       if (!result) return;
       fotoUrl = result.url;
     }
-
     const payload: RegistarEmpleado = { ...data, fotoUrl };
-
     try {
       await toastPromise(registrarEmpleado(payload), {
         loading: "Registrando empleado...",
@@ -199,73 +230,620 @@ export default function RegistrarEmpleado() {
       resetForm();
     } catch (_) {}
   };
+
   return (
-    <>
-      <Box sx={{ width: "100%", px: "10px", boxSizing: "border-box" }}>
-        <Typography variant="h6" align="left">
-          Registrar Empleado
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid size={3}>
-            <Button
-              component="label"
-              role={undefined}
-              variant="contained"
-              tabIndex={-1}
-              startIcon={<CloudUploadIcon />}
-            >
-              Upload files
-              <VisuallyHiddenInput type="file" onChange={(event) => console.log(event.target.files)} multiple />
-            </Button>
-          </Grid>
-          <Grid size={3}>
-            <TextField size="small" id="outlined-basic" label="Nombres" variant="outlined" />
-          </Grid>
-          <Grid size={3}>
-            <TextField size="small" id="outlined-basic" label="Apellidos" variant="outlined" />
-          </Grid>
-          <Grid size={3}>
-            <TextField size="small" id="outlined-basic" label="Apellidos" variant="outlined" />
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{ width: "100%", maxWidth: 1100, mx: "auto", px: { xs: 1, sm: 2, md: 3 }, py: 2 }}
+    >
+      {/* ── Encabezado de página ── */}
+      <Stack sx={{ mb: 1, gap: 1, alignItems: "center", justifyContent: "space-between" }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            Registrar Empleado
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Complete todos los campos requeridos
+          </Typography>
+        </Box>
+      </Stack>
+
+      {/* ══ SECCIÓN: Foto + Búsqueda DNI ══ */}
+      <Paper
+        elevation={0}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 3,
+          p: { xs: 2, sm: 3 },
+          mb: 2,
+        }}
+      >
+        <Grid container sx={{ alignItems: "center", gap: { xs: 2, sm: 3 } }}>
+          {/* Foto */}
+          <Grid size={{ xs: 12, sm: "auto" }}>
+            <Stack sx={{ alignItems: "center", gap: 1 }}>
+              <Avatar
+                src={preview ?? ""}
+                sx={{
+                  width: 110,
+                  height: 110,
+                  border: "3px dashed",
+                  borderColor: preview ? "primary.main" : "divider",
+                  bgcolor: "grey.100",
+                }}
+              >
+                {!preview && <PhotoCamera sx={{ fontSize: 36, color: "grey.400" }} />}
+              </Avatar>
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<CloudUploadIcon />}
+                size="small"
+                sx={{ borderRadius: 2, fontSize: 12 }}
+              >
+                Subir Foto
+                <input id="foto-input" hidden type="file" accept="image/*" onChange={handleImageChange} />
+              </Button>
+              {preview && (
+                <Button
+                  size="small"
+                  color="error"
+                  startIcon={<DeleteForeverIcon />}
+                  onClick={handleRemoveImage}
+                  sx={{ fontSize: 12 }}
+                >
+                  Eliminar
+                </Button>
+              )}
+            </Stack>
           </Grid>
 
-          <Grid size={3}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Fecha de Nacimiento"
-                value={dateValue}
-                onChange={(newValue) => setDateValue(newValue)}
-                slotProps={{ textField: { size: "small" } }}
+          {/* Búsqueda DNI */}
+          <Grid size={{ xs: 12, sm: "grow" }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+              Búsqueda rápida por DNI
+            </Typography>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+              <TextField
+                size="small"
+                label="Número de DNI"
+                value={dniBusqueda}
+                onChange={(e) => setDniBusqueda(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                onKeyDown={(e) => e.key === "Enter" && handleBuscarDni()}
+                slotProps={{ htmlInput: { maxLength: 8 } }}
+                sx={{ flexGrow: 1, maxWidth: { sm: 260 } }}
               />
-            </LocalizationProvider>
-          </Grid>
-          <Grid size={3}>
-            <Container maxWidth="sm">
-              <Box sx={{ bgcolor: "#cfe8fc", height: "10vh" }} />
-            </Container>
-          </Grid>
-          <Grid size={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="tipo-doc-label">Tipo de Documento</InputLabel>
-              <Select
-                labelId="tipo-doc-label"
-                value={tipoDocumento}
-                label="Tipo de Documento"
-                onChange={(e) => setTipoDocumento(e.target.value as number)}
-                displayEmpty
+              <Button
+                variant="contained"
+                endIcon={<PersonSearchIcon />}
+                onClick={handleBuscarDni}
+                disabled={loadingDni || dniBusqueda.length !== 8}
+                sx={{ whiteSpace: "nowrap", minWidth: 130 }}
               >
-                {catalogos.tiposDocumentos.map((item) => (
-                  <MenuItem key={item.id} value={item.id}>
-                    {item.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={3}>
-            <TextField label="DNI" size="small" />
+                {loadingDni ? "Buscando..." : "Buscar DNI"}
+              </Button>
+            </Stack>
+            {errorDni && (
+              <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
+                {errorDni}
+              </Typography>
+            )}
+            {dniData && (
+              <Chip
+                label={`${dniData.nombres} ${dniData.apellidoPaterno} ${dniData.apellidoMaterno}`}
+                color="success"
+                size="small"
+                sx={{ mt: 1 }}
+              />
+            )}
           </Grid>
         </Grid>
-      </Box>
-    </>
+      </Paper>
+
+      {/* ══ SECCIÓN 1: Datos Personales ══ */}
+      <Section icon={<BadgeIcon />} title="Datos Personales">
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="nombre"
+            control={control}
+            render={({ field }) => (
+              <InputCard {...field} label="Nombres *" error={!!errors.nombre} helperText={errors.nombre?.message} />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="apellidos"
+            control={control}
+            render={({ field }) => (
+              <InputCard
+                {...field}
+                label="Apellidos *"
+                error={!!errors.apellidos}
+                helperText={errors.apellidos?.message}
+              />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="genero"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Género</InputLabel>
+                <Select {...field} label="Género">
+                  {catalogos.generos.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Controller
+              name="fechaNacimiento"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  key={resetKey}
+                  label="Fecha de Nacimiento"
+                  value={field.value ? dayjs(field.value) : null}
+                  onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
+                  slotProps={{ textField: { size: "small", fullWidth: true, error: !!errors.fechaNacimiento } }}
+                />
+              )}
+            />
+          </LocalizationProvider>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="tipoDocumento"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo Documento</InputLabel>
+                <Select {...field} label="Tipo Documento">
+                  {catalogos.tiposDocumentos.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="numeroDocumento"
+            control={control}
+            render={({ field }) => (
+              <InputCard
+                {...field}
+                label="Número de Documento *"
+                error={!!errors.numeroDocumento}
+                helperText={errors.numeroDocumento?.message}
+              />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="estadoCivil"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Estado Civil</InputLabel>
+                <Select {...field} label="Estado Civil">
+                  {catalogos.estadosCiviles.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="correo"
+            control={control}
+            render={({ field }) => (
+              <InputCard
+                {...field}
+                label="Correo Electrónico"
+                type="email"
+                error={!!errors.correo}
+                helperText={errors.correo?.message}
+              />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="telefonoMovil"
+            control={control}
+            render={({ field }) => (
+              <InputCard
+                {...field}
+                label="Teléfono Móvil"
+                error={!!errors.telefonoMovil}
+                helperText={errors.telefonoMovil?.message}
+              />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="nacionalidad"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Nacionalidad" />}
+          />
+        </Grid>
+      </Section>
+
+      {/* ══ SECCIÓN 2: Dirección ══ */}
+      <Section icon={<HomeIcon />} title="Dirección">
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Controller
+            name="direccion"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Dirección" />}
+          />
+        </Grid>
+
+        {/* Departamento */}
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+          <Controller
+            name="departamento"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Departamento</InputLabel>
+                <Select
+                  {...field}
+                  label="Departamento"
+                  disabled={loadingUbigeo}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setValue("provincia", "");
+                    setValue("distrito", "");
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione...</em>
+                  </MenuItem>
+                  {departamentos.map((dep) => (
+                    <MenuItem key={dep} value={dep}>
+                      {dep}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+
+        {/* Provincia */}
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+          <Controller
+            name="provincia"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Provincia</InputLabel>
+                <Select
+                  {...field}
+                  label="Provincia"
+                  disabled={!departamento || provincias.length === 0}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setValue("distrito", "");
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione...</em>
+                  </MenuItem>
+                  {provincias.map((prov) => (
+                    <MenuItem key={prov} value={prov}>
+                      {prov}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+
+        {/* Distrito */}
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+          <Controller
+            name="distrito"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Distrito</InputLabel>
+                <Select {...field} label="Distrito" disabled={!provincia || distritos.length === 0}>
+                  <MenuItem value="">
+                    <em>Seleccione...</em>
+                  </MenuItem>
+                  {distritos.map((dist) => (
+                    <MenuItem key={dist} value={dist}>
+                      {dist}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+      </Section>
+
+      {/* ══ SECCIÓN 3: Datos Laborales ══ */}
+      <Section icon={<WorkIcon />} title="Datos Laborales">
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="cargoId"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Cargo</InputLabel>
+                <Select {...field} value={field.value ?? ""} label="Cargo">
+                  <MenuItem value="">
+                    <em>Seleccione...</em>
+                  </MenuItem>
+                  {cargos.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Controller
+              name="fechaIngreso"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  key={resetKey}
+                  label="Fecha de Ingreso"
+                  value={field.value ? dayjs(field.value) : null}
+                  onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
+                  slotProps={{ textField: { size: "small", fullWidth: true } }}
+                />
+              )}
+            />
+          </LocalizationProvider>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="tipoContrato"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo de Contrato</InputLabel>
+                <Select {...field} label="Tipo de Contrato">
+                  {catalogos.tiposContrato.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="tipoJornada"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo de Jornada</InputLabel>
+                <Select {...field} label="Tipo de Jornada">
+                  {catalogos.tiposJornada.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="nivelEducativo"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Nivel Educativo</InputLabel>
+                <Select {...field} label="Nivel Educativo">
+                  {catalogos.nivelesEducativos.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="profesionOficio"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Profesión / Oficio" />}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="ruc"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="RUC" />}
+          />
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Controller
+            name="observaciones"
+            control={control}
+            render={({ field }) => (
+              <InputCard {...field} value={field.value ?? ""} label="Observaciones" multiline rows={2} />
+            )}
+          />
+        </Grid>
+      </Section>
+
+      {/* ══ SECCIÓN 4: Contacto de Emergencia ══ */}
+      <Section icon={<ContactPhoneIcon />} title="Contacto de Emergencia">
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="contactoEmergenciaNombre"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Nombres y Apellidos" />}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="contactoEmergenciaParentesco"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Parentesco</InputLabel>
+                <Select {...field} label="Parentesco">
+                  {catalogos.tiposParentesco.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="contactoEmergenciaTelefono"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Teléfono de Contacto" />}
+          />
+        </Grid>
+      </Section>
+
+      {/* ══ SECCIÓN 5: Financiero y Seguros ══ */}
+      <Section icon={<AccountBalanceIcon />} title="Financiero y Seguros">
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="bancoNombre"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Banco" />}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="tiposCuentaBancaria"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo de Cuenta</InputLabel>
+                <Select {...field} label="Tipo de Cuenta">
+                  {catalogos.tiposCuentaBancaria.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="numeroCuentaBancaria"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Número de Cuenta" />}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="cci"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="CCI" />}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="sistemaPensiones"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Sistema de Pensiones</InputLabel>
+                <Select {...field} label="Sistema de Pensiones">
+                  {catalogos.sistemasPensiones.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="cuspp"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="CUSPP" />}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="numeroESSalud"
+            control={control}
+            render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Número EsSalud" />}
+          />
+        </Grid>
+      </Section>
+
+      {/* ── Botones inferiores (móvil) ── */}
+      <Stack direction="row" sx={{ display: { xs: "flex", sm: "none" }, justifyContent: "center", gap: 2, mt: 3 }}>
+        <Button variant="outlined" startIcon={<RestartAltIcon />} onClick={resetForm}>
+          Limpiar
+        </Button>
+        <Button type="submit" variant="contained" startIcon={<SaveIcon />} disabled={uploading} sx={{ px: 4 }}>
+          {uploading ? "Subiendo..." : "Guardar Empleado"}
+        </Button>
+      </Stack>
+      <Stack sx={{ mb: 2, gap: 1, alignItems: "center" }}>
+        <Stack direction="row" spacing={1}>
+          <Button variant="outlined" startIcon={<RestartAltIcon />} onClick={resetForm} size="small">
+            Limpiar
+          </Button>
+          <Button
+            variant="text"
+            startIcon={<KeyboardBackspaceIcon />}
+            size="small"
+            onClick={() => router.push("/dashboard/empleados/listar")}
+          >
+            Retornar
+          </Button>
+          <Button type="submit" variant="contained" startIcon={<SaveIcon />} size="small" disabled={uploading}>
+            Guardar
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
   );
 }

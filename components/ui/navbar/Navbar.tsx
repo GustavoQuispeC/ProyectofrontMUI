@@ -26,7 +26,6 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import ViewInArOutlinedIcon from "@mui/icons-material/ViewInArOutlined";
-import CartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { useThemeMode } from "../theme/ThemeRegistry";
 import { CartButton } from "@/components/cartdrawer/Cartdrawer";
 
@@ -242,8 +241,8 @@ export default function Navbar() {
               <div className="w-8 h-8 bg-blue-600 group-hover:bg-blue-700 rounded-lg flex items-center justify-center text-white transition-colors duration-200">
                 <ViewInArOutlinedIcon fontSize="small" />
               </div>
-              <span className="text-[15px] font-semibold text-text-primary group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
-                AcmePro
+              <span className="text-[15px] font-semibold text-text-blue-900 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-200">
+                Grupo Famet SAC
               </span>
             </a>
 
@@ -265,7 +264,7 @@ export default function Navbar() {
                     <span className="opacity-70">
                       <WorkOutlineOutlinedIcon fontSize="small" />
                     </span>
-                    Products
+                    Productos
                     <KeyboardArrowDownIcon
                       fontSize="small"
                       className={`transition-transform duration-200 ${openDropdown === "products" ? "rotate-180" : ""}`}
@@ -300,7 +299,7 @@ export default function Navbar() {
                     <span className="opacity-70">
                       <DescriptionOutlinedIcon fontSize="small" />
                     </span>
-                    Resources
+                    Recursos
                     <KeyboardArrowDownIcon
                       fontSize="small"
                       className={`transition-transform duration-200 ${openDropdown === "resources" ? "rotate-180" : ""}`}
@@ -351,7 +350,7 @@ export default function Navbar() {
                 <SearchIcon fontSize="small" className="text-gray-400 shrink-0" style={{ fontSize: 16 }} />
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Buscar..."
                   onFocus={() => setSearchFocused(true)}
                   onBlur={() => setSearchFocused(false)}
                   className="bg-transparent text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 outline-none w-full"
@@ -482,7 +481,7 @@ export default function Navbar() {
               }`}
             >
               <HomeOutlinedIcon fontSize="small" className="opacity-60" />
-              Home
+              Inicio
             </a>
 
             {/* Products collapsible */}
@@ -531,7 +530,7 @@ export default function Navbar() {
               }`}
             >
               <BusinessOutlinedIcon fontSize="small" className="opacity-60" />
-              Company
+              Compañia
             </a>
 
             {/* Resources collapsible */}
@@ -580,7 +579,7 @@ export default function Navbar() {
               }`}
             >
               <EmailIcon fontSize="small" className="opacity-60" />
-              Contact
+              Contáctenos
               <span className="ml-1 bg-blue-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full leading-tight">
                 New
               </span>
