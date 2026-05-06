@@ -1,5 +1,4 @@
 "use client";
-"use no memo";
 import { useCargos } from "@/features/dashboard/cargo/hooks/useCargos";
 import { useCatalogos } from "@/features/dashboard/catalogo";
 import { EmpleadoForm, empleadoSchema } from "@/features/dashboard/empleado/empleado.schema";
@@ -9,7 +8,6 @@ import { useUbigeo } from "@/shared/hooks/useUbigeo";
 import { useRouter } from "next/navigation";
 import React, { useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { RegistarEmpleado } from "@/features/dashboard/empleado/empleado.types";
 import { toastPromise } from "@/shared/utils/toast";
 import { registrarEmpleado } from "@/features/dashboard/empleado/empleado.logic";
@@ -23,6 +21,7 @@ import Divider from "@mui/material/Divider";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { PhotoCamera } from "@mui/icons-material";
 import dayjs from "dayjs";
+import "dayjs/locale/es";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -43,7 +42,9 @@ import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import SaveIcon from "@mui/icons-material/Save";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
-
+import InputAdornment from "@mui/material/InputAdornment";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import FormHelperText from "@mui/material/FormHelperText";
 // ─── Estilos base del TextField ──────────────────────────────────────────────
 const defaultValues: EmpleadoForm = {
   nombre: "",
@@ -53,33 +54,33 @@ const defaultValues: EmpleadoForm = {
   fechaNacimiento: "",
   genero: "",
   estadoCivil: "",
-  nacionalidad: null,
+  nacionalidad: "",
   correo: "",
   telefonoMovil: "",
-  direccion: null,
+  direccion: "",
   distrito: "",
   provincia: "",
   departamento: "",
-  contactoEmergenciaNombre: null,
+  contactoEmergenciaNombre: "",
   contactoEmergenciaParentesco: "",
-  contactoEmergenciaTelefono: null,
-  numeroCuentaBancaria: null,
-  bancoNombre: null,
+  contactoEmergenciaTelefono: "",
+  numeroCuentaBancaria: "",
+  bancoNombre: "",
   tiposCuentaBancaria: "",
-  cci: null,
-  ruc: null,
-  numeroESSalud: null,
+  cci: "",
+  ruc: "",
+  numeroESSalud: "",
   sistemaPensiones: "",
-  cuspp: null,
+  cuspp: "",
   nivelEducativo: "",
-  profesionOficio: null,
-  fotoUrl: null,
+  profesionOficio: "",
+  fotoUrl: "",
   cargoId: "",
-  salario: 0.0,
+  salario: 0,
   tipoContrato: "",
   tipoJornada: "",
   fechaIngreso: "",
-  observaciones: null,
+  observaciones: "",
 };
 
 type InputCardProps = TextFieldProps;
@@ -141,12 +142,10 @@ const Section = ({ icon, title, children }: SectionProps) => (
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 export default function RegistrarEmpleado() {
-  "use no memo";
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dniBusqueda, setDniBusqueda] = useState("");
   const [resetKey, setResetKey] = useState(0);
-
   const { loadingUbigeo, departamentos, getProvincias, getDistritos } = useUbigeo();
   const { catalogos } = useCatalogos();
   const { cargos } = useCargos();
@@ -162,13 +161,14 @@ export default function RegistrarEmpleado() {
     watch,
     formState: { errors },
   } = useForm<EmpleadoForm>({
-    resolver: zodResolver(empleadoSchema),
+    resolver: standardSchemaResolver(empleadoSchema),
     defaultValues,
     mode: "onSubmit",
     reValidateMode: "onChange",
     shouldFocusError: true,
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const departamento = watch("departamento");
   const provincia = watch("provincia");
 
@@ -214,7 +214,7 @@ export default function RegistrarEmpleado() {
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (data: EmpleadoForm) => {
-    let fotoUrl: string | null = data.fotoUrl ?? null;
+    let fotoUrl: string = data.fotoUrl || "";
     if (selectedFile) {
       const result = await uploadFile(selectedFile, "empleados");
       if (!result) return;
@@ -228,6 +228,7 @@ export default function RegistrarEmpleado() {
         error: "Error al registrar el empleado",
       });
       resetForm();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {}
   };
 
@@ -235,7 +236,7 @@ export default function RegistrarEmpleado() {
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ width: "100%", maxWidth: 1100, mx: "auto", px: { xs: 1, sm: 2, md: 3 }, py: 2 }}
+      sx={{ width: "100%", maxWidth: 1100, mx: "auto", px: { xs: 1, sm: 2, md: 3 } }}
     >
       {/* ── Encabezado de página ── */}
       <Stack sx={{ mb: 1, gap: 1, alignItems: "center", justifyContent: "space-between" }}>
@@ -372,32 +373,44 @@ export default function RegistrarEmpleado() {
             name="genero"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
-                <InputLabel>Género</InputLabel>
-                <Select {...field} label="Género">
+              <FormControl fullWidth size="small" error={!!errors.genero}>
+                <InputLabel>Género *</InputLabel>
+                <Select {...field} label="Género *">
                   {catalogos.generos.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.genero?.message}</FormHelperText>
               </FormControl>
             )}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+            {" "}
             <Controller
               name="fechaNacimiento"
               control={control}
               render={({ field }) => (
-                <DatePicker
-                  key={resetKey}
-                  label="Fecha de Nacimiento"
-                  value={field.value ? dayjs(field.value) : null}
-                  onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
-                  slotProps={{ textField: { size: "small", fullWidth: true, error: !!errors.fechaNacimiento } }}
-                />
+                <FormControl fullWidth error={!!errors.fechaNacimiento}>
+                  {" "}
+                  <DatePicker
+                    key={resetKey}
+                    label="Fecha de Nacimiento"
+                    value={field.value ? dayjs(field.value) : null}
+                    onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        fullWidth: true,
+                        error: !!errors.fechaNacimiento,
+                      },
+                    }}
+                  />
+                  <FormHelperText>{errors.fechaNacimiento?.message}</FormHelperText>
+                </FormControl>
               )}
             />
           </LocalizationProvider>
@@ -416,6 +429,7 @@ export default function RegistrarEmpleado() {
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.tipoDocumento?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -486,6 +500,24 @@ export default function RegistrarEmpleado() {
             name="nacionalidad"
             control={control}
             render={({ field }) => <InputCard {...field} value={field.value ?? ""} label="Nacionalidad" />}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="salario"
+            control={control}
+            render={({ field }) => (
+              <InputCard
+                {...field}
+                value={field.value ?? ""}
+                label="Salario"
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">S/</InputAdornment>,
+                  },
+                }}
+              />
+            )}
           />
         </Grid>
       </Section>
@@ -818,31 +850,36 @@ export default function RegistrarEmpleado() {
       </Section>
 
       {/* ── Botones inferiores (móvil) ── */}
-      <Stack direction="row" sx={{ display: { xs: "flex", sm: "none" }, justifyContent: "center", gap: 2, mt: 3 }}>
-        <Button variant="outlined" startIcon={<RestartAltIcon />} onClick={resetForm}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ width: { xs: "100%", sm: "auto" } }}>
+        {/* 🔙 Retornar */}
+        <Button
+          variant="text"
+          startIcon={<KeyboardBackspaceIcon />}
+          onClick={() => router.push("/dashboard/empleados/listar")}
+          fullWidth
+        >
+          Retornar
+        </Button>
+
+        {/* 🧹 Limpiar */}
+        <Button variant="outlined" color="inherit" startIcon={<RestartAltIcon />} onClick={resetForm} fullWidth>
           Limpiar
         </Button>
-        <Button type="submit" variant="contained" startIcon={<SaveIcon />} disabled={uploading} sx={{ px: 4 }}>
-          {uploading ? "Subiendo..." : "Guardar Empleado"}
+
+        {/* 💾 Guardar */}
+        <Button
+          type="submit"
+          variant="contained"
+          startIcon={<SaveIcon />}
+          disabled={uploading}
+          fullWidth
+          sx={{
+            minWidth: 180,
+            fontWeight: 600,
+          }}
+        >
+          {uploading ? "Guardando..." : "Guardar Empleado"}
         </Button>
-      </Stack>
-      <Stack sx={{ mb: 2, gap: 1, alignItems: "center" }}>
-        <Stack direction="row" spacing={1}>
-          <Button variant="outlined" startIcon={<RestartAltIcon />} onClick={resetForm} size="small">
-            Limpiar
-          </Button>
-          <Button
-            variant="text"
-            startIcon={<KeyboardBackspaceIcon />}
-            size="small"
-            onClick={() => router.push("/dashboard/empleados/listar")}
-          >
-            Retornar
-          </Button>
-          <Button type="submit" variant="contained" startIcon={<SaveIcon />} size="small" disabled={uploading}>
-            Guardar
-          </Button>
-        </Stack>
       </Stack>
     </Box>
   );
