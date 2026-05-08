@@ -221,12 +221,14 @@ export default function RegistrarEmpleado() {
       fotoUrl = result.url;
     }
     const payload: RegistarEmpleado = { ...data, fotoUrl };
+    console.log(payload);
     try {
       await toastPromise(registrarEmpleado(payload), {
         loading: "Registrando empleado...",
         success: "Empleado registrado correctamente",
         error: "Error al registrar el empleado",
       });
+
       resetForm();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {}
