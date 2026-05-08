@@ -4,17 +4,21 @@ export const empleadoSchema = z.object({
   nombre: z.string().trim().min(1, "El nombre es obligatorio"),
   apellidos: z.string().trim().min(1, "Los apellidos son obligatorios"),
   tipoDocumento: z.string().min(1, "Seleccione un tipo de documento"),
-  numeroDocumento: z.string().trim(),
+  numeroDocumento: z.string().min(1, "Seleccione un tipo de documento"),
   fechaNacimiento: z.string().min(1, "La fecha de nacimiento es obligatoria"),
   genero: z.string().min(1, "Seleccione un género"),
   estadoCivil: z.string().min(1, "Seleccione un estado civil"),
-
-  // ✅ .default("") en lugar de .optional()
   nacionalidad: z.string().trim().default(""),
-  correo: z.union([z.email("Correo inválido"), z.literal("")]).default(""),
+  correo: z
+    .string()
+    .trim()
+    .min(1, "El correo es obligatorio")
+    .refine((value) => z.email().safeParse(value).success, {
+      message: "Correo inválido",
+    }),
   telefonoMovil: z.union([z.string().regex(/^\d{9}$/, "Debe tener 9 dígitos"), z.literal("")]).default(""),
-  direccion: z.string().trim().default(""),
 
+  direccion: z.string().trim().default(""),
   departamento: z.string().min(1, "Seleccione un departamento"),
   provincia: z.string().min(1, "Seleccione una provincia"),
   distrito: z.string().min(1, "Seleccione un distrito"),
@@ -22,6 +26,7 @@ export const empleadoSchema = z.object({
   contactoEmergenciaNombre: z.string().trim().default(""),
   contactoEmergenciaParentesco: z.string().trim().default(""),
   contactoEmergenciaTelefono: z.union([z.string().regex(/^\d{9}$/, "Debe tener 9 dígitos"), z.literal("")]).default(""),
+
   numeroCuentaBancaria: z.string().trim().default(""),
   bancoNombre: z.string().trim().default(""),
   tiposCuentaBancaria: z.string().trim().default(""),
@@ -34,7 +39,7 @@ export const empleadoSchema = z.object({
   profesionOficio: z.string().trim().default(""),
   fotoUrl: z.string().trim().default(""),
 
-  cargoId: z.string().min(1, "Seleccione un cargo"),
+  cargoId: z.number().min(1, "Seleccione un cargo"),
   salario: z.coerce.number({ error: "El salario es obligatorio" }).positive("El salario debe ser mayor a 0.00"),
   tipoContrato: z.string().min(1, "Seleccione un tipo de contrato"),
   tipoJornada: z.string().min(1, "Seleccione un tipo de jornada"),

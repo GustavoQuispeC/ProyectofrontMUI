@@ -57,7 +57,7 @@ export interface RegistarEmpleado {
   nivelEducativo: string;
   profesionOficio: string;
   fotoUrl: string;
-  cargoId: string;
+  cargoId: number;
   salario: number;
   tipoContrato: string;
   tipoJornada: string;

@@ -45,6 +45,7 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import InputAdornment from "@mui/material/InputAdornment";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import FormHelperText from "@mui/material/FormHelperText";
+import { string } from "zod";
 // ─── Estilos base del TextField ──────────────────────────────────────────────
 const defaultValues: EmpleadoForm = {
   nombre: "",
@@ -75,7 +76,7 @@ const defaultValues: EmpleadoForm = {
   nivelEducativo: "",
   profesionOficio: "",
   fotoUrl: "",
-  cargoId: "",
+  cargoId: 0,
   salario: 0,
   tipoContrato: "",
   tipoJornada: "",
@@ -214,6 +215,7 @@ export default function RegistrarEmpleado() {
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (data: EmpleadoForm) => {
+    console.log("📝 data del form:", data);
     let fotoUrl: string = data.fotoUrl || "";
     if (selectedFile) {
       const result = await uploadFile(selectedFile, "empleados");
@@ -221,7 +223,7 @@ export default function RegistrarEmpleado() {
       fotoUrl = result.url;
     }
     const payload: RegistarEmpleado = { ...data, fotoUrl };
-    console.log(payload);
+    console.log("📦 payload:", payload);
     try {
       await toastPromise(registrarEmpleado(payload), {
         loading: "Registrando empleado...",
@@ -237,7 +239,9 @@ export default function RegistrarEmpleado() {
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit, (errors) => {
+        console.log("❌ Errores de validación:", errors);
+      })}
       sx={{ width: "100%", maxWidth: 1100, mx: "auto", px: { xs: 1, sm: 2, md: 3 } }}
     >
       {/* ── Encabezado de página ── */}
@@ -379,7 +383,7 @@ export default function RegistrarEmpleado() {
                 <InputLabel>Género *</InputLabel>
                 <Select {...field} label="Género *">
                   {catalogos.generos.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
@@ -422,11 +426,11 @@ export default function RegistrarEmpleado() {
             name="tipoDocumento"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.tipoDocumento}>
                 <InputLabel>Tipo Documento</InputLabel>
                 <Select {...field} label="Tipo Documento">
                   {catalogos.tiposDocumentos.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
@@ -455,15 +459,16 @@ export default function RegistrarEmpleado() {
             name="estadoCivil"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.estadoCivil}>
                 <InputLabel>Estado Civil</InputLabel>
                 <Select {...field} label="Estado Civil">
                   {catalogos.estadosCiviles.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.estadoCivil?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -513,6 +518,9 @@ export default function RegistrarEmpleado() {
                 {...field}
                 value={field.value ?? ""}
                 label="Salario"
+                type="number"
+                error={!!errors.salario}
+                helperText={errors.salario?.message}
                 slotProps={{
                   input: {
                     startAdornment: <InputAdornment position="start">S/</InputAdornment>,
@@ -628,7 +636,7 @@ export default function RegistrarEmpleado() {
             name="cargoId"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.cargoId}>
                 <InputLabel>Cargo</InputLabel>
                 <Select {...field} value={field.value ?? ""} label="Cargo">
                   <MenuItem value="">
@@ -640,23 +648,28 @@ export default function RegistrarEmpleado() {
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.cargoId?.message}</FormHelperText>
               </FormControl>
             )}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
             <Controller
               name="fechaIngreso"
               control={control}
               render={({ field }) => (
-                <DatePicker
-                  key={resetKey}
-                  label="Fecha de Ingreso"
-                  value={field.value ? dayjs(field.value) : null}
-                  onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
-                  slotProps={{ textField: { size: "small", fullWidth: true } }}
-                />
+                <FormControl fullWidth error={!!errors.fechaIngreso}>
+                  {" "}
+                  <DatePicker
+                    key={resetKey}
+                    label="Fecha de Ingreso"
+                    value={field.value ? dayjs(field.value) : null}
+                    onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
+                    slotProps={{ textField: { size: "small", fullWidth: true, error: !!errors.fechaIngreso } }}
+                  />
+                  <FormHelperText>{errors.fechaIngreso?.message}</FormHelperText>
+                </FormControl>
               )}
             />
           </LocalizationProvider>
@@ -666,15 +679,16 @@ export default function RegistrarEmpleado() {
             name="tipoContrato"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.tipoContrato}>
                 <InputLabel>Tipo de Contrato</InputLabel>
                 <Select {...field} label="Tipo de Contrato">
                   {catalogos.tiposContrato.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.tipoContrato?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -684,15 +698,16 @@ export default function RegistrarEmpleado() {
             name="tipoJornada"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.tipoJornada}>
                 <InputLabel>Tipo de Jornada</InputLabel>
                 <Select {...field} label="Tipo de Jornada">
                   {catalogos.tiposJornada.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.tipoJornada?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -706,11 +721,12 @@ export default function RegistrarEmpleado() {
                 <InputLabel>Nivel Educativo</InputLabel>
                 <Select {...field} label="Nivel Educativo">
                   {catalogos.nivelesEducativos.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.nivelEducativo?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -758,11 +774,12 @@ export default function RegistrarEmpleado() {
                 <InputLabel>Parentesco</InputLabel>
                 <Select {...field} label="Parentesco">
                   {catalogos.tiposParentesco.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.contactoEmergenciaParentesco?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -794,11 +811,12 @@ export default function RegistrarEmpleado() {
                 <InputLabel>Tipo de Cuenta</InputLabel>
                 <Select {...field} label="Tipo de Cuenta">
                   {catalogos.tiposCuentaBancaria.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.tiposCuentaBancaria?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -826,11 +844,12 @@ export default function RegistrarEmpleado() {
                 <InputLabel>Sistema de Pensiones</InputLabel>
                 <Select {...field} label="Sistema de Pensiones">
                   {catalogos.sistemasPensiones.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem key={item.id} value={String(item.id)}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>{errors.sistemaPensiones?.message}</FormHelperText>
               </FormControl>
             )}
           />
