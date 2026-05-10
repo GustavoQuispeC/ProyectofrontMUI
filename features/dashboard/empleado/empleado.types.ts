@@ -31,37 +31,54 @@ export interface TipoDocumentoListar {
 export interface RegistarEmpleado {
   nombre: string;
   apellidos: string;
-  tipoDocumento: string;
+
+  tipoDocumento: number;
   numeroDocumento: string;
+
   fechaNacimiento: string;
-  genero: string;
-  estadoCivil: string;
+
+  genero: number;
+  estadoCivil: number;
+
   nacionalidad: string;
   correo: string;
   telefonoMovil: string;
+
   direccion: string;
   distrito: string;
   provincia: string;
   departamento: string;
+
   contactoEmergenciaNombre: string;
-  contactoEmergenciaParentesco: string;
+  contactoEmergenciaParentesco: number | null;
   contactoEmergenciaTelefono: string;
+
   numeroCuentaBancaria: string;
   bancoNombre: string;
-  tiposCuentaBancaria: string;
+
+  tipoCuenta: number | null;
+
   cci: string;
   ruc: string;
   numeroESSalud: string;
-  sistemaPensiones: string;
+
+  sistemaPensiones: number | null;
+
   cuspp: string;
-  nivelEducativo: string;
+
+  nivelEducativo: number | null;
+
   profesionOficio: string;
   fotoUrl: string;
+
   cargoId: number;
   salario: number;
-  tipoContrato: string;
-  tipoJornada: string;
+
+  tipoContrato: number | null;
+  tipoJornada: number | null;
+
   fechaIngreso: string;
+
   observaciones: string;
 }
 

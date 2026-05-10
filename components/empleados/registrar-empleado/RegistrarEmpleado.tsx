@@ -45,42 +45,62 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import InputAdornment from "@mui/material/InputAdornment";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import FormHelperText from "@mui/material/FormHelperText";
-import { string } from "zod";
+
 // ─── Estilos base del TextField ──────────────────────────────────────────────
 const defaultValues: EmpleadoForm = {
   nombre: "",
   apellidos: "",
-  tipoDocumento: "",
+
+  tipoDocumento: 0,
   numeroDocumento: "",
+
   fechaNacimiento: "",
-  genero: "",
-  estadoCivil: "",
+
+  genero: 0,
+  estadoCivil: 0,
+
   nacionalidad: "",
+
   correo: "",
   telefonoMovil: "",
+
   direccion: "",
   distrito: "",
   provincia: "",
   departamento: "",
+
   contactoEmergenciaNombre: "",
-  contactoEmergenciaParentesco: "",
+  contactoEmergenciaParentesco: null,
   contactoEmergenciaTelefono: "",
+
   numeroCuentaBancaria: "",
   bancoNombre: "",
-  tiposCuentaBancaria: "",
+
+  tipoCuenta: null,
+
   cci: "",
   ruc: "",
   numeroESSalud: "",
-  sistemaPensiones: "",
+
+  sistemaPensiones: null,
+
   cuspp: "",
-  nivelEducativo: "",
+
+  nivelEducativo: null,
+
   profesionOficio: "",
+
   fotoUrl: "",
+
   cargoId: 0,
+
   salario: 0,
-  tipoContrato: "",
-  tipoJornada: "",
+
+  tipoContrato: 0,
+  tipoJornada: 0,
+
   fechaIngreso: "",
+
   observaciones: "",
 };
 
@@ -381,13 +401,25 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.genero}>
                 <InputLabel>Género *</InputLabel>
-                <Select {...field} label="Género *">
+
+                <Select
+                  value={field.value || ""}
+                  label="Género *"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.generos.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.genero?.message}</FormHelperText>
               </FormControl>
             )}
@@ -428,13 +460,25 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.tipoDocumento}>
                 <InputLabel>Tipo Documento</InputLabel>
-                <Select {...field} label="Tipo Documento">
+
+                <Select
+                  value={field.value || ""}
+                  label="Tipo Documento"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposDocumentos.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.tipoDocumento?.message}</FormHelperText>
               </FormControl>
             )}
@@ -461,13 +505,25 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.estadoCivil}>
                 <InputLabel>Estado Civil</InputLabel>
-                <Select {...field} label="Estado Civil">
+
+                <Select
+                  value={field.value || ""}
+                  label="Estado Civil"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.estadosCiviles.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.estadoCivil?.message}</FormHelperText>
               </FormControl>
             )}
@@ -638,16 +694,25 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.cargoId}>
                 <InputLabel>Cargo</InputLabel>
-                <Select {...field} value={field.value ?? ""} label="Cargo">
+
+                <Select
+                  value={field.value || ""}
+                  label="Cargo"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
                   <MenuItem value="">
                     <em>Seleccione...</em>
                   </MenuItem>
+
                   {cargos.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.cargoId?.message}</FormHelperText>
               </FormControl>
             )}
@@ -681,13 +746,25 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.tipoContrato}>
                 <InputLabel>Tipo de Contrato</InputLabel>
-                <Select {...field} label="Tipo de Contrato">
+
+                <Select
+                  value={field.value || ""}
+                  label="Tipo de Contrato"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposContrato.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.tipoContrato?.message}</FormHelperText>
               </FormControl>
             )}
@@ -700,13 +777,25 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.tipoJornada}>
                 <InputLabel>Tipo de Jornada</InputLabel>
-                <Select {...field} label="Tipo de Jornada">
+
+                <Select
+                  value={field.value || ""}
+                  label="Tipo de Jornada"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposJornada.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.tipoJornada?.message}</FormHelperText>
               </FormControl>
             )}
@@ -719,13 +808,27 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small">
                 <InputLabel>Nivel Educativo</InputLabel>
-                <Select {...field} label="Nivel Educativo">
+
+                <Select
+                  value={field.value ?? ""}
+                  label="Nivel Educativo"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.nivelesEducativos.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.nivelEducativo?.message}</FormHelperText>
               </FormControl>
             )}
@@ -772,13 +875,27 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small">
                 <InputLabel>Parentesco</InputLabel>
-                <Select {...field} label="Parentesco">
+
+                <Select
+                  value={field.value ?? ""}
+                  label="Parentesco"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposParentesco.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.contactoEmergenciaParentesco?.message}</FormHelperText>
               </FormControl>
             )}
@@ -804,19 +921,33 @@ export default function RegistrarEmpleado() {
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Controller
-            name="tiposCuentaBancaria"
+            name="tipoCuenta"
             control={control}
             render={({ field }) => (
               <FormControl fullWidth size="small">
                 <InputLabel>Tipo de Cuenta</InputLabel>
-                <Select {...field} label="Tipo de Cuenta">
+
+                <Select
+                  value={field.value ?? ""}
+                  label="Tipo de Cuenta"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposCuentaBancaria.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>{errors.tiposCuentaBancaria?.message}</FormHelperText>
+
+                <FormHelperText>{errors.tipoCuenta?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -842,13 +973,27 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small">
                 <InputLabel>Sistema de Pensiones</InputLabel>
-                <Select {...field} label="Sistema de Pensiones">
+
+                <Select
+                  value={field.value ?? ""}
+                  label="Sistema de Pensiones"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.sistemasPensiones.map((item) => (
-                    <MenuItem key={item.id} value={String(item.id)}>
+                    <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.sistemaPensiones?.message}</FormHelperText>
               </FormControl>
             )}

@@ -2,6 +2,7 @@ import { apiEmpleado } from "@/lib/api-empleado";
 import { EmpleadosListar, RegistarEmpleado, VerEmpleado } from "./empleado.types";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 //! Función para listar empleados
 export async function listarEmpleadosApi(): Promise<EmpleadosListar[]> {
   return apiEmpleado(`${apiUrl}/Empleados`, {
@@ -24,10 +25,8 @@ export async function eliminarEmpleadoApi(id: string): Promise<void> {
 }
 
 //! Función para registrar empleados, token y rol requrido
-export async function registrarEmpleadoApi(
-  payload: RegistarEmpleado, // recibe del formulario
-): Promise<RegistarEmpleado> {
-  return apiEmpleado(`${apiUrl}/empleados`, {
+export async function registrarEmpleadoApi(payload: RegistarEmpleado): Promise<RegistarEmpleado> {
+  return apiEmpleado(`${apiUrl}/Empleados`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
