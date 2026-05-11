@@ -50,19 +50,17 @@ import FormHelperText from "@mui/material/FormHelperText";
 const defaultValues: EmpleadoForm = {
   nombre: "",
   apellidos: "",
-
   tipoDocumento: 0,
   numeroDocumento: "",
-
   fechaNacimiento: "",
-
   genero: 0,
   estadoCivil: 0,
-
   nacionalidad: "",
-
   correo: "",
   telefonoMovil: "",
+  fotoUrl: "",
+  cargoId: 0,
+  salario: 0,
 
   direccion: "",
   distrito: "",
@@ -75,26 +73,16 @@ const defaultValues: EmpleadoForm = {
 
   numeroCuentaBancaria: "",
   bancoNombre: "",
-
   tipoCuenta: null,
-
   cci: "",
+
   ruc: "",
   numeroESSalud: "",
-
   sistemaPensiones: null,
-
   cuspp: "",
 
   nivelEducativo: null,
-
   profesionOficio: "",
-
-  fotoUrl: "",
-
-  cargoId: 0,
-
-  salario: 0,
 
   tipoContrato: 0,
   tipoJornada: 0,

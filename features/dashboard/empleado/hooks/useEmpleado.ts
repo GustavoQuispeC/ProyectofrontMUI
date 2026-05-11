@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { VerEmpleado } from "../empleado.types";
-import { verEmpleadoApi } from "../empleado.service";
+import { DetalleEmpleado } from "../empleado.types";
+import { detalleEmpleadoApi } from "../empleado.service";
 
 export function useEmpleado(id: string) {
-  const [empleado, setEmpleado] = useState<VerEmpleado | null>(null);
+  const [empleado, setEmpleado] = useState<DetalleEmpleado | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +15,7 @@ export function useEmpleado(id: string) {
         setLoading(true);
         setError(null);
 
-        const data = await verEmpleadoApi(id);
+        const data = await detalleEmpleadoApi(id);
         setEmpleado(data);
       } catch (err) {
         console.error("Error al obtener empleado:", err);

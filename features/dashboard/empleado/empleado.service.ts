@@ -1,5 +1,5 @@
 import { apiEmpleado } from "@/lib/api-empleado";
-import { EmpleadosListar, RegistarEmpleado, VerEmpleado } from "./empleado.types";
+import { EmpleadosListar, RegistarEmpleado, DetalleEmpleado } from "./empleado.types";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -11,7 +11,7 @@ export async function listarEmpleadosApi(): Promise<EmpleadosListar[]> {
 }
 
 //! Listar empleado por ID
-export async function verEmpleadoApi(id: string): Promise<VerEmpleado> {
+export async function detalleEmpleadoApi(id: string): Promise<DetalleEmpleado> {
   return apiEmpleado(`${apiUrl}/Empleados/${id}`, {
     method: "GET",
   });

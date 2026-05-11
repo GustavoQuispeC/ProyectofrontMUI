@@ -82,44 +82,81 @@ export interface RegistarEmpleado {
   observaciones: string;
 }
 
-export interface VerEmpleado {
-  id: string;
+export interface DetalleEmpleado {
+  id: number;
+
   nombreCompleto: string;
+
   nombre: string;
+
   apellidos: string;
-  genero: string;
-  estadoCivil: string;
-  tipoDocumento: string;
+
+  genero: number | null;
+
+  estadoCivil: number | null;
+
+  tipoDocumento: number | null;
+
   numeroDocumento: string;
+
   fechaNacimiento: string;
+
   edad: number;
+
   correo: string;
+
   telefonoMovil: string;
+
   fotoUrl: string | null;
+
   nacionalidad: string;
+
   direccion: string | null;
+
   departamento: string | null;
+
   provincia: string | null;
+
   distrito: string | null;
+
   contactoEmergenciaNombre: string | null;
+
   contactoEmergenciaTelefono: string | null;
-  contactoEmergenciaParentesco: string | null;
+
+  contactoEmergenciaParentesco: number | null;
+
   bancoNombre: string | null;
+
   numeroCuentaBancaria: string | null;
-  tiposCuentaBancaria: string | null;
+
+  tipoCuenta: number | null;
+
   cci: string | null;
+
   numeroEssalud: string | null;
-  sistemaPensiones: string | null;
+
+  sistemaPensiones: number | null;
+
   cuspp: string | null;
-  nivelEducativo: string | null;
+
+  nivelEducativo: number | null;
+
   profesionOficio: string | null;
+
   codigoEmpleado: string;
+
   cargoActual: string;
+
   salarioActual: number;
-  fechaIngresoActual: string;
+  fechaIngreso: string;
+
   fechaEgreso: string | null;
+
   observaciones: string | null;
-  tipoContrato: string | null;
-  tipoJornada: string | null;
+
+  tipoContrato: number | null;
+
+  tipoJornada: number | null;
+
   isActive: boolean;
 }

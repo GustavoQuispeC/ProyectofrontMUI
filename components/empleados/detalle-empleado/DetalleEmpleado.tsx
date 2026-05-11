@@ -28,9 +28,15 @@ import {
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useEmpleado } from "@/features/dashboard/empleado/hooks/useEmpleado";
+import { useCatalogos } from "@/features/dashboard/catalogo/hooks/useCatalogos";
 
 interface Props {
   id: string;
+}
+
+//! Función auxiliar para obtener el nombre de un ítem de catálogo a partir de su ID
+function obtenerNombreCatalogo(items: { id: number; nombre: string }[], id?: number | null) {
+  return items.find((x) => x.id === id)?.nombre ?? "—";
 }
 
 // ── Subcomponentes ────────────────────────────────────────────────────────────
@@ -149,7 +155,11 @@ export default function DetalleEmpleado({ id }: Props) {
   const router = useRouter();
   const { empleado, loading, error } = useEmpleado(id);
 
-  if (loading) return <LoadingSkeleton />;
+  const { catalogos, loading: loadingCatalogos } = useCatalogos();
+
+  if (loading || loadingCatalogos) {
+    return <LoadingSkeleton />;
+  }
 
   if (error) {
     return (
@@ -245,7 +255,7 @@ export default function DetalleEmpleado({ id }: Props) {
                   <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 0.5 }}>
                     <Work sx={{ fontSize: 12, color: "text.disabled" }} />
                     <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                      {empleado.cargoActual ?? "Sin cargo"}
+                      {obtenerNombreCatalogo(catalogos.tiposContrato, empleado.tipoContrato) || empleado.cargoActual}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -258,7 +268,13 @@ export default function DetalleEmpleado({ id }: Props) {
                     color={empleado.isActive ? "success" : "error"}
                     variant="outlined"
                   />
-                  {empleado.tipoContrato && <Chip size="small" label={empleado.tipoContrato} variant="outlined" />}
+                  {empleado.tipoContrato && (
+                    <Chip
+                      size="small"
+                      label={obtenerNombreCatalogo(catalogos.tiposContrato, empleado.tipoContrato)}
+                      variant="outlined"
+                    />
+                  )}
                 </Stack>
               </Stack>
             </Stack>
@@ -293,8 +309,8 @@ export default function DetalleEmpleado({ id }: Props) {
           <SectionCard title="Datos personales" icon={Person}>
             <Field label="Nombres" value={empleado.nombre} />
             <Field label="Apellidos" value={empleado.apellidos} />
-            <Field label="Género" value={empleado.genero} />
-            <Field label="Estado civil" value={empleado.estadoCivil} />
+            <Field label="Género" value={obtenerNombreCatalogo(catalogos.generos, empleado.genero)} />
+            <Field label="Estado civil" value={obtenerNombreCatalogo(catalogos.estadosCiviles, empleado.estadoCivil)} />
             <Field label="Fecha de nacimiento" value={empleado.fechaNacimiento} />
             <Field label="Edad" value={empleado.edad ? `${empleado.edad} años` : null} />
             <Field label="Nacionalidad" value={empleado.nacionalidad} />
@@ -321,7 +337,10 @@ export default function DetalleEmpleado({ id }: Props) {
           <SectionCard title="Contacto de emergencia" icon={Phone}>
             <Field label="Nombre" value={empleado.contactoEmergenciaNombre} />
             <Field label="Teléfono" value={empleado.contactoEmergenciaTelefono} />
-            <Field label="Parentesco" value={empleado.contactoEmergenciaParentesco} />
+            <Field
+              label="Parentesco"
+              value={obtenerNombreCatalogo(catalogos.tiposParentesco, empleado.contactoEmergenciaParentesco)}
+            />
           </SectionCard>
         </Grid>
 
@@ -329,9 +348,15 @@ export default function DetalleEmpleado({ id }: Props) {
           <SectionCard title="Información laboral" icon={Work}>
             <Field label="Cargo" value={empleado.cargoActual} />
             <Field label="Salario" value={empleado.salarioActual ? `S/ ${empleado.salarioActual}` : null} />
-            <Field label="Tipo de contrato" value={empleado.tipoContrato} />
-            <Field label="Tipo de jornada" value={empleado.tipoJornada} />
-            <Field label="Fecha de ingreso" value={empleado.fechaIngresoActual} />
+            <Field
+              label="Tipo de contrato"
+              value={obtenerNombreCatalogo(catalogos.tiposContrato, empleado.tipoContrato)}
+            />
+            <Field
+              label="Tipo de jornada"
+              value={obtenerNombreCatalogo(catalogos.tiposJornada, empleado.tipoJornada)}
+            />
+            <Field label="Fecha de ingreso" value={empleado.fechaIngreso} />
           </SectionCard>
         </Grid>
 
@@ -340,13 +365,19 @@ export default function DetalleEmpleado({ id }: Props) {
             <Field label="Banco" value={empleado.bancoNombre} />
             <Field label="Número de cuenta" value={empleado.numeroCuentaBancaria} />
             <Field label="CCI" value={empleado.cci} />
-            <Field label="Tipo de cuenta" value={empleado.tiposCuentaBancaria} />
+            <Field
+              label="Tipo de cuenta"
+              value={obtenerNombreCatalogo(catalogos.tiposCuentaBancaria, empleado.tipoCuenta)}
+            />
           </SectionCard>
         </Grid>
 
         <Grid size={{ xs: 12, lg: 6 }}>
           <SectionCard title="Pensiones y salud" icon={Favorite}>
-            <Field label="Sistema de pensiones" value={empleado.sistemaPensiones} />
+            <Field
+              label="Sistema de pensiones"
+              value={obtenerNombreCatalogo(catalogos.sistemasPensiones, empleado.sistemaPensiones)}
+            />
             <Field label="CUSPP" value={empleado.cuspp} />
             <Field label="N° EsSalud" value={empleado.numeroEssalud} />
           </SectionCard>
