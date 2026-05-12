@@ -8,9 +8,12 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
+//import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { esES } from "@mui/x-data-grid/locales";
 import { useEffect, useMemo, useState } from "react";
+import Button from "@mui/material/Button";
+import Link from "next/link";
 
 const getColumns = (): GridColDef[] => [
   {
@@ -67,11 +70,11 @@ const getColumns = (): GridColDef[] => [
     disableColumnMenu: true,
     renderCell: (params) => (
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%" }}>
-        <Tooltip title="Ver">
+        {/* <Tooltip title="Ver">
           <IconButton size="small" color="info" onClick={() => console.log("Ver", params.row)}>
             <RemoveRedEyeOutlinedIcon fontSize="small" />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
         <Tooltip title="Editar">
           <IconButton size="small" color="inherit" onClick={() => console.log("Editar", params.row)}>
             <ModeEditOutlineOutlinedIcon fontSize="small" />
@@ -109,6 +112,11 @@ export default function ListarUsuariosDataTable() {
 
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
+        <Button component={Link} href="/dashboard/empleados/registrar" variant="contained" startIcon={<GroupAddIcon />}>
+          Nuevo Usuario
+        </Button>
+      </Box>
       <DataGrid
         rows={usuarios}
         columns={columns}
