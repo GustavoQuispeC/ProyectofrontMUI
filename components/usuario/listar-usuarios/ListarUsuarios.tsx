@@ -113,7 +113,7 @@ export default function ListarUsuariosDataTable() {
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>
       <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
-        <Button component={Link} href="/dashboard/empleados/registrar" variant="contained" startIcon={<GroupAddIcon />}>
+        <Button component={Link} href="/dashboard/usuarios/registrar" variant="contained" startIcon={<GroupAddIcon />}>
           Nuevo Usuario
         </Button>
       </Box>

@@ -10,3 +10,4 @@ export { default as LoginUsuario } from "./usuario/login-usuario/LoginUsuario";
 export { default as ListarUsuarios } from "./usuario/listar-usuarios/ListarUsuarios";
 export { default as ListarEmpleados } from "./empleados/listar-empleados/ListarEmpleados";
 export { default as RegistrarEmpleado } from "./empleados/registrar-empleado/RegistrarEmpleado";
+export { default as RegistrarUsuario } from "./usuario/registrar-usuario/RegistrarUsuario";
