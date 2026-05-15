@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
+
 import {
   Alert,
   Autocomplete,
@@ -31,14 +32,22 @@ import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
-import { useRoles } from "@/features/dashboard/roles/hooks/useRoles";
+
 import { useRouter } from "next/navigation";
-import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
-import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
-import { UsuarioForm, UsuarioSchema } from "@/features/dashboard/usuario/usuario.schema";
+
 import { Controller, useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+
+import { useRoles } from "@/features/dashboard/roles/hooks/useRoles";
+import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
+
+import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
+
+import { UsuarioForm, UsuarioSchema } from "@/features/dashboard/usuario/usuario.schema";
+
 import { toastPromise } from "@/shared/utils/toast";
+
+import { registrarUsuario } from "@/features/dashboard/usuario/usuario.logic";
 
 const defaultValues: UsuarioForm = {
   empleadoId: "",
@@ -46,28 +55,25 @@ const defaultValues: UsuarioForm = {
   rolId: "",
   password: "",
 };
-interface AlertMessage {
-  type: "success" | "error" | "warning" | "info";
-  text: string;
-}
 
 export default function RegistrarUsuario() {
-  const { roles } = useRoles();
-  const { empleados, loading: loadingEmployees } = useEmpleados();
-  const [selectedEmployee, setSelectedEmployee] = useState<EmpleadosListar | null>(null);
   const router = useRouter();
 
-  const [message, setMessage] = useState<AlertMessage | null>(null);
+  const { roles } = useRoles();
+
+  const { empleados, loading: loadingEmployees } = useEmpleados();
+
+  const [selectedEmployee, setSelectedEmployee] = useState<EmpleadosListar | null>(null);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [saving, setSaving] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     control,
     handleSubmit,
     reset,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<UsuarioForm>({
     resolver: standardSchemaResolver(UsuarioSchema),
@@ -77,28 +83,36 @@ export default function RegistrarUsuario() {
     shouldFocusError: true,
   });
 
-  // ── Reset ─────────────────────────────────────────────────────────────────
+  //! Reset form
+
   const resetForm = () => {
     reset(defaultValues);
     setSelectedEmployee(null);
   };
 
-  //TODO: Implementar lógica de guardado real conectando con el backend
-  const onSubmit = async (data: UsuarioForm) => {
-    console.log("📝 data del form:", data);
+  //! Submit
 
-    // const payload: RegistarUsuario = { ...data };
-    // console.log("📦 payload:", payload);
+  const onSubmit = async (data: UsuarioForm) => {
     try {
-      // await toastPromise(registrarUsuario(payload), {
-      //   loading: "Registrando usuario...",
-      //   success: "Usuario registrado correctamente",
-      //   error: "Error al registrar el usuario",
-      // });
+      setSaving(true);
+      console.log(saving);
+
+      await toastPromise(
+        registrarUsuario(Number(data.empleadoId), {
+          roleId: data.rolId,
+          password: data.password,
+        }),
+        {
+          loading: "Registrando usuario...",
+          success: "Usuario registrado correctamente",
+          error: "Error al registrar el usuario",
+        },
+      );
 
       resetForm();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_) {}
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -133,7 +147,13 @@ export default function RegistrarUsuario() {
             bgcolor: "background.paper",
           }}
         >
-          <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
             <Avatar
               sx={{
                 bgcolor: "primary.main",
@@ -167,13 +187,6 @@ export default function RegistrarUsuario() {
             p: { xs: 3, md: 4 },
           }}
         >
-          {/* Alert */}
-          {message && (
-            <Alert severity={message.type} onClose={() => setMessage(null)} sx={{ mb: 3 }}>
-              {message.text}
-            </Alert>
-          )}
-
           {/* Información del empleado */}
           <Paper
             variant="outlined"
@@ -194,40 +207,45 @@ export default function RegistrarUsuario() {
             </Typography>
 
             <Grid container spacing={2.5}>
+              {/* Autocomplete empleado */}
               <Grid size={{ xs: 12 }}>
-                <Autocomplete
-                  options={empleados}
-                  loading={loadingEmployees}
-                  value={selectedEmployee}
-                  onChange={(_, value) => setSelectedEmployee(value)}
-                  getOptionLabel={(option) => option.nombreCompleto}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  noOptionsText="Sin resultados"
-                  loadingText="Cargando..."
-                  size="small"
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Buscar empleado"
-                      placeholder="Seleccione un empleado"
-                      fullWidth
-                      slotProps={{
-                        ...params.slotProps,
-                        input: {
-                          ...params.slotProps?.input,
-                          endAdornment: (
-                            <>
-                              {loadingEmployees ? <CircularProgress size={18} /> : null}
-                              {(params.slotProps?.input as { endAdornment?: React.ReactNode })?.endAdornment}
-                            </>
-                          ),
-                        },
+                <Controller
+                  name="empleadoId"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      disablePortal
+                      options={empleados ?? []}
+                      loading={loadingEmployees}
+                      value={empleados.find((x) => x.id.toString() === field.value) ?? null}
+                      onChange={(_, value) => {
+                        field.onChange(value?.id?.toString() ?? "");
+
+                        setSelectedEmployee(value);
+
+                        setValue("nombreCompleto", value?.nombreCompleto ?? "");
                       }}
+                      getOptionLabel={(option) => option.nombreCompleto ?? ""}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      noOptionsText="Sin resultados"
+                      loadingText="Cargando..."
+                      size="small"
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Buscar empleado"
+                          placeholder="Seleccione un empleado"
+                          error={!!errors.empleadoId}
+                          helperText={errors.empleadoId?.message}
+                          fullWidth
+                        />
+                      )}
                     />
                   )}
                 />
               </Grid>
 
+              {/* Nombre completo */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Nombre completo"
@@ -239,6 +257,7 @@ export default function RegistrarUsuario() {
                 />
               </Grid>
 
+              {/* Correo */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Correo electrónico"
@@ -271,6 +290,7 @@ export default function RegistrarUsuario() {
             </Typography>
 
             <Grid container spacing={2.5}>
+              {/* Rol */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Controller
                   name="rolId"
@@ -280,11 +300,10 @@ export default function RegistrarUsuario() {
                       <InputLabel>Rol del sistema *</InputLabel>
 
                       <Select
+                        {...field}
                         value={field.value || ""}
                         label="Rol del sistema *"
-                        onChange={(e) => {
-                          field.onChange(Number(e.target.value));
-                        }}
+                        onChange={(e) => field.onChange(e.target.value)}
                       >
                         <MenuItem value="">
                           <em>Seleccione</em>
@@ -303,6 +322,7 @@ export default function RegistrarUsuario() {
                 />
               </Grid>
 
+              {/* Password */}
               <Grid size={{ xs: 12, md: 6 }}>
                 <Controller
                   name="password"
@@ -316,6 +336,17 @@ export default function RegistrarUsuario() {
                       type={showPassword ? "text" : "password"}
                       error={!!errors.password}
                       helperText={errors.password?.message}
+                      slotProps={{
+                        input: {
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton edge="end" onClick={() => setShowPassword(!showPassword)}>
+                                {showPassword ? <VisibilityOffRoundedIcon /> : <VisibilityRoundedIcon />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        },
+                      }}
                     />
                   )}
                 />
@@ -323,11 +354,25 @@ export default function RegistrarUsuario() {
             </Grid>
           </Paper>
 
+          {/* Alert */}
+          <Alert
+            severity="info"
+            sx={{
+              mt: 3,
+              borderRadius: 2,
+            }}
+          >
+            El usuario será creado utilizando el correo registrado del empleado seleccionado.
+          </Alert>
+
           {/* Actions */}
           <Divider sx={{ my: 4 }} />
 
           <Stack
-            direction={{ xs: "column-reverse", sm: "row" }}
+            direction={{
+              xs: "column-reverse",
+              sm: "row",
+            }}
             sx={{
               gap: 2,
               justifyContent: "flex-end",
@@ -351,6 +396,7 @@ export default function RegistrarUsuario() {
               color="warning"
               startIcon={<RestartAltIcon />}
               onClick={resetForm}
+              disabled={saving}
               sx={{
                 minWidth: 120,
                 height: 44,

@@ -2,7 +2,6 @@
 export interface RegistrarUsuario {
   roleId: string;
   password: string;
-  empleadoId: string;
 }
 
 export interface ListarUsuarios {
