@@ -32,22 +32,16 @@ import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
-
 import { useRouter } from "next/navigation";
-
 import { Controller, useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-
 import { useRoles } from "@/features/dashboard/roles/hooks/useRoles";
 import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
-
 import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
-
 import { UsuarioForm, UsuarioSchema } from "@/features/dashboard/usuario/usuario.schema";
-
 import { toastPromise } from "@/shared/utils/toast";
-
 import { registrarUsuario } from "@/features/dashboard/usuario/usuario.logic";
+import { useQueryClient } from "@tanstack/react-query";
 
 const defaultValues: UsuarioForm = {
   empleadoId: "",
@@ -58,17 +52,14 @@ const defaultValues: UsuarioForm = {
 
 export default function RegistrarUsuario() {
   const router = useRouter();
-
   const { roles } = useRoles();
-
   const { empleados, loading: loadingEmployees } = useEmpleados();
-
   const [selectedEmployee, setSelectedEmployee] = useState<EmpleadosListar | null>(null);
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [saving, setSaving] = useState(false);
+  const queryClient = useQueryClient();
 
+  //! usando react-hook-form
   const {
     control,
     handleSubmit,
@@ -84,18 +75,15 @@ export default function RegistrarUsuario() {
   });
 
   //! Reset form
-
   const resetForm = () => {
     reset(defaultValues);
     setSelectedEmployee(null);
   };
 
   //! Submit
-
   const onSubmit = async (data: UsuarioForm) => {
     try {
       setSaving(true);
-      console.log(saving);
 
       await toastPromise(
         registrarUsuario(Number(data.empleadoId), {
@@ -108,6 +96,11 @@ export default function RegistrarUsuario() {
           error: "Error al registrar el usuario",
         },
       );
+
+      //? refresca listado
+      await queryClient.invalidateQueries({
+        queryKey: ["usuarios"],
+      });
 
       resetForm();
     } finally {

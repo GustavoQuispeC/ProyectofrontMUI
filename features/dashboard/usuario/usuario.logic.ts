@@ -27,6 +27,9 @@ export async function listarUsuarios() {
   if (!user) {
     throw new Error("No autenticado");
   }
+  if (user.rol !== "Admin" && user.rol !== "Supervisor") {
+    throw new Error("No tienes permisos para eliminar empleados");
+  }
 
   return listarUsuariosService();
 }

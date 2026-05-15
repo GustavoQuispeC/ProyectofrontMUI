@@ -8,7 +8,6 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-//import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { esES } from "@mui/x-data-grid/locales";
 import { useEffect, useMemo, useState } from "react";
