@@ -11,137 +11,95 @@ import {
   CardContent,
   CircularProgress,
   Divider,
+  FormControl,
+  FormHelperText,
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
   MenuItem,
   Paper,
+  Select,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
-import CleaningServicesRoundedIcon from "@mui/icons-material/CleaningServicesRounded";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import { useRoles } from "@/features/dashboard/roles/hooks/useRoles";
+import { useRouter } from "next/navigation";
+import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
+import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
+import { UsuarioForm, UsuarioSchema } from "@/features/dashboard/usuario/usuario.schema";
+import { Controller, useForm } from "react-hook-form";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { toastPromise } from "@/shared/utils/toast";
 
-// ─────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────
-
-interface Employee {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-interface FormState {
-  roleId: string | number;
-  password: string;
-}
-
+const defaultValues: UsuarioForm = {
+  empleadoId: "",
+  nombreCompleto: "",
+  rolId: "",
+  password: "",
+};
 interface AlertMessage {
   type: "success" | "error" | "warning" | "info";
   text: string;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Mock Data
-// ─────────────────────────────────────────────────────────────
-
-const MOCK_EMPLOYEES: Employee[] = [
-  {
-    id: 1,
-    firstName: "Ana",
-    lastName: "Ramírez",
-    email: "a.ramirez@empresa.com",
-  },
-  {
-    id: 2,
-    firstName: "Carlos",
-    lastName: "Mendoza",
-    email: "c.mendoza@empresa.com",
-  },
-  {
-    id: 3,
-    firstName: "Laura",
-    lastName: "Torres",
-    email: "l.torres@empresa.com",
-  },
-];
-
-// ─────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────
-
 export default function RegistrarUsuario() {
   const { roles } = useRoles();
-  console.log(roles);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-
-  const [form, setForm] = useState<FormState>({
-    roleId: "",
-    password: "",
-  });
+  const { empleados, loading: loadingEmployees } = useEmpleados();
+  const [selectedEmployee, setSelectedEmployee] = useState<EmpleadosListar | null>(null);
+  const router = useRouter();
 
   const [message, setMessage] = useState<AlertMessage | null>(null);
 
   const [saving, setSaving] = useState(false);
-  const [loadingEmployees] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const employees = MOCK_EMPLOYEES;
-  // const roles = MOCK_ROLES;
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<UsuarioForm>({
+    resolver: standardSchemaResolver(UsuarioSchema),
+    defaultValues,
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    shouldFocusError: true,
+  });
 
-  const employeeFullName = selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : "";
-
-  const handleClear = useCallback(() => {
+  // ── Reset ─────────────────────────────────────────────────────────────────
+  const resetForm = () => {
+    reset(defaultValues);
     setSelectedEmployee(null);
-    setForm({
-      roleId: "",
-      password: "",
-    });
-    setMessage(null);
-  }, []);
+  };
 
-  const handleBack = useCallback(() => {
-    console.log("Navigate back");
-  }, []);
+  //TODO: Implementar lógica de guardado real conectando con el backend
+  const onSubmit = async (data: UsuarioForm) => {
+    console.log("📝 data del form:", data);
 
-  const handleSave = useCallback(async () => {
-    if (!selectedEmployee || !form.roleId || !form.password) {
-      setMessage({
-        type: "error",
-        text: "Complete todos los campos requeridos.",
-      });
-      return;
-    }
-
-    setSaving(true);
-
+    // const payload: RegistarUsuario = { ...data };
+    // console.log("📦 payload:", payload);
     try {
-      await new Promise((r) => setTimeout(r, 1500));
+      // await toastPromise(registrarUsuario(payload), {
+      //   loading: "Registrando usuario...",
+      //   success: "Usuario registrado correctamente",
+      //   error: "Error al registrar el usuario",
+      // });
 
-      setMessage({
-        type: "success",
-        text: "Usuario registrado exitosamente.",
-      });
-
-      handleClear();
-    } catch {
-      setMessage({
-        type: "error",
-        text: "Ocurrió un error al guardar.",
-      });
-    } finally {
-      setSaving(false);
-    }
-  }, [selectedEmployee, form, handleClear]);
+      resetForm();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {}
+  };
 
   return (
     <Box
@@ -238,14 +196,15 @@ export default function RegistrarUsuario() {
             <Grid container spacing={2.5}>
               <Grid size={{ xs: 12 }}>
                 <Autocomplete
-                  options={employees}
+                  options={empleados}
                   loading={loadingEmployees}
                   value={selectedEmployee}
                   onChange={(_, value) => setSelectedEmployee(value)}
-                  getOptionLabel={(option) => `${option.firstName} ${option.lastName}`}
+                  getOptionLabel={(option) => option.nombreCompleto}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
                   noOptionsText="Sin resultados"
                   loadingText="Cargando..."
+                  size="small"
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -259,14 +218,7 @@ export default function RegistrarUsuario() {
                           endAdornment: (
                             <>
                               {loadingEmployees ? <CircularProgress size={18} /> : null}
-
-                              {
-                                (
-                                  params.slotProps?.input as {
-                                    endAdornment?: React.ReactNode;
-                                  }
-                                )?.endAdornment
-                              }
+                              {(params.slotProps?.input as { endAdornment?: React.ReactNode })?.endAdornment}
                             </>
                           ),
                         },
@@ -279,8 +231,9 @@ export default function RegistrarUsuario() {
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Nombre completo"
-                  value={employeeFullName}
+                  value={selectedEmployee?.nombreCompleto ?? ""}
                   fullWidth
+                  size="small"
                   disabled
                   placeholder="Seleccione un empleado"
                 />
@@ -289,7 +242,8 @@ export default function RegistrarUsuario() {
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Correo electrónico"
-                  value={selectedEmployee?.email ?? ""}
+                  size="small"
+                  value={selectedEmployee?.correo ?? ""}
                   fullWidth
                   disabled
                   placeholder="Correo del empleado"
@@ -318,51 +272,52 @@ export default function RegistrarUsuario() {
 
             <Grid container spacing={2.5}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Rol del sistema"
-                  value={form.roleId}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      roleId: e.target.value,
-                    }))
-                  }
-                >
-                  <MenuItem value="">Seleccione un rol</MenuItem>
+                <Controller
+                  name="rolId"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl fullWidth size="small" error={!!errors.rolId}>
+                      <InputLabel>Rol del sistema *</InputLabel>
 
-                  {roles.map((role) => (
-                    <MenuItem key={role.id} value={role.id}>
-                      {role.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                      <Select
+                        value={field.value || ""}
+                        label="Rol del sistema *"
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value));
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>Seleccione</em>
+                        </MenuItem>
+
+                        {roles.map((item) => (
+                          <MenuItem key={item.id} value={item.id}>
+                            {item.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+
+                      <FormHelperText>{errors.rolId?.message}</FormHelperText>
+                    </FormControl>
+                  )}
+                />
               </Grid>
 
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Contraseña"
-                  type={showPassword ? "text" : "password"}
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      password: e.target.value,
-                    })
-                  }
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton edge="end" onClick={() => setShowPassword((prev) => !prev)}>
-                            {showPassword ? <VisibilityOffRoundedIcon /> : <VisibilityRoundedIcon />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      size="small"
+                      label="Contraseña"
+                      type={showPassword ? "text" : "password"}
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                    />
+                  )}
                 />
               </Grid>
             </Grid>
@@ -381,8 +336,8 @@ export default function RegistrarUsuario() {
             <Button
               variant="outlined"
               color="inherit"
-              startIcon={<ArrowBackRoundedIcon />}
-              onClick={handleBack}
+              startIcon={<KeyboardBackspaceIcon />}
+              onClick={() => router.push("/dashboard/usuarios/listar")}
               sx={{
                 minWidth: 120,
                 height: 44,
@@ -394,8 +349,8 @@ export default function RegistrarUsuario() {
             <Button
               variant="outlined"
               color="warning"
-              startIcon={<CleaningServicesRoundedIcon />}
-              onClick={handleClear}
+              startIcon={<RestartAltIcon />}
+              onClick={resetForm}
               sx={{
                 minWidth: 120,
                 height: 44,
@@ -407,7 +362,7 @@ export default function RegistrarUsuario() {
             <Button
               variant="contained"
               startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
-              onClick={handleSave}
+              onClick={handleSubmit(onSubmit)}
               disabled={saving}
               sx={{
                 minWidth: 140,

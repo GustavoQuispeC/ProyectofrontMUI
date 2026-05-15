@@ -2,7 +2,7 @@
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
-import { useUsuarios } from "@/features/dashboard/usuarios/hooks/useUsuarios";
+import { useUsuarios } from "@/features/dashboard/usuario/hooks/useUsuarios";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";

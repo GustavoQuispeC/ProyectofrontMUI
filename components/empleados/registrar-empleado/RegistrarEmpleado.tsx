@@ -247,10 +247,14 @@ export default function RegistrarEmpleado() {
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit(onSubmit, (errors) => {
-        console.log("❌ Errores de validación:", errors);
-      })}
-      sx={{ width: "100%", maxWidth: 1100, mx: "auto", px: { xs: 1, sm: 2, md: 3 } }}
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{
+        width: "100%",
+        bgcolor: "background.default",
+        minHeight: "100vh",
+        py: { xs: 2, md: 5 },
+        px: 2,
+      }}
     >
       {/* ── Encabezado de página ── */}
       <Stack sx={{ mb: 1, gap: 1, alignItems: "center", justifyContent: "space-between" }}>
@@ -1004,35 +1008,48 @@ export default function RegistrarEmpleado() {
       </Section>
 
       {/* ── Botones inferiores (móvil) ── */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ width: { xs: "100%", sm: "auto" } }}>
-        {/* 🔙 Retornar */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        sx={{
+          gap: 2,
+          justifyContent: "flex-end",
+          flexWrap: "wrap",
+        }}
+      >
         <Button
-          variant="text"
+          variant="outlined"
+          color="inherit"
           startIcon={<KeyboardBackspaceIcon />}
           onClick={() => router.push("/dashboard/empleados/listar")}
-          fullWidth
+          sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
         >
-          Retornar
+          Volver
         </Button>
 
-        {/* 🧹 Limpiar */}
-        <Button variant="outlined" color="inherit" startIcon={<RestartAltIcon />} onClick={resetForm} fullWidth>
+        <Button
+          variant="outlined"
+          color="warning"
+          startIcon={<RestartAltIcon />}
+          onClick={resetForm}
+          sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
+        >
           Limpiar
         </Button>
 
-        {/* 💾 Guardar */}
         <Button
           type="submit"
           variant="contained"
           startIcon={<SaveIcon />}
           disabled={uploading}
-          fullWidth
           sx={{
-            minWidth: 180,
-            fontWeight: 600,
+            minWidth: 140,
+            height: 44,
+            boxShadow: "none",
+            borderRadius: 2,
+            width: { xs: "100%", sm: "auto" },
           }}
         >
-          {uploading ? "Guardando..." : "Guardar Empleado"}
+          {uploading ? "Guardando..." : "Guardar"}
         </Button>
       </Stack>
     </Box>
