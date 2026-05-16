@@ -160,3 +160,9 @@ export interface DetalleEmpleado {
 
   isActive: boolean;
 }
+
+export interface EmpleadoAutocomplete {
+  id: number;
+  nombreCompleto: string;
+  correo: string;
+}

@@ -1,5 +1,5 @@
 import { apiEmpleado } from "@/lib/api-empleado";
-import { EmpleadosListar, RegistarEmpleado, DetalleEmpleado } from "./empleado.types";
+import { EmpleadosListar, RegistarEmpleado, DetalleEmpleado, EmpleadoAutocomplete } from "./empleado.types";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -29,5 +29,12 @@ export async function registrarEmpleadoApi(payload: RegistarEmpleado): Promise<R
   return apiEmpleado(`${apiUrl}/Empleados`, {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+//! Función para listar empleados activos para autocomplete
+export async function listarEmpleadosActivosApi(): Promise<EmpleadoAutocomplete[]> {
+  return apiEmpleado(`${apiUrl}/Empleados/autocomplete`, {
+    method: "GET",
   });
 }

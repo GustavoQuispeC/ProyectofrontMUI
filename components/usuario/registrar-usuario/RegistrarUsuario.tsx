@@ -36,12 +36,12 @@ import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useRoles } from "@/features/dashboard/roles/hooks/useRoles";
-import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
-import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
+import { EmpleadoAutocomplete } from "@/features/dashboard/empleado/empleado.types";
 import { UsuarioForm, UsuarioSchema } from "@/features/dashboard/usuario/usuario.schema";
 import { toastPromise } from "@/shared/utils/toast";
 import { registrarUsuario } from "@/features/dashboard/usuario/usuario.logic";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEmpleadosAutocomplete } from "@/features/dashboard/empleado/hooks/useEmpleadosAutocomplete";
 
 const defaultValues: UsuarioForm = {
   empleadoId: "",
@@ -53,8 +53,8 @@ const defaultValues: UsuarioForm = {
 export default function RegistrarUsuario() {
   const router = useRouter();
   const { roles } = useRoles();
-  const { empleados, loading: loadingEmployees } = useEmpleados();
-  const [selectedEmployee, setSelectedEmployee] = useState<EmpleadosListar | null>(null);
+  const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
+  const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const queryClient = useQueryClient();
