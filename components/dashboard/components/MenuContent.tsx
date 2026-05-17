@@ -21,7 +21,7 @@ const mainListItems = [
   { text: "Usuarios", icon: <GroupIcon />, href: "/dashboard/usuarios/listar" },
   { text: "Empleados", icon: <AnalyticsRoundedIcon />, href: "/dashboard/empleados/listar" },
   { text: "Clients", icon: <AccountBoxIcon />, href: "/dashboard/clientes" },
-  { text: "Tasks", icon: <AssignmentRoundedIcon />, href: "/dashboard/tasks" },
+  { text: "Permisos", icon: <AssignmentRoundedIcon />, href: "/dashboard/permisos" },
 ];
 
 const secondaryListItems = [
