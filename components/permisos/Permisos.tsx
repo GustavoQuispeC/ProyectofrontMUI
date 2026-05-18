@@ -31,6 +31,7 @@ import {
   IconButton,
   Tooltip,
   Avatar,
+  FormHelperText,
 } from "@mui/material";
 import {
   BeachAccess as PermisosIcon,
@@ -43,113 +44,27 @@ import {
   Work as WorkIcon,
   Badge as BadgeIcon,
 } from "@mui/icons-material";
+import { useEmpleadosAutocomplete } from "@/features/dashboard/empleado/hooks/useEmpleadosAutocomplete";
+import { Controller, useForm } from "react-hook-form";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { PermisoForm, PermisoSchema } from "@/features/dashboard/permiso/permiso.schema";
+import { EmpleadoAutocomplete } from "@/features/dashboard/empleado/empleado.types";
+import { Condicion, RegistrarPermiso } from "@/features/dashboard/permiso/permiso.type";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
+
+//TODO: falta implementar otros datos
+const defaultValues: PermisoForm = {
+  empleadoId: "",
+  nombreCompleto: "",
+  fechaPermiso: "",
+};
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
 type Rol = "gerente" | "administrador" | "jefe_almacen";
-type Condicion = "pendiente" | "aprobado" | "rechazado";
-
-interface Empleado {
-  id: number;
-  nombre: string;
-  cargo: string;
-  area: string;
-  email: string;
-}
-
-interface Permiso {
-  id: number;
-  empleado: string;
-  fecha: string;
-  horaInicio: string;
-  horaFin: string;
-  duracion: string;
-  motivo: string;
-  lugar: string;
-  condicion: Condicion;
-  motivoRechazo?: string;
-  periodo: string;
-}
-
-// ─── Datos de ejemplo ────────────────────────────────────────────────────────
-
-const empleadosActivos: Empleado[] = [
-  { id: 1, nombre: "Carlos Mendoza Ríos", cargo: "Analista de Sistemas", area: "TI", email: "c.mendoza@empresa.com" },
-  { id: 2, nombre: "Lucía Fernández Torres", cargo: "Contadora", area: "Finanzas", email: "l.fernandez@empresa.com" },
-  {
-    id: 3,
-    nombre: "Roberto Sánchez Paredes",
-    cargo: "Operario de Almacén",
-    area: "Logística",
-    email: "r.sanchez@empresa.com",
-  },
-  {
-    id: 4,
-    nombre: "Ana Paula Díaz Vega",
-    cargo: "Asistente Administrativa",
-    area: "Administración",
-    email: "a.diaz@empresa.com",
-  },
-  {
-    id: 5,
-    nombre: "Miguel Ángel Torres Ruiz",
-    cargo: "Supervisor de Ventas",
-    area: "Comercial",
-    email: "m.torres@empresa.com",
-  },
-];
-
-const permisosIniciales: Permiso[] = [
-  {
-    id: 1,
-    empleado: "Carlos Mendoza Ríos",
-    fecha: "2025-05-10",
-    horaInicio: "09:00",
-    horaFin: "11:00",
-    duracion: "2h 0m",
-    motivo: "Cita médica",
-    lugar: "Clínica San Pablo",
-    condicion: "aprobado",
-    periodo: "2025-05",
-  },
-  {
-    id: 2,
-    empleado: "Lucía Fernández Torres",
-    fecha: "2025-05-12",
-    horaInicio: "14:00",
-    horaFin: "16:30",
-    duracion: "2h 30m",
-    motivo: "Trámite notarial",
-    lugar: "Notaría Central",
-    condicion: "pendiente",
-    periodo: "2025-05",
-  },
-  {
-    id: 3,
-    empleado: "Roberto Sánchez Paredes",
-    fecha: "2025-05-08",
-    horaInicio: "08:00",
-    horaFin: "09:00",
-    duracion: "1h 0m",
-    motivo: "Banco",
-    lugar: "BCP Av. Principal",
-    condicion: "rechazado",
-    motivoRechazo: "Fecha no disponible por inventario",
-    periodo: "2025-05",
-  },
-  {
-    id: 4,
-    empleado: "Carlos Mendoza Ríos",
-    fecha: "2025-04-22",
-    horaInicio: "10:00",
-    horaFin: "12:00",
-    duracion: "2h 0m",
-    motivo: "Reunión externa",
-    lugar: "Hotel Libertador",
-    condicion: "aprobado",
-    periodo: "2025-04",
-  },
-];
 
 const anios = ["2023", "2024", "2025", "2026"];
 const meses = [
@@ -180,9 +95,9 @@ const calcularDuracion = (inicio: string, fin: string): string => {
 
 const chipCondicion = (condicion: Condicion) => {
   const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
-    pendiente: { color: "warning", label: "Pendiente" },
-    aprobado: { color: "success", label: "Aprobado" },
-    rechazado: { color: "error", label: "Rechazado" },
+    Pendiente: { color: "warning", label: "Pendiente" },
+    Aprobado: { color: "success", label: "Aprobado" },
+    Rechazado: { color: "error", label: "Rechazado" },
   };
   return <Chip size="small" color={config[condicion].color} label={config[condicion].label} />;
 };
@@ -193,14 +108,18 @@ const rolActual: Rol = "gerente"; // Cambiar para simular roles: "gerente" | "ad
 const puedeAprobar = rolActual === "gerente" || rolActual === "administrador";
 
 export default function PermisosEmpleados() {
+  const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
+  const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
+  const [resetKey, setResetKey] = useState(0);
+
   // Estado del formulario
-  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState<Empleado | null>(null);
+
   const [fecha, setFecha] = useState("");
   const [horaInicio, setHoraInicio] = useState("");
   const [horaFin, setHoraFin] = useState("");
   const [motivo, setMotivo] = useState("");
   const [lugar, setLugar] = useState("");
-  const [condicion, setCondicion] = useState<Condicion>("pendiente");
+  const [condicion, setCondicion] = useState<Condicion>("Pendiente");
   const [motivoRechazo, setMotivoRechazo] = useState("");
 
   // Filtros datatable
@@ -208,7 +127,7 @@ export default function PermisosEmpleados() {
   const [mesFiltro, setMesFiltro] = useState("05");
 
   // Tabla
-  const [permisos, setPermisos] = useState<Permiso[]>(permisosIniciales);
+  //const [permisos, setPermisos] = useState<RegistrarPermiso[]>(permisosIniciales);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -221,40 +140,40 @@ export default function PermisosEmpleados() {
 
   const duracion = useMemo(() => calcularDuracion(horaInicio, horaFin), [horaInicio, horaFin]);
 
-  const permisosFiltraods = useMemo(() => {
-    return permisos.filter((p) => {
-      const coincideEmpleado = empleadoSeleccionado ? p.empleado === empleadoSeleccionado.nombre : true;
-      const coincidePeriodo = p.periodo === `${anioFiltro}-${mesFiltro}`;
-      return coincideEmpleado && coincidePeriodo;
-    });
-  }, [permisos, empleadoSeleccionado, anioFiltro, mesFiltro]);
+  // const permisosFiltraods = useMemo(() => {
+  //   return permisos.filter((p) => {
+  //     const coincideEmpleado = selectedEmployee ? p.empleado === selectedEmployee.nombreCompleto : true;
+  //     const coincidePeriodo = p.periodo === `${anioFiltro}-${mesFiltro}`;
+  //     return coincideEmpleado && coincidePeriodo;
+  //   });
+  // }, [permisos, selectedEmployee, anioFiltro, mesFiltro]);
 
-  const handleGuardar = () => {
-    if (!empleadoSeleccionado || !fecha || !horaInicio || !horaFin || !motivo || !lugar) {
-      setSnackbar({ open: true, mensaje: "Complete todos los campos obligatorios.", tipo: "error" });
-      return;
-    }
-    if (duracion === "Inválido" || !duracion) {
-      setSnackbar({ open: true, mensaje: "La hora fin debe ser mayor a la hora inicio.", tipo: "error" });
-      return;
-    }
-    const nuevo: Permiso = {
-      id: permisos.length + 1,
-      empleado: empleadoSeleccionado.nombre,
-      fecha,
-      horaInicio,
-      horaFin,
-      duracion,
-      motivo,
-      lugar,
-      condicion: puedeAprobar ? condicion : "pendiente",
-      motivoRechazo: condicion === "rechazado" ? motivoRechazo : undefined,
-      periodo: `${anioFiltro}-${mesFiltro}`,
-    };
-    setPermisos((prev) => [nuevo, ...prev]);
-    setSnackbar({ open: true, mensaje: "Permiso registrado correctamente.", tipo: "success" });
-    handleLimpiar();
-  };
+  // const handleGuardar = () => {
+  //   if (!selectedEmployee || !fecha || !horaInicio || !horaFin || !motivo || !lugar) {
+  //     setSnackbar({ open: true, mensaje: "Complete todos los campos obligatorios.", tipo: "error" });
+  //     return;
+  //   }
+  //   if (duracion === "Inválido" || !duracion) {
+  //     setSnackbar({ open: true, mensaje: "La hora fin debe ser mayor a la hora inicio.", tipo: "error" });
+  //     return;
+  //   }
+  //   const nuevo: RegistrarPermiso = {
+  //     id: permisos.length + 1,
+  //     empleado: selectedEmployee.nombreCompleto,
+  //     fecha,
+  //     horaInicio,
+  //     horaFin,
+  //     duracion,
+  //     motivo,
+  //     lugar,
+  //     condicion: puedeAprobar ? condicion : "Pendiente",
+  //     motivoRechazo: condicion === "Rechazado" ? motivoRechazo : undefined,
+  //     periodo: `${anioFiltro}-${mesFiltro}`,
+  //   };
+  //   setPermisos((prev) => [nuevo, ...prev]);
+  //   setSnackbar({ open: true, mensaje: "Permiso registrado correctamente.", tipo: "success" });
+  //   handleLimpiar();
+  // };
 
   const handleLimpiar = () => {
     setFecha("");
@@ -262,8 +181,29 @@ export default function PermisosEmpleados() {
     setHoraFin("");
     setMotivo("");
     setLugar("");
-    setCondicion("pendiente");
+    setCondicion("Pendiente");
     setMotivoRechazo("");
+  };
+
+  //! usando react-hook-form
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<PermisoForm>({
+    resolver: standardSchemaResolver(PermisoSchema),
+    defaultValues,
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    shouldFocusError: true,
+  });
+
+  //! Reset form
+  const resetForm = () => {
+    reset(defaultValues);
+    setSelectedEmployee(null);
   };
 
   return (
@@ -299,17 +239,44 @@ export default function PermisosEmpleados() {
           Información del empleado
         </Typography>
 
-        <Autocomplete
-          options={empleadosActivos}
-          getOptionLabel={(op) => op.nombre}
-          value={empleadoSeleccionado}
-          onChange={(_, val) => setEmpleadoSeleccionado(val)}
-          renderInput={(params) => <TextField {...params} label="Buscar empleado" placeholder="Escriba el nombre..." />}
-          sx={{ mb: 2 }}
+        <Controller
+          name="empleadoId"
+          control={control}
+          render={({ field }) => (
+            <Autocomplete
+              disablePortal
+              options={empleados ?? []}
+              loading={loadingEmployees}
+              value={empleados.find((x) => x.id.toString() === field.value) ?? null}
+              onChange={(_, value) => {
+                field.onChange(value?.id?.toString() ?? "");
+
+                setSelectedEmployee(value);
+
+                setValue("nombreCompleto", value?.nombreCompleto ?? "");
+              }}
+              getOptionLabel={(option) => option.nombreCompleto ?? ""}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              noOptionsText="Sin resultados"
+              loadingText="Cargando..."
+              size="medium"
+              sx={{ mb: 2 }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Buscar empleado"
+                  placeholder="Seleccione un empleado"
+                  error={!!errors.empleadoId}
+                  helperText={errors.empleadoId?.message}
+                  fullWidth
+                />
+              )}
+            />
+          )}
         />
 
         {/* Chip de datos del empleado */}
-        {empleadoSeleccionado && (
+        {selectedEmployee && (
           <Box
             sx={{
               display: "flex",
@@ -322,10 +289,10 @@ export default function PermisosEmpleados() {
               borderRadius: 2,
             }}
           >
-            <Chip icon={<PersonIcon />} label={empleadoSeleccionado.nombre} color="primary" variant="outlined" />
-            <Chip icon={<WorkIcon />} label={empleadoSeleccionado.cargo} variant="outlined" />
-            <Chip icon={<BadgeIcon />} label={empleadoSeleccionado.area} variant="outlined" />
-            <Chip label={empleadoSeleccionado.email} variant="outlined" size="small" sx={{ alignSelf: "center" }} />
+            <Chip icon={<PersonIcon />} label={selectedEmployee.nombreCompleto} color="primary" variant="outlined" />
+            <Chip icon={<WorkIcon />} label={selectedEmployee.correo} variant="outlined" />
+            {/* <Chip icon={<BadgeIcon />} label={empleadoSeleccionado.area} variant="outlined" />
+            <Chip label={empleadoSeleccionado.email} variant="outlined" size="small" sx={{ alignSelf: "center" }} /> */}
           </Box>
         )}
       </Paper>
@@ -338,14 +305,32 @@ export default function PermisosEmpleados() {
 
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              fullWidth
-              label="Fecha"
-              type="date"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+              {" "}
+              <Controller
+                name="fechaPermiso"
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth error={!!errors.fechaPermiso}>
+                    {" "}
+                    <DatePicker
+                      key={resetKey}
+                      label="Fecha de Permiso"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
+                      slotProps={{
+                        textField: {
+                          size: "medium",
+                          fullWidth: true,
+                          error: !!errors.fechaPermiso,
+                        },
+                      }}
+                    />
+                    <FormHelperText>{errors.fechaPermiso?.message}</FormHelperText>
+                  </FormControl>
+                )}
+              />
+            </LocalizationProvider>
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
             <TextField
@@ -431,7 +416,7 @@ export default function PermisosEmpleados() {
               </FormControl>
             </Grid>
 
-            {condicion === "rechazado" && (
+            {condicion === "Rechazado" && (
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
@@ -487,7 +472,7 @@ export default function PermisosEmpleados() {
               <Button variant="outlined" startIcon={<RefreshIcon />} color="warning" onClick={handleLimpiar}>
                 Limpiar
               </Button>
-              <Button variant="contained" startIcon={<SaveIcon />} color="primary" onClick={handleGuardar}>
+              <Button variant="contained" startIcon={<SaveIcon />} color="primary">
                 Guardar
               </Button>
             </Box>
@@ -502,9 +487,9 @@ export default function PermisosEmpleados() {
         </Typography>
       </Divider>
 
-      {empleadoSeleccionado && (
+      {selectedEmployee && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          Mostrando permisos de <strong>{empleadoSeleccionado.nombre}</strong> —{" "}
+          Mostrando permisos de <strong>{selectedEmployee.nombreCompleto}</strong> —{" "}
           {meses.find((m) => m.value === mesFiltro)?.label} {anioFiltro}
         </Alert>
       )}
@@ -561,7 +546,7 @@ export default function PermisosEmpleados() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {permisosFiltraods.length === 0 ? (
+            {/* {permisosFiltraods.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
                   <Typography variant="body2" color="text.secondary">
@@ -625,11 +610,11 @@ export default function PermisosEmpleados() {
                   </TableRow>
                 );
               })
-            )}
+            )} */}
           </TableBody>
         </Table>
 
-        <TablePagination
+        {/* <TablePagination
           component="div"
           count={permisosFiltraods.length}
           page={page}
@@ -642,7 +627,7 @@ export default function PermisosEmpleados() {
           rowsPerPageOptions={[5, 10, 25]}
           labelRowsPerPage="Filas por página:"
           labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
-        />
+        /> */}
       </TableContainer>
 
       {/* ── Snackbar ── */}
