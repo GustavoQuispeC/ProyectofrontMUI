@@ -45,6 +45,10 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import InputAdornment from "@mui/material/InputAdornment";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import FormHelperText from "@mui/material/FormHelperText";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { permissions } from "@/shared/auth/auth.permissions";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 // ─── Estilos base del TextField ──────────────────────────────────────────────
 const defaultValues: EmpleadoForm = {
@@ -162,6 +166,10 @@ export default function RegistrarEmpleado() {
   const { uploading, uploadFile } = useFirebaseStorage();
   const router = useRouter();
 
+  //!Validando permisos
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.registrarEmpleado) : false;
+
   const {
     control,
     handleSubmit,
@@ -243,7 +251,9 @@ export default function RegistrarEmpleado() {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {}
   };
-
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
   return (
     <Box
       component="form"

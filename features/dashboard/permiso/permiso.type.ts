@@ -7,7 +7,7 @@ export interface RegistrarPermiso {
   fecha: string;
   horaInicio: string;
   horaFin: string;
-  duracionMin: number;
+  duracionMin: string;
   motivo: string;
   lugar: string;
   condicion: Condicion;

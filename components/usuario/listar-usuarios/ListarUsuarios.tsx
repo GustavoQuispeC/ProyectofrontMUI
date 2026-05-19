@@ -13,6 +13,10 @@ import { esES } from "@mui/x-data-grid/locales";
 import { useEffect, useMemo, useState } from "react";
 import Button from "@mui/material/Button";
 import Link from "next/link";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { permissions } from "@/shared/auth/auth.permissions";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 const getColumns = (): GridColDef[] => [
   {
@@ -96,6 +100,10 @@ export default function ListarUsuariosDataTable() {
   const { usuarios, loading } = useUsuarios();
   const [mounted, setMounted] = useState(false);
 
+  //!Validando permisos
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.listarUsuarios) : false;
+
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       setMounted(true);
@@ -109,6 +117,9 @@ export default function ListarUsuariosDataTable() {
 
   if (!mounted) return null;
 
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>
       <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>

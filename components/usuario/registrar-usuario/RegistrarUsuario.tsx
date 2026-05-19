@@ -42,6 +42,10 @@ import { toastPromise } from "@/shared/utils/toast";
 import { registrarUsuario } from "@/features/dashboard/usuario/usuario.logic";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEmpleadosAutocomplete } from "@/features/dashboard/empleado/hooks/useEmpleadosAutocomplete";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { permissions } from "@/shared/auth/auth.permissions";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 const defaultValues: UsuarioForm = {
   empleadoId: "",
@@ -58,6 +62,10 @@ export default function RegistrarUsuario() {
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const queryClient = useQueryClient();
+
+  //!Validando permisos
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.registrarUsuarios) : false;
 
   //! usando react-hook-form
   const {
@@ -108,6 +116,9 @@ export default function RegistrarUsuario() {
     }
   };
 
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
   return (
     <Box
       sx={{

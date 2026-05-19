@@ -29,6 +29,10 @@ import {
 import { useRouter } from "next/navigation";
 import { useEmpleado } from "@/features/dashboard/empleado/hooks/useEmpleado";
 import { useCatalogos } from "@/features/dashboard/catalogo/hooks/useCatalogos";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { permissions } from "@/shared/auth/auth.permissions";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 interface Props {
   id: string;
@@ -152,10 +156,14 @@ const LoadingSkeleton = () => (
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function DetalleEmpleado({ id }: Props) {
-  const router = useRouter();
-  const { empleado, loading, error } = useEmpleado(id);
+  //!Validando permisos
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.detalleEmpleado) : false;
 
+  const { empleado, loading, error } = useEmpleado(id, canAccess);
   const { catalogos, loading: loadingCatalogos } = useCatalogos();
+
+  const router = useRouter();
 
   if (loading || loadingCatalogos) {
     return <LoadingSkeleton />;
@@ -189,6 +197,10 @@ export default function DetalleEmpleado({ id }: Props) {
         </Button>
       </Stack>
     );
+  }
+
+  if (!canAccess) {
+    return <AccessDenied />;
   }
 
   return (
