@@ -23,6 +23,10 @@ import { useEliminarEmpleado } from "@/features/dashboard/empleado/hooks/useElim
 import { useRouter } from "next/navigation";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import Link from "next/link";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { permissions } from "@/shared/auth/auth.permissions";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 //! Componente para mostrar la imagen con un loader mientras se carga
 interface Props {
@@ -79,6 +83,7 @@ export function ImageWithLoader({ src, alt }: Props) {
 const getColumns = (
   onDelete: (row: EmpleadosListar) => void,
   onView: (row: EmpleadosListar) => void,
+  canDelete: boolean,
 ): GridColDef<EmpleadosListar>[] => [
   {
     field: "codigoEmpleado",
@@ -162,9 +167,22 @@ const getColumns = (
             <ModeEditOutlineOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title={params.row.isActive ? "Eliminar" : "No se puede eliminar un empleado inactivo"}>
+        <Tooltip
+          title={
+            !canDelete
+              ? "No tienes permisos para eliminar empleados"
+              : params.row.isActive
+                ? "Eliminar"
+                : "No se puede eliminar un empleado inactivo"
+          }
+        >
           <span>
-            <IconButton size="small" color="error" disabled={!params.row.isActive} onClick={() => onDelete(params.row)}>
+            <IconButton
+              size="small"
+              color="error"
+              disabled={!params.row.isActive || !canDelete}
+              onClick={() => onDelete(params.row)}
+            >
               <DeleteForeverOutlinedIcon fontSize="small" />
             </IconButton>
           </span>
@@ -187,6 +205,11 @@ export default function ListarEmpleadosDataTable() {
   const [selectedRow, setSelectedRow] = useState<EmpleadosListar | null>(null);
   const { eliminarEmpleado } = useEliminarEmpleado();
   const router = useRouter();
+
+  //!Validando permisos
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.listarEmpleados) : false;
+  const canDelete = user ? hasPermission(user.rol, permissions.eliminarEmpleado) : false;
 
   const handleOpenDialog = useCallback((row: EmpleadosListar) => {
     setSelectedRow(row);
@@ -215,9 +238,16 @@ export default function ListarEmpleadosDataTable() {
 
   const localeText = useMemo(() => esES.components.MuiDataGrid.defaultProps.localeText, []);
 
-  const columns = useMemo(() => getColumns(handleOpenDialog, handleView), [handleOpenDialog, handleView]);
+  const columns = useMemo(
+    () => getColumns(handleOpenDialog, handleView, canDelete),
+    [handleOpenDialog, handleView, canDelete],
+  );
 
   if (!mounted) return null;
+
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
 
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>

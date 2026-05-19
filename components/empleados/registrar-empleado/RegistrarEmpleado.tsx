@@ -45,41 +45,54 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import InputAdornment from "@mui/material/InputAdornment";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import FormHelperText from "@mui/material/FormHelperText";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { permissions } from "@/shared/auth/auth.permissions";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
+
 // ─── Estilos base del TextField ──────────────────────────────────────────────
 const defaultValues: EmpleadoForm = {
   nombre: "",
   apellidos: "",
-  tipoDocumento: "",
+  tipoDocumento: 0,
   numeroDocumento: "",
   fechaNacimiento: "",
-  genero: "",
-  estadoCivil: "",
+  genero: 0,
+  estadoCivil: 0,
   nacionalidad: "",
   correo: "",
   telefonoMovil: "",
+  fotoUrl: "",
+  cargoId: 0,
+  salario: 0,
+
   direccion: "",
   distrito: "",
   provincia: "",
   departamento: "",
+
   contactoEmergenciaNombre: "",
-  contactoEmergenciaParentesco: "",
+  contactoEmergenciaParentesco: null,
   contactoEmergenciaTelefono: "",
+
   numeroCuentaBancaria: "",
   bancoNombre: "",
-  tiposCuentaBancaria: "",
+  tipoCuenta: null,
   cci: "",
+
   ruc: "",
   numeroESSalud: "",
-  sistemaPensiones: "",
+  sistemaPensiones: null,
   cuspp: "",
-  nivelEducativo: "",
+
+  nivelEducativo: null,
   profesionOficio: "",
-  fotoUrl: "",
-  cargoId: "",
-  salario: 0,
-  tipoContrato: "",
-  tipoJornada: "",
+
+  tipoContrato: 0,
+  tipoJornada: 0,
+
   fechaIngreso: "",
+
   observaciones: "",
 };
 
@@ -153,6 +166,10 @@ export default function RegistrarEmpleado() {
   const { uploading, uploadFile } = useFirebaseStorage();
   const router = useRouter();
 
+  //!Validando permisos
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.registrarEmpleado) : false;
+
   const {
     control,
     handleSubmit,
@@ -214,6 +231,7 @@ export default function RegistrarEmpleado() {
 
   // ── Submit ────────────────────────────────────────────────────────────────
   const onSubmit = async (data: EmpleadoForm) => {
+    console.log("📝 data del form:", data);
     let fotoUrl: string = data.fotoUrl || "";
     if (selectedFile) {
       const result = await uploadFile(selectedFile, "empleados");
@@ -221,22 +239,32 @@ export default function RegistrarEmpleado() {
       fotoUrl = result.url;
     }
     const payload: RegistarEmpleado = { ...data, fotoUrl };
+    console.log("📦 payload:", payload);
     try {
       await toastPromise(registrarEmpleado(payload), {
         loading: "Registrando empleado...",
         success: "Empleado registrado correctamente",
         error: "Error al registrar el empleado",
       });
+
       resetForm();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_) {}
   };
-
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
   return (
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ width: "100%", maxWidth: 1100, mx: "auto", px: { xs: 1, sm: 2, md: 3 } }}
+      sx={{
+        width: "100%",
+        bgcolor: "background.default",
+        minHeight: "100vh",
+        py: { xs: 2, md: 5 },
+        px: 2,
+      }}
     >
       {/* ── Encabezado de página ── */}
       <Stack sx={{ mb: 1, gap: 1, alignItems: "center", justifyContent: "space-between" }}>
@@ -375,13 +403,25 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.genero}>
                 <InputLabel>Género *</InputLabel>
-                <Select {...field} label="Género *">
+
+                <Select
+                  value={field.value || ""}
+                  label="Género *"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.generos.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.genero?.message}</FormHelperText>
               </FormControl>
             )}
@@ -420,15 +460,27 @@ export default function RegistrarEmpleado() {
             name="tipoDocumento"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.tipoDocumento}>
                 <InputLabel>Tipo Documento</InputLabel>
-                <Select {...field} label="Tipo Documento">
+
+                <Select
+                  value={field.value || ""}
+                  label="Tipo Documento"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposDocumentos.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
                 <FormHelperText>{errors.tipoDocumento?.message}</FormHelperText>
               </FormControl>
             )}
@@ -453,15 +505,28 @@ export default function RegistrarEmpleado() {
             name="estadoCivil"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.estadoCivil}>
                 <InputLabel>Estado Civil</InputLabel>
-                <Select {...field} label="Estado Civil">
+
+                <Select
+                  value={field.value || ""}
+                  label="Estado Civil"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.estadosCiviles.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
+                <FormHelperText>{errors.estadoCivil?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -511,6 +576,9 @@ export default function RegistrarEmpleado() {
                 {...field}
                 value={field.value ?? ""}
                 label="Salario"
+                type="number"
+                error={!!errors.salario}
+                helperText={errors.salario?.message}
                 slotProps={{
                   input: {
                     startAdornment: <InputAdornment position="start">S/</InputAdornment>,
@@ -626,35 +694,49 @@ export default function RegistrarEmpleado() {
             name="cargoId"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.cargoId}>
                 <InputLabel>Cargo</InputLabel>
-                <Select {...field} value={field.value ?? ""} label="Cargo">
+
+                <Select
+                  value={field.value || ""}
+                  label="Cargo"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
                   <MenuItem value="">
                     <em>Seleccione...</em>
                   </MenuItem>
+
                   {cargos.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
+                <FormHelperText>{errors.cargoId?.message}</FormHelperText>
               </FormControl>
             )}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
             <Controller
               name="fechaIngreso"
               control={control}
               render={({ field }) => (
-                <DatePicker
-                  key={resetKey}
-                  label="Fecha de Ingreso"
-                  value={field.value ? dayjs(field.value) : null}
-                  onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
-                  slotProps={{ textField: { size: "small", fullWidth: true } }}
-                />
+                <FormControl fullWidth error={!!errors.fechaIngreso}>
+                  {" "}
+                  <DatePicker
+                    key={resetKey}
+                    label="Fecha de Ingreso"
+                    value={field.value ? dayjs(field.value) : null}
+                    onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
+                    slotProps={{ textField: { size: "small", fullWidth: true, error: !!errors.fechaIngreso } }}
+                  />
+                  <FormHelperText>{errors.fechaIngreso?.message}</FormHelperText>
+                </FormControl>
               )}
             />
           </LocalizationProvider>
@@ -664,15 +746,28 @@ export default function RegistrarEmpleado() {
             name="tipoContrato"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.tipoContrato}>
                 <InputLabel>Tipo de Contrato</InputLabel>
-                <Select {...field} label="Tipo de Contrato">
+
+                <Select
+                  value={field.value || ""}
+                  label="Tipo de Contrato"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposContrato.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
+                <FormHelperText>{errors.tipoContrato?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -682,15 +777,28 @@ export default function RegistrarEmpleado() {
             name="tipoJornada"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small" error={!!errors.tipoJornada}>
                 <InputLabel>Tipo de Jornada</InputLabel>
-                <Select {...field} label="Tipo de Jornada">
+
+                <Select
+                  value={field.value || ""}
+                  label="Tipo de Jornada"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposJornada.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
+                <FormHelperText>{errors.tipoJornada?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -702,13 +810,28 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small">
                 <InputLabel>Nivel Educativo</InputLabel>
-                <Select {...field} label="Nivel Educativo">
+
+                <Select
+                  value={field.value ?? ""}
+                  label="Nivel Educativo"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.nivelesEducativos.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
+                <FormHelperText>{errors.nivelEducativo?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -754,13 +877,28 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small">
                 <InputLabel>Parentesco</InputLabel>
-                <Select {...field} label="Parentesco">
+
+                <Select
+                  value={field.value ?? ""}
+                  label="Parentesco"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposParentesco.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
+                <FormHelperText>{errors.contactoEmergenciaParentesco?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -785,18 +923,33 @@ export default function RegistrarEmpleado() {
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Controller
-            name="tiposCuentaBancaria"
+            name="tipoCuenta"
             control={control}
             render={({ field }) => (
               <FormControl fullWidth size="small">
                 <InputLabel>Tipo de Cuenta</InputLabel>
-                <Select {...field} label="Tipo de Cuenta">
+
+                <Select
+                  value={field.value ?? ""}
+                  label="Tipo de Cuenta"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.tiposCuentaBancaria.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
+                <FormHelperText>{errors.tipoCuenta?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -822,13 +975,28 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small">
                 <InputLabel>Sistema de Pensiones</InputLabel>
-                <Select {...field} label="Sistema de Pensiones">
+
+                <Select
+                  value={field.value ?? ""}
+                  label="Sistema de Pensiones"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+
                   {catalogos.sistemasPensiones.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
                   ))}
                 </Select>
+
+                <FormHelperText>{errors.sistemaPensiones?.message}</FormHelperText>
               </FormControl>
             )}
           />
@@ -850,35 +1018,48 @@ export default function RegistrarEmpleado() {
       </Section>
 
       {/* ── Botones inferiores (móvil) ── */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ width: { xs: "100%", sm: "auto" } }}>
-        {/* 🔙 Retornar */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        sx={{
+          gap: 2,
+          justifyContent: "flex-end",
+          flexWrap: "wrap",
+        }}
+      >
         <Button
-          variant="text"
+          variant="outlined"
+          color="inherit"
           startIcon={<KeyboardBackspaceIcon />}
           onClick={() => router.push("/dashboard/empleados/listar")}
-          fullWidth
+          sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
         >
-          Retornar
+          Volver
         </Button>
 
-        {/* 🧹 Limpiar */}
-        <Button variant="outlined" color="inherit" startIcon={<RestartAltIcon />} onClick={resetForm} fullWidth>
+        <Button
+          variant="outlined"
+          color="warning"
+          startIcon={<RestartAltIcon />}
+          onClick={resetForm}
+          sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
+        >
           Limpiar
         </Button>
 
-        {/* 💾 Guardar */}
         <Button
           type="submit"
           variant="contained"
           startIcon={<SaveIcon />}
           disabled={uploading}
-          fullWidth
           sx={{
-            minWidth: 180,
-            fontWeight: 600,
+            minWidth: 140,
+            height: 44,
+            boxShadow: "none",
+            borderRadius: 2,
+            width: { xs: "100%", sm: "auto" },
           }}
         >
-          {uploading ? "Guardando..." : "Guardar Empleado"}
+          {uploading ? "Guardando..." : "Guardar"}
         </Button>
       </Stack>
     </Box>

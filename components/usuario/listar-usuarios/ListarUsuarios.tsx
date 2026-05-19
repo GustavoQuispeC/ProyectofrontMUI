@@ -2,15 +2,21 @@
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
-import { useUsuarios } from "@/features/dashboard/usuarios/hooks/useUsuarios";
+import { useUsuarios } from "@/features/dashboard/usuario/hooks/useUsuarios";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { esES } from "@mui/x-data-grid/locales";
 import { useEffect, useMemo, useState } from "react";
+import Button from "@mui/material/Button";
+import Link from "next/link";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { permissions } from "@/shared/auth/auth.permissions";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 const getColumns = (): GridColDef[] => [
   {
@@ -67,11 +73,11 @@ const getColumns = (): GridColDef[] => [
     disableColumnMenu: true,
     renderCell: (params) => (
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%" }}>
-        <Tooltip title="Ver">
+        {/* <Tooltip title="Ver">
           <IconButton size="small" color="info" onClick={() => console.log("Ver", params.row)}>
             <RemoveRedEyeOutlinedIcon fontSize="small" />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
         <Tooltip title="Editar">
           <IconButton size="small" color="inherit" onClick={() => console.log("Editar", params.row)}>
             <ModeEditOutlineOutlinedIcon fontSize="small" />
@@ -91,7 +97,12 @@ const paginationModel = { page: 0, pageSize: 10 };
 const gridInitialState = { pagination: { paginationModel } };
 
 export default function ListarUsuariosDataTable() {
-  const { usuarios, loading } = useUsuarios();
+  const user = getAuthUser();
+
+  const canAccess = user ? hasPermission(user.rol, permissions.listarUsuarios) : false;
+
+  const { usuarios, loading } = useUsuarios(canAccess);
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -107,8 +118,16 @@ export default function ListarUsuariosDataTable() {
 
   if (!mounted) return null;
 
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
   return (
     <Paper sx={{ height: "100%", width: "100%" }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
+        <Button component={Link} href="/dashboard/usuarios/registrar" variant="contained" startIcon={<GroupAddIcon />}>
+          Nuevo Usuario
+        </Button>
+      </Box>
       <DataGrid
         rows={usuarios}
         columns={columns}

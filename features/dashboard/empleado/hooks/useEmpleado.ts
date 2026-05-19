@@ -1,32 +1,27 @@
-import { useEffect, useState } from "react";
-import { VerEmpleado } from "../empleado.types";
-import { verEmpleadoApi } from "../empleado.service";
+import { DetalleEmpleado } from "../empleado.types";
+import { detalleEmpleadoApi } from "../empleado.service";
+import { useQuery } from "@tanstack/react-query";
 
-export function useEmpleado(id: string) {
-  const [empleado, setEmpleado] = useState<VerEmpleado | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useEmpleado(id: string, canAccess: boolean) {
+  const {
+    data: empleado,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<DetalleEmpleado>({
+    queryKey: ["empleado", id],
 
-  useEffect(() => {
-    if (!id) return;
+    queryFn: () => detalleEmpleadoApi(id),
 
-    const fetchEmpleado = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    enabled: !!id && canAccess,
 
-        const data = await verEmpleadoApi(id);
-        setEmpleado(data);
-      } catch (err) {
-        console.error("Error al obtener empleado:", err);
-        setError("Error al cargar empleado");
-      } finally {
-        setLoading(false);
-      }
-    };
+    staleTime: 1000 * 60 * 5,
+  });
 
-    fetchEmpleado();
-  }, [id]);
-
-  return { empleado, loading, error };
+  return {
+    empleado,
+    loading,
+    error: error ? "Error al cargar empleado" : null,
+    refetch,
+  };
 }

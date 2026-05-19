@@ -1,5 +1,5 @@
 import { apiUsuario } from "@/lib/api-usuario";
-import { ListarUsuarios } from "./usuario.types";
+import { ListarUsuarios, RegistrarUsuario } from "./usuario.types";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,5 +15,13 @@ export function loginUsuarioApi(email: string, password: string) {
   return apiUsuario(`${apiUrl}/Auth/login/usuario`, {
     method: "POST",
     body: JSON.stringify({ email, password }),
+  });
+}
+
+//! Función para registrar usuario, token y rol requrido
+export async function registrarUsuarioApi(empleadoId: number, payload: RegistrarUsuario): Promise<void> {
+  return apiUsuario(`${apiUrl}/Admin/empleados/${empleadoId}/create-user`, {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }
