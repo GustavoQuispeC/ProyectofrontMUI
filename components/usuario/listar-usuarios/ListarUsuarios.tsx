@@ -97,12 +97,13 @@ const paginationModel = { page: 0, pageSize: 10 };
 const gridInitialState = { pagination: { paginationModel } };
 
 export default function ListarUsuariosDataTable() {
-  const { usuarios, loading } = useUsuarios();
-  const [mounted, setMounted] = useState(false);
-
-  //!Validando permisos
   const user = getAuthUser();
+
   const canAccess = user ? hasPermission(user.rol, permissions.listarUsuarios) : false;
+
+  const { usuarios, loading } = useUsuarios(canAccess);
+
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {

@@ -28,7 +28,7 @@ export default function AccessDenied({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "grey.50",
+        bgcolor: "white",
         px: 2,
       }}
     >

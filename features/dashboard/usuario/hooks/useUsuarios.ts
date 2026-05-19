@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { listarUsuariosApi } from "../usuario.service";
 
-export function useUsuarios() {
+export function useUsuarios(canAccess: boolean) {
   const {
     data: usuarios = [],
     isLoading: loading,
@@ -9,10 +9,14 @@ export function useUsuarios() {
     refetch,
   } = useQuery({
     queryKey: ["usuarios"],
+
     queryFn: listarUsuariosApi,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+
+    staleTime: 1000 * 60 * 5,
+
     retry: 1,
-    enabled: true,
+
+    enabled: canAccess,
   });
 
   return {
