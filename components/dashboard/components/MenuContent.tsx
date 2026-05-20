@@ -135,7 +135,7 @@ const mainListItems: MenuItemType[] = [
   {
     text: "Permisos",
     icon: <AssignmentRoundedIcon />,
-    href: "/dashboard/permisos",
+    href: "/dashboard/permisos/registrar",
   },
 ];
 

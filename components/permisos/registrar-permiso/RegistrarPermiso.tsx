@@ -61,8 +61,6 @@ import { registrarPermiso } from "@/features/dashboard/permiso/permiso.logic";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { usePermisos } from "@/features/dashboard/permiso/hooks/usePermiso";
 
-// ─── Constantes ───────────────────────────────────────────────────────────────
-
 const defaultValues: RegistrarPermisoForm = {
   empleadoId: 0,
   fecha: "",
@@ -110,11 +108,11 @@ const chipCondicion = (condicion: Condicion) => {
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function PermisosEmpleados() {
+export default function RegistrarPermiso() {
   // ── Auth ──
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.registrarUsuarios) : false;
-  const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador";
+  const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin";
 
   // ── Estado local ──
   const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
@@ -145,6 +143,7 @@ export default function PermisosEmpleados() {
     shouldFocusError: true,
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const empleadoId = watch("empleadoId");
   const horaInicio = watch("horaInicio");
   const horaFin = watch("horaFin");
@@ -179,6 +178,8 @@ export default function PermisosEmpleados() {
           horaFin: data.horaFin,
           motivo: data.motivo,
           lugar: data.lugar,
+          condicion: puedeAprobar ? condicion : undefined, // ← solo si puede aprobar
+          motivoRechazo: condicion === "Rechazado" ? motivoRechazo : undefined,
         }),
         {
           loading: "Registrando permiso...",
@@ -434,37 +435,59 @@ export default function PermisosEmpleados() {
 
       {/* ── Filtros + Botones ── */}
       <Paper variant="outlined" sx={{ p: 2.5, mb: 2 }}>
-        <Grid container sx={{ spacing: 2, alignItems: "center" }}>
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Año</InputLabel>
-              <Select value={anioFiltro} label="Año" onChange={(e) => setAnioFiltro(e.target.value)}>
-                {anios.map((a) => (
-                  <MenuItem key={a} value={a}>
-                    {a}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+        <Grid container sx={{ gap: 2 }}>
+          {/* Filtros */}
+          <Grid size={{ xs: 12 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Año</InputLabel>
+                <Select value={anioFiltro} label="Año" onChange={(e) => setAnioFiltro(e.target.value)}>
+                  {anios.map((a) => (
+                    <MenuItem key={a} value={a}>
+                      {a}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>Mes</InputLabel>
+                <Select value={mesFiltro} label="Mes" onChange={(e) => setMesFiltro(e.target.value)}>
+                  {meses.map((m) => (
+                    <MenuItem key={m.value} value={m.value}>
+                      {m.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
           </Grid>
-          <Grid size={{ xs: 6, sm: 3 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Mes</InputLabel>
-              <Select value={mesFiltro} label="Mes" onChange={(e) => setMesFiltro(e.target.value)}>
-                {meses.map((m) => (
-                  <MenuItem key={m.value} value={m.value}>
-                    {m.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <Box sx={{ display: "flex", gap: 1.5, justifyContent: { xs: "flex-start", sm: "flex-end" } }}>
-              <Button variant="outlined" startIcon={<ArrowBackIcon />} color="inherit">
+
+          {/* Botones */}
+          <Grid size={{ xs: 12 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 1.5,
+                justifyContent: { sm: "flex-end" },
+              }}
+            >
+              <Button
+                fullWidth={false}
+                variant="outlined"
+                startIcon={<ArrowBackIcon />}
+                color="inherit"
+                sx={{ flex: { xs: 1, sm: "unset" } }}
+              >
                 Volver
               </Button>
-              <Button variant="outlined" startIcon={<RefreshIcon />} color="warning" onClick={resetForm}>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                color="warning"
+                onClick={resetForm}
+                sx={{ flex: { xs: 1, sm: "unset" } }}
+              >
                 Limpiar
               </Button>
               <Button
@@ -473,6 +496,7 @@ export default function PermisosEmpleados() {
                 color="primary"
                 disabled={saving}
                 onClick={handleSubmit(onSubmit)}
+                sx={{ flex: { xs: 1, sm: "unset" } }}
               >
                 Guardar
               </Button>

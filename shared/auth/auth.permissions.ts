@@ -13,4 +13,5 @@ export const permissions = {
 
   //Permisos
   registrarPermiso: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR, ROLES.SUPERVISOR, ROLES.JEFE_ALMACEN],
+  listarPermisosPendientes: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
 };

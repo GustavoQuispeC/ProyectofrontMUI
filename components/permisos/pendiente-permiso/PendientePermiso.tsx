@@ -1,0 +1,153 @@
+import { usePermisosPendientes } from "@/features/dashboard/permiso/hooks/usePermisosPendientes";
+import { Condicion } from "@/features/dashboard/permiso/permiso.type";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { permissions } from "@/shared/auth/auth.permissions";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
+import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TablePagination from "@mui/material/TablePagination";
+import TableRow from "@mui/material/TableRow";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { Visibility as VisibilityIcon, Edit as EditIcon } from "@mui/icons-material";
+
+const chipCondicion = (condicion: Condicion) => {
+  const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
+    Pendiente: { color: "warning", label: "Pendiente" },
+    Aprobado: { color: "success", label: "Aprobado" },
+    Rechazado: { color: "error", label: "Rechazado" },
+  };
+  return <Chip size="small" color={config[condicion].color} label={config[condicion].label} />;
+};
+
+export default function ListarPermisosPendientes() {
+  // ── Auth ──
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.registrarUsuarios) : false;
+  const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin"; // ✅ definido
+
+  // ── Queries ──
+  const { permisosPendientes, loading: loadingPermisos } = usePermisosPendientes(canAccess);
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  return (
+    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" }}>
+      <TableContainer component={Paper} variant="outlined">
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ bgcolor: "grey.50" }}>
+              {["N°", "Empleado", "Fecha", "Horario", "Duración", "Motivo", "Lugar", "Estado", "Acciones"].map(
+                (col) => (
+                  <TableCell key={col} align={col === "Acciones" ? "center" : "left"}>
+                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                      {col}
+                    </Typography>
+                  </TableCell>
+                ),
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loadingPermisos ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Cargando...
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : permisosPendientes.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No hay permisos pendientes.
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              permisosPendientes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((permiso, idx) => {
+                const yaDefinido = permiso.condicion === "Aprobado" || permiso.condicion === "Rechazado";
+                const puedeEditar = !yaDefinido || puedeAprobar;
+
+                return (
+                  <TableRow key={permiso.id} hover>
+                    <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
+                        {permiso.nombreEmpleado}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">{permiso.fecha}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {permiso.horaInicio} - {permiso.horaFin}
+                      </Typography>
+                    </TableCell>
+                    {/* ✅ permiso.duracionMin en lugar de permisosPendientes.duracionMin */}
+                    <TableCell>{`${Math.floor(permiso.duracionMin / 60)}h ${permiso.duracionMin % 60}m`}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
+                        {permiso.motivo}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
+                        {permiso.lugar}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip title={permiso.motivoRechazo || ""} arrow>
+                        <span>{chipCondicion(permiso.condicion as Condicion)}</span>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="Ver detalle">
+                        <IconButton size="small" color="info">
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title={!puedeEditar ? "No puede editar un permiso ya procesado" : "Editar"}>
+                        <span>
+                          <IconButton size="small" color="warning" disabled={!puedeEditar}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+
+        <TablePagination
+          component="div"
+          count={permisosPendientes.length}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          rowsPerPageOptions={[5, 10, 25]}
+          labelRowsPerPage="Filas por página:"
+          labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+        />
+      </TableContainer>
+    </Box>
+  );
+}

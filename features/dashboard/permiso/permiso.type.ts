@@ -7,6 +7,8 @@ export interface RegistrarPermiso {
   horaFin: string;
   motivo: string;
   lugar: string;
+  condicion?: string; // ← opcional
+  motivoRechazo?: string; // ← opcional
 }
 
 export interface ListarPermisos {
@@ -25,4 +27,22 @@ export interface ListarPermisos {
   aprobadoPorNombre: null | string;
   fechaAprobacion: Date | null;
   createdAt: Date;
+}
+
+export interface PendientesPermisos {
+  id: number;
+  empleadoId: number;
+  nombreEmpleado: string;
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
+  duracionMin: number;
+  motivo: string;
+  lugar: string;
+  condicion: Condicion;
+  motivoRechazo: string | null;
+  aprobadoPor: string | null;
+  aprobadoPorNombre: string | null;
+  fechaAprobacion: string | null;
+  createdAt: string;
 }
