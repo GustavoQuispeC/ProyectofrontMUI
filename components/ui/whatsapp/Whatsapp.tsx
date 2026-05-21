@@ -1,8 +1,6 @@
 "use client";
-import { Carousel, Navbar, Footer, Categorias, Marcas, Productos, Contactenos } from "@/components";
-
-import { ArrowUpward, FmdGood, Close } from "@mui/icons-material";
-import { useEffect, useState } from "react";
+import { FmdGood, Close } from "@mui/icons-material";
+import {  useState } from "react";
 
 const TIENDAS = [
   {
@@ -25,27 +23,8 @@ const TIENDAS = [
   },
 ];
 
-export default function Home() {
+export default function Whatsapp() {
   const [showMenu, setShowMenu] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
-
-  const imagenesBanner = [
-    "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Carousel%2FCAROUSEL_1.png?alt=media&token=a5218405-7e1c-4e24-a996-07d33845c113",
-    "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Carousel%2FCAROUSEL_2.png?alt=media&token=399808d1-f1d3-4b5e-b1cf-bcb729467b9b",
-    "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Carousel%2FCAROUSEL_3.png?alt=media&token=65e1c03d-1dfc-47b7-8ed7-9c654daff179",
-  ];
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 400);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   const handleWhatsAppClick = (whatsapp: string, tienda: string) => {
     const message = encodeURIComponent(`Hola, quiero cotizar materiales desde ${tienda}. ¿Me pueden ayudar?`);
@@ -54,31 +33,11 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
       <main className="grow">
-        <Navbar />
-        <Carousel images={imagenesBanner} />
-        <Categorias />
-        <Productos />
-        <Marcas />
-        <Contactenos />
 
         {/* CONTROLES FLOTANTES */}
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
           {/* BOTÓN IR ARRIBA */}
-          <button
-            onClick={scrollToTop}
-            className={[
-              "bg-blue-950 text-white dark:bg-white dark:text-blue-950",
-              "h-12 w-12 rounded-full shadow-2xl border border-white/10",
-              "flex items-center justify-center",
-              "transition-all duration-500",
-              showBackToTop ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none",
-            ].join(" ")}
-            aria-label="Subir al inicio"
-          >
-            <ArrowUpward fontSize="small" />
-          </button>
 
           {/* MENÚ WHATSAPP */}
           <div className="flex flex-col items-end gap-3">
@@ -154,7 +113,5 @@ export default function Home() {
         </div>
       </main>
 
-      <Footer />
-    </div>
   );
 }

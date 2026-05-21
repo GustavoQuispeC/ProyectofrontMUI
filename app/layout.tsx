@@ -4,7 +4,6 @@ import { Roboto } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { cookies } from "next/headers";
 import ThemeRegistry from "@/components/ui/theme/ThemeRegistry";
-import CartDrawer from "@/components/cartdrawer/Cartdrawer";
 import ToastProvider from "@/components/ui/toast-provider/toast-provider";
 import { ReactQueryProvider } from "@/components/ui/providers/QueryClientProvider";
 
@@ -22,23 +21,28 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const themeCookie = (await cookies()).get("theme")?.value;
+
   const initialMode = themeCookie === "dark" ? "dark" : "light";
 
   return (
-    <html lang="en" className={`${roboto.variable} h-full antialiased ${initialMode === "dark" ? "dark" : ""}`}>
-      <body className="min-h-full flex flex-col">
-        {/* CLAVE: MUI Provider */}
+    <html
+      lang="en"
+      className={`${roboto.variable} ${
+        initialMode === "dark" ? "dark" : ""
+      }`}
+    >
+      <body>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ReactQueryProvider>
             <ThemeRegistry initialMode={initialMode}>
               <ToastProvider />
 
               {children}
-              <CartDrawer />
+
             </ThemeRegistry>
           </ReactQueryProvider>
         </AppRouterCacheProvider>

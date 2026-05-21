@@ -1,9 +1,7 @@
 
-//import Link from "next/link";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
-//import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import EmailIcon from "@mui/icons-material/Email";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { NavLink } from "./NavLink";
@@ -41,23 +39,6 @@ export function NavDesktop({
     </>
   );
 
-//   const resourceTrigger = (
-//     <>
-//       <span className="opacity-70">
-//         <DescriptionOutlinedIcon fontSize="small" />
-//       </span>
-
-//       Recursos
-
-//       <KeyboardArrowDownIcon
-//         fontSize="small"
-//         className={`transition-transform duration-200 ${
-//           openDropdown === "resources" ? "rotate-180" : ""
-//         }`}
-//       />
-//     </>
-//   );
-
   return (
     <div className="hidden md:flex items-center gap-1 flex-1">
       {/* Inicio */}
@@ -90,66 +71,21 @@ export function NavDesktop({
       </Dropdown>
 
       {/* Catalogo Productos */}
- <NavLink
+<NavLink
   icon={<BusinessOutlinedIcon fontSize="small" />}
   label="Catálogo de Productos"
+  href="/productFilter"
   active={activeNav === "productFilter"}
   onClick={() => onNavClick("productFilter")}
 />
-
-      {/* Recursos */}
-      {/* <Dropdown
-        id="resources"
-        openId={openDropdown}
-        onToggle={onToggleDropdown}
-        width="w-72"
-        trigger={resourceTrigger}
-      >
-        <div className="grid grid-cols-2 gap-1">
-          {RESOURCE_ITEMS.map(
-            ({ icon: Icon, label, sub, bg, color, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="
-                  flex items-start gap-2.5 rounded-lg p-2.5
-                  transition-colors duration-150
-                  hover:bg-gray-50
-                  dark:hover:bg-gray-800
-                "
-              >
-                <div
-                  className={`
-                    ${bg}
-                    ${color}
-                    flex h-8 w-8 shrink-0 items-center justify-center rounded-lg
-                  `}
-                >
-                  <Icon fontSize="small" />
-                </div>
-
-                <div>
-                  <div className="text-sm font-medium text-text-primary dark:text-text-secondary">
-                    {label}
-                  </div>
-
-                  <div className="mt-0.5 text-[11px] text-text-tertiary">
-                    {sub}
-                  </div>
-                </div>
-              </Link>
-            )
-          )}
-        </div>
-      </Dropdown> */}
-
       {/* Contact */}
-      <NavLink
-        icon={<EmailIcon fontSize="small" />}
-        label="Contáctanos"
-        active={activeNav === "contacto"}
-        onClick={() => onNavClick("contacto")}
-      />
+     <NavLink
+  icon={<EmailIcon fontSize="small" />}
+  label="Contáctanos"
+  href="/#contacto"
+  active={activeNav === "contacto"}
+  onClick={() => onNavClick("contacto")}
+/>
     </div>
   );
 }
