@@ -9,7 +9,7 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { esES } from "@mui/x-data-grid/locales";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
 import CircularProgress from "@mui/material/CircularProgress";
 import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";

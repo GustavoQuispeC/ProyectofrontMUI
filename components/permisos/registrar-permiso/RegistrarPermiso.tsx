@@ -110,12 +110,10 @@ const chipCondicion = (condicion: Condicion) => {
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function RegistrarPermiso() {
-  // ── Auth ──
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.registrarUsuarios) : false;
   const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin";
 
-  // ── Estado local ──
   const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
   const [saving, setSaving] = useState(false);
   const [condicion, setCondicion] = useState<Condicion>("Pendiente");

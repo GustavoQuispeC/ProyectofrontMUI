@@ -4,6 +4,8 @@ import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { registrarPermisoApi as registrarPermisoService } from "./permiso.service";
 import { listarPermisosPendientesApi as listarPermisosPendientesService } from "./permiso.service";
+import { aprobarPermisoApi as aprobarPermisoService } from "./permiso.service";
+import { rechazarPermisoApi as rechazarPermisoService } from "./permiso.service";
 
 //! Registrar persmiso
 export async function registrarPermiso(payload: RegistrarPermiso): Promise<{ permisoId: number }> {
@@ -29,4 +31,28 @@ export async function listarPermisosPendientes() {
     throw new Error("No tienes permisos para listar usuarios");
   }
   return listarPermisosPendientesService();
+}
+
+//! Aprobar permiso
+export async function aprobarPermiso(permisoId: number) {
+  const user = getAuthUser();
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+  if (!hasPermission(user.rol, permissions.aprobarPermiso)) {
+    throw new Error("No tienes permisos para aprobar permisos");
+  }
+  return aprobarPermisoService(permisoId);
+}
+
+//! Rechazar permiso
+export async function rechazarPermiso(id: number, motivoRechazo: string) {
+  const user = getAuthUser();
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+  if (!hasPermission(user.rol, permissions.rechazarPermiso)) {
+    throw new Error("No tienes permisos para rechazar permisos");
+  }
+  return rechazarPermisoService(id, motivoRechazo);
 }

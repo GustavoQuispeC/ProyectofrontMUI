@@ -21,3 +21,18 @@ export async function listarPermisosPendientesApi(): Promise<PendientesPermisos[
     method: "GET",
   });
 }
+
+//!Aprobar permiso
+export async function aprobarPermisoApi(permisoId: number): Promise<void> {
+  return apiPermiso(`${apiUrl}/Permisos/${permisoId}/aprobar`, {
+    method: "POST", //put
+  });
+}
+
+//!Rechazar permiso
+export async function rechazarPermisoApi(id: number, motivoRechazo: string): Promise<void> {
+  return apiPermiso(`${apiUrl}/Permisos/${id}/rechazar`, {
+    method: "PUT",
+    body: JSON.stringify({ motivoRechazo }),
+  });
+}

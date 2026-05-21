@@ -16,13 +16,21 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { Visibility as VisibilityIcon, Edit as EditIcon } from "@mui/icons-material";
+import { Visibility as VisibilityIcon } from "@mui/icons-material";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { useMounted } from "@/shared/hooks/useMounted";
 import { useState } from "react";
 import Button from "@mui/material/Button";
 import Link from "next/link";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import CheckIcon from "@mui/icons-material/Check";
+import ClearIcon from "@mui/icons-material/Clear";
+import { useRechazarPermiso } from "@/features/dashboard/permiso/hooks/useRechazarPermiso";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@mui/material/DialogActions";
+import TextField from "@mui/material/TextField";
 
 const chipCondicion = (condicion: Condicion) => {
   const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
@@ -34,16 +42,35 @@ const chipCondicion = (condicion: Condicion) => {
 };
 
 export default function ListarPermisosPendientes() {
-  // ── Auth ──
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.registrarUsuarios) : false;
-  const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin"; // ✅ definido
+  const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin";
   const mounted = useMounted(); //? controla el estado de montaje
-  // ── Queries ──
   const { permisosPendientes, loading: loadingPermisos } = usePermisosPendientes(canAccess);
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const { rechazarPermiso, loading: rechazando } = useRechazarPermiso();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<{ id: number; nombreEmpleado: string } | null>(null);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+
+  const handleOpenDialog = (id: number, nombreEmpleado: string) => {
+    setSelectedRow({ id, nombreEmpleado });
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedRow(null);
+    setMotivoRechazo("");
+  };
+
+  //! guarda el rechazo del permiso
+  const handleRechazar = () => {
+    if (!selectedRow) return;
+    rechazarPermiso({ id: selectedRow.id, motivoRechazo });
+    handleCloseDialog();
+  };
 
   //! controla el renderizado
   if (!mounted) return null;
@@ -137,8 +164,20 @@ export default function ListarPermisosPendientes() {
                       </Tooltip>
                       <Tooltip title={!puedeEditar ? "No puede editar un permiso ya procesado" : "Editar"}>
                         <span>
-                          <IconButton size="small" color="warning" disabled={!puedeEditar}>
-                            <EditIcon fontSize="small" />
+                          <IconButton size="small" color="success" disabled={!puedeEditar}>
+                            <CheckIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+
+                      <Tooltip title="Rechazar permiso">
+                        <span>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleOpenDialog(permiso.id, permiso.nombreEmpleado)}
+                          >
+                            <ClearIcon fontSize="small" />
                           </IconButton>
                         </span>
                       </Tooltip>
@@ -165,6 +204,31 @@ export default function ListarPermisosPendientes() {
           labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
         />
       </TableContainer>
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
+        <DialogTitle>Rechazar permiso</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            ¿Está seguro que desea rechazar el permiso de <strong>{selectedRow?.nombreEmpleado}</strong>?
+          </Typography>
+          <TextField
+            fullWidth
+            label="Motivo de rechazo"
+            multiline
+            rows={3}
+            value={motivoRechazo}
+            onChange={(e) => setMotivoRechazo(e.target.value)}
+            placeholder="Indique el motivo del rechazo..."
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} disabled={rechazando}>
+            Cancelar
+          </Button>
+          <Button variant="contained" color="error" onClick={handleRechazar} disabled={rechazando}>
+            {rechazando ? "Rechazando..." : "Rechazar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
