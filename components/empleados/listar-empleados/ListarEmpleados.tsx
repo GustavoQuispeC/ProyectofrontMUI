@@ -27,6 +27,7 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
+import { useMounted } from "@/shared/hooks/useMounted";
 
 //! Componente para mostrar la imagen con un loader mientras se carga
 interface Props {
@@ -200,7 +201,7 @@ const gridInitialState = { pagination: { paginationModel } };
 
 export default function ListarEmpleadosDataTable() {
   const { empleados, loading } = useEmpleados();
-  const [mounted, setMounted] = useState(false); // Estado para controlar el montaje del componente y evitar renderizados prematuros
+  const mounted = useMounted();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<EmpleadosListar | null>(null);
   const { eliminarEmpleado } = useEliminarEmpleado();
@@ -228,14 +229,6 @@ export default function ListarEmpleadosDataTable() {
     [router],
   );
 
-  //! useEffect para establecer el estado de montaje después del primer renderizado, utilizando requestAnimationFrame para asegurar que se ejecute después de que el componente esté completamente montado
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      setMounted(true);
-    });
-    return () => cancelAnimationFrame(id);
-  }, []);
-
   const localeText = useMemo(() => esES.components.MuiDataGrid.defaultProps.localeText, []);
 
   const columns = useMemo(
@@ -243,6 +236,7 @@ export default function ListarEmpleadosDataTable() {
     [handleOpenDialog, handleView, canDelete],
   );
 
+  //! controla el renderizado
   if (!mounted) return null;
 
   if (!canAccess) {
@@ -250,8 +244,8 @@ export default function ListarEmpleadosDataTable() {
   }
 
   return (
-    <Paper sx={{ height: "100%", width: "100%" }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
+    <Paper sx={{ height: "100%", width: "100%", mt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
         <Button component={Link} href="/dashboard/empleados/registrar" variant="contained" startIcon={<GroupAddIcon />}>
           Nuevo Empleado
         </Button>
@@ -267,6 +261,7 @@ export default function ListarEmpleadosDataTable() {
         localeText={localeText}
         sx={{
           border: 0,
+          mx: 1,
           "& .MuiDataGrid-columnHeader": {
             backgroundColor: "#e4eaeb",
           },

@@ -1,11 +1,12 @@
 "use client";
 
 import { ListarPermisosPendientes } from "@/components";
+import Box from "@mui/material/Box";
 
 export default function ListarPermisosPendientesPage() {
   return (
-    <div style={{ height: "100%", width: "100%" }}>
+    <Box sx={{ display: "flex" }}>
       <ListarPermisosPendientes />
-    </div>
+    </Box>
   );
 }

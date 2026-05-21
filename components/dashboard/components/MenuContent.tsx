@@ -27,7 +27,7 @@
 //   },
 //   { text: "Empleados", icon: <AnalyticsRoundedIcon />, href: "/dashboard/empleados/listar" },
 //   { text: "Clients", icon: <AccountBoxIcon />, href: "/dashboard/clientes" },
-//   { text: "Permisos", icon: <AssignmentRoundedIcon />, href: "/dashboard/permisos" },
+//   { text: "Permisos", icon: <AssignmentRoundedIcon />, href: "/dashboard/permisos/registrar" },
 // ];
 
 // const secondaryListItems = [
@@ -91,6 +91,7 @@ import Link from "next/link";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
+import { useMounted } from "@/shared/hooks/useMounted";
 
 type MenuItemType = {
   text: string;
@@ -135,7 +136,7 @@ const mainListItems: MenuItemType[] = [
   {
     text: "Permisos",
     icon: <AssignmentRoundedIcon />,
-    href: "/dashboard/permisos/registrar",
+    href: "/dashboard/permisos/pendiente",
   },
 ];
 
@@ -160,7 +161,9 @@ const secondaryListItems = [
 ];
 
 export default function MenuContent() {
+  const mounted = useMounted(); //? controla el estado de montaje
   const user = getAuthUser();
+  if (!mounted) return null;
 
   const filteredMainItems = mainListItems.filter((item) => {
     // Sin restricción

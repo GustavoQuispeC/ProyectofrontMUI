@@ -122,8 +122,8 @@ export default function ListarUsuariosDataTable() {
     return <AccessDenied />;
   }
   return (
-    <Paper sx={{ height: "100%", width: "100%" }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
+    <Paper sx={{ height: "100%", width: "100%", mt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
         <Button component={Link} href="/dashboard/usuarios/registrar" variant="contained" startIcon={<GroupAddIcon />}>
           Nuevo Usuario
         </Button>
@@ -138,6 +138,7 @@ export default function ListarUsuariosDataTable() {
         localeText={localeText}
         sx={{
           border: 0,
+          mx: 1,
           "& .MuiDataGrid-columnHeader": {
             backgroundColor: "#e4eaeb",
           },

@@ -27,16 +27,19 @@ export default function Dashboard({ children }: DashboardProps) {
           overflow: "auto",
         })}
       >
+        {/* ✅ Header sin mx, ocupa todo el ancho */}
+        <Header />
+
+        {/* ✅ Solo el contenido tiene mx */}
         <Stack
           spacing={2}
           sx={{
-            alignItems: "center",
+            alignItems: "stretch",
             mx: 3,
             pb: 5,
             mt: { xs: 8, md: 0 },
           }}
         >
-          <Header />
           {children}
         </Stack>
       </Box>

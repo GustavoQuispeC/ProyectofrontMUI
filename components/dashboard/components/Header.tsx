@@ -20,10 +20,9 @@ export default function Header() {
         width: "100%",
         alignItems: "center",
         justifyContent: "space-between",
-        maxWidth: { sm: "100%", md: "1700px" },
+        px: 3, // ← agrega padding horizontal aquí
         pt: 1.5,
         pb: 1,
-        // separación visual inferior coherente con el Drawer
         borderBottom: "0.5px solid",
         borderColor: "divider",
       }}

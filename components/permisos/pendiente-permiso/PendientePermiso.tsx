@@ -16,8 +16,13 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
 import { Visibility as VisibilityIcon, Edit as EditIcon } from "@mui/icons-material";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
+import { useMounted } from "@/shared/hooks/useMounted";
+import { useState } from "react";
+import Button from "@mui/material/Button";
+import Link from "next/link";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 
 const chipCondicion = (condicion: Condicion) => {
   const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
@@ -33,17 +38,29 @@ export default function ListarPermisosPendientes() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.registrarUsuarios) : false;
   const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin"; // ✅ definido
-
+  const mounted = useMounted(); //? controla el estado de montaje
   // ── Queries ──
   const { permisosPendientes, loading: loadingPermisos } = usePermisosPendientes(canAccess);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  //! controla el renderizado
+  if (!mounted) return null;
+
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
+
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" }}>
-      <TableContainer component={Paper} variant="outlined">
-        <Table size="small">
+    <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+        <Button component={Link} href="/dashboard/permisos/registrar" variant="contained" startIcon={<GroupAddIcon />}>
+          Gestionar Permisos
+        </Button>
+      </Box>
+      <TableContainer component={Paper} variant="outlined" sx={{ width: "100%" }}>
+        <Table size="small" sx={{ minWidth: 900 }}>
           <TableHead>
             <TableRow sx={{ bgcolor: "grey.50" }}>
               {["N°", "Empleado", "Fecha", "Horario", "Duración", "Motivo", "Lugar", "Estado", "Acciones"].map(

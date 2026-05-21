@@ -3,7 +3,6 @@ import MuiAvatar from "@mui/material/Avatar";
 import MuiListItemAvatar from "@mui/material/ListItemAvatar";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemText from "@mui/material/ListItemText";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListSubheader from "@mui/material/ListSubheader";
 import Select, { SelectChangeEvent, selectClasses } from "@mui/material/Select";
 import Divider from "@mui/material/Divider";

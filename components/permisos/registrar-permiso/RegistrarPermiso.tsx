@@ -60,6 +60,7 @@ import { permissions } from "@/shared/auth/auth.permissions";
 import { registrarPermiso } from "@/features/dashboard/permiso/permiso.logic";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { usePermisos } from "@/features/dashboard/permiso/hooks/usePermiso";
+import { useMounted } from "@/shared/hooks/useMounted";
 
 const defaultValues: RegistrarPermisoForm = {
   empleadoId: 0,
@@ -123,7 +124,7 @@ export default function RegistrarPermiso() {
   const [mesFiltro, setMesFiltro] = useState("05");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
+  const mounted = useMounted(); //? controla el estado de montaje
   // ── Hooks ──
   const queryClient = useQueryClient();
   const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
@@ -194,8 +195,11 @@ export default function RegistrarPermiso() {
     }
   };
 
-  // ── Guard ──
-  if (!canAccess) return <AccessDenied />;
+  //! ── Efecto de montaje ──
+  if (!mounted) return null;
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" }}>

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { listarPermisosApi } from "../permiso.service";
 
-export function usePermisos(canAccess: boolean, empleadoId: number, anio: string, mes: string) {
+export function usePermisos(canAccess: boolean, empleadoId: number, anio: number, mes: number) {
   const {
     data: permisos = [],
     isLoading: loading,
@@ -26,3 +26,4 @@ export function usePermisos(canAccess: boolean, empleadoId: number, anio: string
     refetch,
   };
 }
+
