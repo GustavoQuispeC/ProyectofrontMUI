@@ -204,7 +204,15 @@ export default function DetalleEmpleado({ id }: Props) {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1100, mx: "auto" }}>
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 1100,
+        mx: "auto",
+        px: { xs: 2, md: 3 },
+        py: { xs: 2, md: 3 },
+      }}
+    >
       {/* ── Header Card ── */}
       <Card variant="outlined" sx={{ borderRadius: 4, boxShadow: "none", mb: 2 }}>
         <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>

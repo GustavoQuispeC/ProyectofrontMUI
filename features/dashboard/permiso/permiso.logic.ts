@@ -14,7 +14,7 @@ export async function registrarPermiso(payload: RegistrarPermiso): Promise<{ per
     throw new Error("No autenticado");
   }
   if (!hasPermission(user.rol, permissions.registrarPermiso)) {
-    throw new Error("No tienes permisos para registrar permisos");
+    throw new Error("No tienes privilegios para registrar permisos");
   }
   return registrarPermisoService(payload);
 }
@@ -28,21 +28,21 @@ export async function listarPermisosPendientes() {
   }
 
   if (!hasPermission(user.rol, permissions.listarPermisosPendientes)) {
-    throw new Error("No tienes permisos para listar usuarios");
+    throw new Error("No tienes privilegios para listar permisos pendientes");
   }
   return listarPermisosPendientesService();
 }
 
 //! Aprobar permiso
-export async function aprobarPermiso(permisoId: number) {
+export async function aprobarPermiso(id: number) {
   const user = getAuthUser();
   if (!user) {
     throw new Error("No autenticado");
   }
   if (!hasPermission(user.rol, permissions.aprobarPermiso)) {
-    throw new Error("No tienes permisos para aprobar permisos");
+    throw new Error("No tienes privilegios para aprobar permisos");
   }
-  return aprobarPermisoService(permisoId);
+  return aprobarPermisoService(id);
 }
 
 //! Rechazar permiso
@@ -52,7 +52,7 @@ export async function rechazarPermiso(id: number, motivoRechazo: string) {
     throw new Error("No autenticado");
   }
   if (!hasPermission(user.rol, permissions.rechazarPermiso)) {
-    throw new Error("No tienes permisos para rechazar permisos");
+    throw new Error("No tienes privilegios para rechazar permisos");
   }
   return rechazarPermisoService(id, motivoRechazo);
 }

@@ -31,6 +31,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
+import { useAprobarPermiso } from "@/features/dashboard/permiso/hooks/useAprobarPermiso";
 
 const chipCondicion = (condicion: Condicion) => {
   const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
@@ -50,6 +51,7 @@ export default function ListarPermisosPendientes() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const { rechazarPermiso, loading: rechazando } = useRechazarPermiso();
+  const { aprobarPermiso, loading: aprobando } = useAprobarPermiso();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<{ id: number; nombreEmpleado: string } | null>(null);
   const [motivoRechazo, setMotivoRechazo] = useState("");
@@ -120,9 +122,6 @@ export default function ListarPermisosPendientes() {
               </TableRow>
             ) : (
               permisosPendientes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((permiso, idx) => {
-                const yaDefinido = permiso.condicion === "Aprobado" || permiso.condicion === "Rechazado";
-                const puedeEditar = !yaDefinido || puedeAprobar;
-
                 return (
                   <TableRow key={permiso.id} hover>
                     <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
@@ -162,15 +161,20 @@ export default function ListarPermisosPendientes() {
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title={!puedeEditar ? "No puede editar un permiso ya procesado" : "Editar"}>
+                      <Tooltip title="Aprobar">
                         <span>
-                          <IconButton size="small" color="success" disabled={!puedeEditar}>
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => aprobarPermiso(permiso.id)}
+                            disabled={aprobando}
+                          >
                             <CheckIcon fontSize="small" />
                           </IconButton>
                         </span>
                       </Tooltip>
 
-                      <Tooltip title="Rechazar permiso">
+                      <Tooltip title="Rechazar">
                         <span>
                           <IconButton
                             size="small"

@@ -118,16 +118,16 @@ export default function RegistrarPermiso() {
   const [saving, setSaving] = useState(false);
   const [condicion, setCondicion] = useState<Condicion>("Pendiente");
   const [motivoRechazo, setMotivoRechazo] = useState("");
-  const [anioFiltro, setAnioFiltro] = useState("2025");
-  const [mesFiltro, setMesFiltro] = useState("05");
+  const fechaActual = new Date();
+  const [anioFiltro, setAnioFiltro] = useState(fechaActual.getFullYear().toString());
+  const [mesFiltro, setMesFiltro] = useState(String(fechaActual.getMonth() + 1).padStart(2, "0"));
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const mounted = useMounted(); //? controla el estado de montaje
-  // ── Hooks ──
   const queryClient = useQueryClient();
   const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
 
-  // ── React Hook Form ──
+  //!React Hook Form
   const {
     control,
     handleSubmit,
@@ -147,7 +147,6 @@ export default function RegistrarPermiso() {
   const horaInicio = watch("horaInicio");
   const horaFin = watch("horaFin");
 
-  // ── Queries ──
   const { permisos, loading: loadingPermisos } = usePermisos(
     canAccess,
     empleadoId,
@@ -155,20 +154,21 @@ export default function RegistrarPermiso() {
     parseInt(mesFiltro),
   );
 
-  // ── Calculado ──
+  //! ── Calculado el tiempo de duracion
   const duracion = useMemo(() => calcularDuracion(horaInicio, horaFin), [horaInicio, horaFin]);
 
-  // ── Handlers ──
+  //! Reseter form
   const resetForm = () => {
     reset(defaultValues);
     setSelectedEmployee(null);
     setCondicion("Pendiente");
     setMotivoRechazo("");
   };
-
+  //! enviar form
   const onSubmit = async (data: RegistrarPermisoForm) => {
     try {
       setSaving(true);
+
       await toastPromise(
         registrarPermiso({
           empleadoId: data.empleadoId,
@@ -177,7 +177,7 @@ export default function RegistrarPermiso() {
           horaFin: data.horaFin,
           motivo: data.motivo,
           lugar: data.lugar,
-          condicion: puedeAprobar ? condicion : undefined, // ← solo si puede aprobar
+          condicion: puedeAprobar ? condicion : undefined,
           motivoRechazo: condicion === "Rechazado" ? motivoRechazo : undefined,
         }),
         {
@@ -186,7 +186,15 @@ export default function RegistrarPermiso() {
           error: "Error al registrar el permiso",
         },
       );
-      await queryClient.invalidateQueries({ queryKey: ["permisos", data.empleadoId] });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["permisos", data.empleadoId],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["permisosPendientes"],
+      });
+
       resetForm();
     } finally {
       setSaving(false);
@@ -195,6 +203,7 @@ export default function RegistrarPermiso() {
 
   //! ── Efecto de montaje ──
   if (!mounted) return null;
+  //* Validando permiso de acceso
   if (!canAccess) {
     return <AccessDenied />;
   }

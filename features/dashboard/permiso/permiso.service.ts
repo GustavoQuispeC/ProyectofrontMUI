@@ -23,9 +23,9 @@ export async function listarPermisosPendientesApi(): Promise<PendientesPermisos[
 }
 
 //!Aprobar permiso
-export async function aprobarPermisoApi(permisoId: number): Promise<void> {
-  return apiPermiso(`${apiUrl}/Permisos/${permisoId}/aprobar`, {
-    method: "POST", //put
+export async function aprobarPermisoApi(id: number): Promise<void> {
+  return apiPermiso(`${apiUrl}/Permisos/${id}/aprobar`, {
+    method: "PUT",
   });
 }
 
