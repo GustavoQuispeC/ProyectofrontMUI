@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -36,9 +37,17 @@ export function NavMobile({
   onLogout,
 }: NavMobileProps) {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
   function toggle(id: string) {
     setExpanded((prev) => (prev === id ? null : id));
+  }
+
+  function handleSearch() {
+    const trimmed = searchTerm.trim();
+    if (!trimmed) return;
+    router.push(`/productFilter?search=${encodeURIComponent(trimmed)}`);
   }
 
   const activeCls =
@@ -63,6 +72,9 @@ export function NavMobile({
 
           <input
             type="text"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            onKeyDown={(event) => event.key === "Enter" && handleSearch()}
             placeholder="Buscar..."
             className="bg-transparent text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 outline-none w-full"
           />

@@ -10,6 +10,7 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Dropdown, DropdownItem } from "./Dropdown";
 import type { DropdownId } from "../types";
 import { CartButton } from "@/components/cartdrawer/Cartdrawer";
@@ -32,7 +33,15 @@ export function NavActions({
   onLogout,
 }: NavActionsProps) {
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const { mode, toggleTheme } = useThemeMode();
+  const router = useRouter();
+
+  const handleSearch = () => {
+    const trimmed = searchTerm.trim();
+    if (!trimmed) return;
+    router.push(`/productFilter?search=${encodeURIComponent(trimmed)}`);
+  };
 
   return (
     <div className="flex items-center gap-1 ml-auto">
@@ -50,6 +59,9 @@ export function NavActions({
         <input
           type="text"
           placeholder="Buscar..."
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          onKeyDown={(event) => event.key === "Enter" && handleSearch()}
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
           className="bg-transparent text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 outline-none w-full"

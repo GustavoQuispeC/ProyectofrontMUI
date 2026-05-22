@@ -3,6 +3,9 @@ export const BRANDS = [
   "Stanley",
   "Makita",
   "Truper",
+  "Philips",
+  "Rust-Oleum",
+  "Poxipol",
 ];
 
 export const CATEGORIES = [

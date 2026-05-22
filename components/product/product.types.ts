@@ -5,8 +5,8 @@ export interface Product {
   category: string;
   price: number;
   image: string | null;
-
   rating: number;
   inStock: boolean;
   hasDiscount: boolean;
+  freeShipping?: boolean;
 }
