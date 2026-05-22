@@ -2,44 +2,34 @@
 
 import { ReactNode, useState } from "react";
 
-interface FilterSectionProps {
+interface Props {
   title: string;
   children: ReactNode;
-  defaultOpen?: boolean;
 }
 
 export default function FilterSection({
   title,
   children,
-  defaultOpen = true,
-}: FilterSectionProps) {
-  const [open, setOpen] = useState(defaultOpen);
+}: Props) {
+  const [open, setOpen] = useState(true);
 
   return (
-    <div className="border-b border-slate-200 dark:border-neutral-800 last:border-0">
+    <div className="border-b border-slate-200 dark:border-neutral-800 pb-5">
+
       <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between py-4 text-left"
+        onClick={() => setOpen(!open)}
+        className="w-full py-4 flex items-center justify-between"
       >
-        <span className="text-xs font-semibold tracking-widest uppercase">
+        <span className="text-xs font-bold uppercase tracking-widest">
           {title}
         </span>
 
-        <svg
-          className={`w-4 h-4 transition-transform duration-200 ${
-            open ? "rotate-180" : ""
-          }`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M19 9l-7 7-7-7" />
-        </svg>
+        <span>
+          {open ? "-" : "+"}
+        </span>
       </button>
 
-      {open && <div className="pb-5">{children}</div>}
+      {open && children}
     </div>
   );
 }
