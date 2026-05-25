@@ -24,7 +24,7 @@ export async function listarPermisosPendientesApi(): Promise<PendientesPermisos[
 
 //! Listar permiso mensual
 export async function listarPermisosMensualApi(anio: number, mes: number): Promise<ListarPermisoMensual[]> {
-  return apiPermiso(`${apiUrl}/Permisos/mensual?anio=${anio}&mes=${mes}`, {
+  return apiPermiso(`${apiUrl}/Permisos/reporte-mensual?anio=${anio}&mes=${mes}`, {
     method: "GET",
   });
 }

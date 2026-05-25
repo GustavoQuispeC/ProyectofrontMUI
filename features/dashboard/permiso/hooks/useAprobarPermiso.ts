@@ -15,6 +15,9 @@ export function useAprobarPermiso() {
       queryClient.invalidateQueries({
         queryKey: ["permisosPendientes"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["permisosMensuales"],
+      });
     },
   });
 

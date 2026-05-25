@@ -46,3 +46,35 @@ export interface PendientesPermisos {
   fechaAprobacion: string | null;
   createdAt: string;
 }
+
+export interface ListarPermisoMensual {
+  empleadoId: number;
+
+  codigoEmpleado: string;
+
+  nombreCompleto: string;
+
+  cantidadPermisos: number;
+
+  totalHorasPermisos: number;
+
+  permisos: PermisoMensual[];
+}
+
+export interface PermisoMensual {
+  id: number;
+
+  fecha: string;
+
+  horaInicio: string;
+
+  horaFin: string;
+
+  totalHoras: number;
+
+  motivo: string;
+
+  lugar: string;
+
+  condicion: Condicion;
+}

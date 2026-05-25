@@ -45,7 +45,7 @@ const chipCondicion = (condicion: Condicion) => {
 
 export default function ListarPermisosPendientes() {
   const user = getAuthUser();
-  const canAccess = user ? hasPermission(user.rol, permissions.registrarUsuarios) : false;
+  const canAccess = user ? hasPermission(user.rol, permissions.listarPermisosPendientes) : false;
   const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin";
   const mounted = useMounted(); //? controla el estado de montaje
   const { permisosPendientes, loading: loadingPermisos } = usePermisosPendientes(canAccess);

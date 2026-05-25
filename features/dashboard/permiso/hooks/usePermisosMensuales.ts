@@ -16,7 +16,7 @@ export function usePermisosMensuales(canAccess: boolean, anio: number, mes: numb
 
     retry: 1,
 
-    enabled: canAccess,
+    enabled: canAccess && anio > 0 && mes > 0,
   });
 
   return {
