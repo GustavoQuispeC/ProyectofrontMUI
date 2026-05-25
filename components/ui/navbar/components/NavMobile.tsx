@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -40,6 +40,30 @@ export function NavMobile({
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
+  const updateSearchParams = (search: string) => {
+    const params = new URLSearchParams(window.location.search);
+    if (search) {
+      params.set("search", search);
+    } else {
+      params.delete("search");
+    }
+    const query = params.toString();
+    router.replace(`/productFilter${query ? `?${query}` : ""}`);
+  };
+
+  useEffect(() => {
+    const trimmed = searchTerm.trim();
+    const timeoutId = window.setTimeout(() => {
+      if (trimmed) {
+        updateSearchParams(trimmed);
+      } else if (window.location.pathname === "/productFilter") {
+        updateSearchParams("");
+      }
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [searchTerm, router]);
+
   function toggle(id: string) {
     setExpanded((prev) => (prev === id ? null : id));
   }
@@ -47,7 +71,7 @@ export function NavMobile({
   function handleSearch() {
     const trimmed = searchTerm.trim();
     if (!trimmed) return;
-    router.push(`/productFilter?search=${encodeURIComponent(trimmed)}`);
+    updateSearchParams(trimmed);
   }
 
   const activeCls =

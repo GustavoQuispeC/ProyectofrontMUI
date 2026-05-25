@@ -9,7 +9,7 @@ import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dropdown, DropdownItem } from "./Dropdown";
 import type { DropdownId } from "../types";
@@ -37,10 +37,34 @@ export function NavActions({
   const { mode, toggleTheme } = useThemeMode();
   const router = useRouter();
 
+  const updateSearchParams = (search: string) => {
+    const params = new URLSearchParams(window.location.search);
+    if (search) {
+      params.set("search", search);
+    } else {
+      params.delete("search");
+    }
+    const query = params.toString();
+    router.replace(`/productFilter${query ? `?${query}` : ""}`);
+  };
+
+  useEffect(() => {
+    const trimmed = searchTerm.trim();
+    const timer = setTimeout(() => {
+      if (trimmed) {
+        updateSearchParams(trimmed);
+      } else if (window.location.pathname === "/productFilter") {
+        updateSearchParams("");
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, router]);
+
   const handleSearch = () => {
     const trimmed = searchTerm.trim();
     if (!trimmed) return;
-    router.push(`/productFilter?search=${encodeURIComponent(trimmed)}`);
+    updateSearchParams(trimmed);
   };
 
   return (

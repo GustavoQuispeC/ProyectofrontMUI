@@ -9,6 +9,15 @@ export const BRANDS = [
 ];
 
 export const CATEGORIES = [
+  "Cementos",
+  "Ladrillos",
+  "Clavos",
+  "Perfiles y Tubos",
+  "Alambres",
+  "Teja Andina",
+  "Tuberías, tanques y accesorios",
+  "Fierros",
+  "Calaminas",
   "Herramientas",
   "Pintura",
   "Electricidad",

@@ -45,9 +45,10 @@ interface Props {
   filters: ProductFilters;
   onFiltersChange: (filters: ProductFilters) => void;
   onClear: () => void;
+  className?: string;
 }
 
-export default function ProductFilterSidebar({ filters, onFiltersChange, onClear }: Props) {
+export default function ProductFilterSidebar({ filters, onFiltersChange, onClear, className }: Props) {
   const [cartCount, setCartCount] = useState(0);
   const [cartTotal, setCartTotal] = useState(0);
 
@@ -68,8 +69,11 @@ export default function ProductFilterSidebar({ filters, onFiltersChange, onClear
     };
   }, []);
 
+  const baseClass =
+    "w-72 xl:w-80 shrink-0 border-r border-slate-200 dark:border-neutral-800 min-h-screen sticky top-0";
+
   return (
-    <aside className="hidden md:block w-72 xl:w-80 shrink-0 border-r border-slate-200 dark:border-neutral-800 min-h-screen sticky top-0">
+    <aside className={`${className ?? baseClass} ${className ? "" : "hidden md:block"}`}>
       <div className="p-6">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>

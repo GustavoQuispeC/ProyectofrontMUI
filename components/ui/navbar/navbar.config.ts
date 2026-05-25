@@ -8,27 +8,27 @@ import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 export const PRODUCT_ITEMS = [
   {
     icon: MonitorOutlinedIcon,
-    label: "Cemento",
-    href: "/software",
+    label: "Cementos",
+    href: "/productFilter?category=Cementos",
   },
   {
     icon: StorageOutlinedIcon,
     label: "Fierros",
-    href: "/cloud",
+    href: "/productFilter?category=Fierros",
   },
   {
     icon: PhoneAndroidOutlinedIcon,
     label: "Ladrillos",
-    href: "/mobile",
+    href: "/productFilter?category=Ladrillos",
   },
   {
     icon: StarBorderOutlinedIcon,
-    label: "perfiles",
-    href: "/featured",
+    label: "Perfiles y Tubos",
+    href: "/productFilter?category=Perfiles%20y%20Tubos",
   },
-   {
+  {
     icon: StarBorderOutlinedIcon,
-    label: "Tuberias",
-    href: "/featured",
+    label: "Tuberías, tanques y accesorios",
+    href: "/productFilter?category=Tuber%C3%ADas%2C%20tanques%20y%20accesorios",
   },
 ] as const;

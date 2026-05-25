@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import useEmblaCarousel from "embla-carousel-react";
 
 interface CardData {
@@ -37,12 +38,14 @@ interface CardProps {
   title: string;
   img: string;
   description?: string;
+  onClick?: () => void;
 }
 
-function Card({ title, img, description }: CardProps) {
+function Card({ title, img, description, onClick }: CardProps) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className="group relative flex flex-col overflow-hidden rounded-2xl text-left w-full h-full bg-surface border border-border-base shadow-sm"
     >
       {/* Imagen — Aumentada a h-36 (144px) para mejor visualización */}
@@ -89,6 +92,7 @@ function Card({ title, img, description }: CardProps) {
   );
 }
 export default function Categorias() {
+  const router = useRouter();
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     dragFree: true,
@@ -96,6 +100,10 @@ export default function Categorias() {
   });
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const handleCategory = (category: string) => {
+    router.push(`/productFilter?category=${encodeURIComponent(category)}`);
+  };
 
   const cards: CardData[] = useMemo(
     () => [
@@ -218,7 +226,12 @@ export default function Categorias() {
                 className="min-w-0 flex-[0_0_45%] sm:flex-[0_0_33%] md:flex-[0_0_25%] lg:flex-[0_0_18%] xl:flex-[0_0_16%]"
                 style={{ height: "260px" }}
               >
-                <Card title={card.title} img={card.img} description={card.description} />
+                <Card
+                  title={card.title}
+                  img={card.img}
+                  description={card.description}
+                  onClick={() => handleCategory(card.title)}
+                />
               </div>
             ))}
           </div>
