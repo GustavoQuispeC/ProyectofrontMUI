@@ -1,5 +1,5 @@
 import { apiPermiso } from "@/lib/api-permiso";
-import { ListarPermisos, PendientesPermisos, RegistrarPermiso } from "./permiso.type";
+import { ListarPermisoMensual, ListarPermisos, PendientesPermisos, RegistrarPermiso } from "./permiso.type";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,6 +18,13 @@ export async function registrarPermisoApi(data: RegistrarPermiso): Promise<{ per
 //!Listar permisos pendientes
 export async function listarPermisosPendientesApi(): Promise<PendientesPermisos[]> {
   return apiPermiso(`${apiUrl}/Permisos/pendientes`, {
+    method: "GET",
+  });
+}
+
+//! Listar permiso mensual
+export async function listarPermisosMensualApi(anio: number, mes: number): Promise<ListarPermisoMensual[]> {
+  return apiPermiso(`${apiUrl}/Permisos/mensual?anio=${anio}&mes=${mes}`, {
     method: "GET",
   });
 }

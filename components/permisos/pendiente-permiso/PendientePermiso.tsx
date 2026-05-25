@@ -32,6 +32,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import { useAprobarPermiso } from "@/features/dashboard/permiso/hooks/useAprobarPermiso";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 
 const chipCondicion = (condicion: Condicion) => {
   const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
@@ -86,6 +87,16 @@ export default function ListarPermisosPendientes() {
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
         <Button component={Link} href="/dashboard/permisos/registrar" variant="contained" startIcon={<GroupAddIcon />}>
           Gestionar Permisos
+        </Button>
+        <Button
+          component={Link}
+          href="/dashboard/permisos/mensual"
+          variant="contained"
+          sx={{ ml: 1 }}
+          color="success"
+          startIcon={<AssessmentIcon />}
+        >
+          Ver todos
         </Button>
       </Box>
       <TableContainer component={Paper} variant="outlined" sx={{ width: "100%" }}>

@@ -6,6 +6,7 @@ import { registrarPermisoApi as registrarPermisoService } from "./permiso.servic
 import { listarPermisosPendientesApi as listarPermisosPendientesService } from "./permiso.service";
 import { aprobarPermisoApi as aprobarPermisoService } from "./permiso.service";
 import { rechazarPermisoApi as rechazarPermisoService } from "./permiso.service";
+import { listarPermisosMensualApi as listarPermisosMensualService } from "./permiso.service";
 
 //! Registrar persmiso
 export async function registrarPermiso(payload: RegistrarPermiso): Promise<{ permisoId: number }> {
@@ -31,6 +32,20 @@ export async function listarPermisosPendientes() {
     throw new Error("No tienes privilegios para listar permisos pendientes");
   }
   return listarPermisosPendientesService();
+}
+
+//! Listar permisos mensual
+export async function listarPermisosMensual(anio: number, mes: number) {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  if (!hasPermission(user.rol, permissions.listarPermisosMensual)) {
+    throw new Error("No tienes privilegios para listar permisos mensuales");
+  }
+  return listarPermisosMensualService(anio, mes);
 }
 
 //! Aprobar permiso
