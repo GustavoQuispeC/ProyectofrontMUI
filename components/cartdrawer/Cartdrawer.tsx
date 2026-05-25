@@ -176,7 +176,7 @@ export default function DrawerComponent() {
     message += `_Pedido generado automáticamente_...\n`;
     message += `_Gracias por confiar en Grupo Famet S.A.C._`;
 
-    const phone = "51999999999";
+    const phone = "51904193374";
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   };
@@ -226,23 +226,6 @@ export default function DrawerComponent() {
           isOpen ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
       >
-        {/* Header */}
-        {/* <div className="flex items-center justify-between border-b border-black/5 dark:border-white/10 px-5 py-4">
-          <div>
-            <p className="font-extrabold text-blue-900 dark:text-white">Tu carrito</p>
-            <p className="text-xs text-slate-500 dark:text-white/60">
-              {badgeQty} {badgeQty === 1 ? "producto" : "productos"}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar carrito"
-            className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-          >
-            <X className="h-5 w-5 text-slate-600 dark:text-white/70" />
-          </button>
-        </div> */}
         <div className="flex items-center justify-between px-5 py-4.5 border-b border-black/5 dark:border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl border border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center justify-center">
@@ -286,77 +269,6 @@ export default function DrawerComponent() {
           ) : (
             <ul className="space-y-3">
               {items.map((it) => (
-                // <li
-                //   key={it.id}
-                //   className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-white/5 p-4"
-                // >
-                //   <div className="flex gap-4">
-                //     {/* Imagen */}
-                //     <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5">
-                //       <img
-                //         src={it.imagen}
-                //         alt={it.nombre}
-                //         className="h-full w-full object-contain p-2"
-                //         loading="lazy"
-                //       />
-                //     </div>
-
-                //     {/* Info */}
-                //     <div className="min-w-0 flex-1">
-                //       <p className="truncate font-semibold text-slate-900 dark:text-white">{it.nombre}</p>
-                //       <p className="text-sm text-slate-500 dark:text-white/60">S/ {it.precio.toFixed(2)}</p>
-
-                //       <div className="mt-3 flex flex-wrap items-center gap-3">
-                //         {/* Cantidad */}
-                //         <div className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/15 bg-slate-50 dark:bg-white/5 px-2 py-1">
-                //           <button
-                //             type="button"
-                //             onClick={() => dec(it.id)}
-                //             aria-label="Disminuir"
-                //             className="grid h-8 w-8 place-items-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                //           >
-                //             <Remove className="h-4 w-4" />
-                //           </button>
-
-                //           <input
-                //             type="number"
-                //             min={0}
-                //             value={it.cantidad}
-                //             onChange={(e) => onManualQty(it.id, e.target.value)}
-                //             className="w-14 bg-transparent text-center font-bold text-slate-900 outline-none dark:text-white"
-                //           />
-
-                //           <button
-                //             type="button"
-                //             onClick={() => inc(it.id)}
-                //             aria-label="Aumentar"
-                //             className="grid h-8 w-8 place-items-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                //           >
-                //             <Add className="h-4 w-4" />
-                //           </button>
-                //         </div>
-
-                //         {/* Eliminar */}
-                //         <button
-                //           type="button"
-                //           onClick={() => setQty(it.id, 0)}
-                //           className="inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 transition-colors"
-                //         >
-                //           <DeleteOutlined className="h-4 w-4" />
-                //           Eliminar
-                //         </button>
-                //       </div>
-                //     </div>
-
-                //     {/* Total ítem */}
-                //     <div className="text-right">
-                //       <p className="text-xs text-slate-500 dark:text-white/60">Total</p>
-                //       <p className="font-extrabold text-slate-900 dark:text-white">
-                //         S/ {(it.precio * it.cantidad).toFixed(2)}
-                //       </p>
-                //     </div>
-                //   </div>
-                // </li>
                 <li
                   key={it.id}
                   className="rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-white/5 p-3.5 flex gap-3 hover:border-black/10 dark:hover:border-white/20 transition-colors"
