@@ -5,9 +5,10 @@ import ProductPlaceholder from "./ProductPlaceholder";
 
 interface Props {
   product: Product;
+  onAdd?: (product: Product) => void;
 }
 
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({ product, onAdd }: Props) {
   return (
     <article className="rounded-2xl overflow-hidden border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:shadow-lg transition-all h-full flex flex-col">
 
@@ -47,7 +48,10 @@ export default function ProductCard({ product }: Props) {
             )}
           </div>
 
-          <button className="mt-4 w-full py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:opacity-90 transition">
+          <button
+            onClick={() => onAdd?.(product)}
+            className="mt-4 w-full py-2 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:opacity-90 transition"
+          >
             Agregar
           </button>
         </div>

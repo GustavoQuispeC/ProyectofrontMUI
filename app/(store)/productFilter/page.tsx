@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProductFilterSidebar } from "@/components/ProductFilterSidebar";
-import { ProductGrid, PRODUCTS, ProductToolbar } from "@/components/product";
+import { Product, ProductGrid, PRODUCTS, ProductToolbar } from "@/components/product";
 import Pagination from "@/components/ui/Pagination";
 import type { ProductFilters } from "@/components/ProductFilterSidebar/filter.types";
 import { MAX_PRICE } from "@/components/ProductFilterSidebar/constants";
+import AddToCartModal from "@/components/cartdrawer/AddToCartModal";
+import { upsertCartItem } from "@/components/cartdrawer/cartService";
 
 const DEFAULT_FILTERS: ProductFilters = {
   search: "",
@@ -50,6 +52,8 @@ export default function Page() {
   const [readyToSync, setReadyToSync] = useState(false);
   const [page, setPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isAddModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     if (!searchParams) return;
@@ -84,6 +88,20 @@ export default function Page() {
   useEffect(() => {
     setPage(1);
   }, [filters, sortBy]);
+
+  const handleAddToCart = (product: Product) => {
+    upsertCartItem(
+      {
+        id: product.id,
+        nombre: product.name,
+        precio: product.price,
+        imagen: product.image ?? "",
+      },
+      1,
+    );
+    setSelectedProduct(product);
+    setAddModalOpen(true);
+  };
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = filters.search.trim().toLowerCase();
@@ -144,13 +162,13 @@ export default function Page() {
             <ProductToolbar
               total={filteredProducts.length}
               sortBy={sortBy}
-              onSortChange={setSortBy}
+              onSortChange={(value) => setSortBy(value as SortOption)}
               onOpenFilters={() => setMobileFiltersOpen(true)}
             />
 
             {paginatedProducts.length > 0 ? (
               <>
-                <ProductGrid products={paginatedProducts} />
+                <ProductGrid products={paginatedProducts} onAdd={handleAddToCart} />
                 <Pagination page={page} totalPages={totalPages} onChange={setPage} />
               </>
             ) : (
@@ -162,6 +180,19 @@ export default function Page() {
           </div>
         </main>
       </div>
+
+      {isAddModalOpen && selectedProduct && (
+        <AddToCartModal
+          isOpen={isAddModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          producto={{
+            id: selectedProduct.id,
+            nombre: selectedProduct.name,
+            precio: selectedProduct.price,
+            imagen: selectedProduct.image ?? "",
+          }}
+        />
+      )}
 
       {mobileFiltersOpen && (
         <div className="fixed inset-0 z-50 flex">

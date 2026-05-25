@@ -2,87 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { DRAWER_OPEN_EVENT } from "@/components/cartdrawer/Cartdrawer";
+import { CART_EVENT, getCartSummary } from "@/components/cartdrawer/cartService";
 import { ProductFilters } from "./filter.types";
 import { BRANDS, CATEGORIES, OFFERS, RATINGS, MAX_PRICE } from "./constants";
 import FilterSection from "./FilterSection";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-
-const CART_KEY = "shopping_cart";
-const CART_EVENT = "cart:updated";
-
-interface Producto {
-  id: number;
-  nombre: string;
-  precio: number;
-  descripcion: string;
-  imagen: string;
-  badge?: string;
-}
-
-function writeCart(cart: Record<string, CartItem>) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  window.dispatchEvent(new Event(CART_EVENT));
-}
-
-function upsertCartItem(producto: Producto, cantidad: number) {
-  const cart = readCart();
-  const key = String(producto.id);
-  cart[key] = {
-    id: producto.id,
-    nombre: producto.nombre,
-    precio: producto.precio,
-    imagen: producto.imagen,
-    cantidad,
-  };
-  writeCart(cart);
-}
-
-function removeCartItem(productId: number) {
-  const cart = readCart();
-  const key = String(productId);
-  if (cart[key]) {
-    delete cart[key];
-    writeCart(cart);
-  }
-}
-
-type CartItem = {
-  id: number;
-  nombre: string;
-  precio: number;
-  imagen: string;
-  cantidad: number;
-};
-
-function safeParseJSON<T>(value: string | null, fallback: T): T {
-  try {
-    return value ? (JSON.parse(value) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function readCart(): Record<string, CartItem> {
-  if (typeof window === "undefined") return {};
-  return safeParseJSON<Record<string, CartItem>>(localStorage.getItem(CART_KEY), {});
-}
-
-function getCartSummary() {
-  const cart = readCart();
-  const totalItems = Object.values(cart).reduce((sum, item) => sum + (item.cantidad || 0), 0);
-  const totalAmount = Object.values(cart).reduce((sum, item) => sum + (item.precio || 0) * item.cantidad, 0);
-  return { totalItems, totalAmount };
-}
-
-function getCartItemQuantity(productId: number): number | null {
-  const cart = readCart();
-  return cart[String(productId)]?.cantidad ?? null;
-}
 
 function toggleItem<T>(items: T[], value: T) {
   if (items.includes(value)) {
@@ -101,8 +24,6 @@ interface Props {
 export default function ProductFilterSidebar({ filters, onFiltersChange, onClear, className }: Props) {
   const [cartCount, setCartCount] = useState(0);
   const [cartTotal, setCartTotal] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
-  const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null);
 
   useEffect(() => {
     const refresh = () => {
@@ -292,136 +213,7 @@ export default function ProductFilterSidebar({ filters, onFiltersChange, onClear
         </div>
       </div>
 
-      {/* MODAL (Tailwind Refactor) */}
-      {isOpen && productoSeleccionado && (
-        <AddToCartModal isOpen={isOpen} onClose={() => setIsOpen(false)} producto={productoSeleccionado} />
-      )}
     </aside>
   );
 }
 
-/* ================= MODAL CART ================= */
-
-interface AddToCartModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  producto: Producto;
-}
-
-function AddToCartModal({ isOpen, onClose, producto }: AddToCartModalProps) {
-  const [cantidad, setCantidad] = useState(() => {
-    const storedQty = getCartItemQuantity(producto.id);
-    return storedQty ?? 1;
-  });
-
-  const syncStorage = (qty: number) => {
-    if (qty <= 0) {
-      removeCartItem(producto.id);
-    } else {
-      upsertCartItem(producto, qty);
-    }
-  };
-
-  const incrementar = () => {
-    const next = cantidad + 1;
-    setCantidad(next);
-    syncStorage(next);
-  };
-
-  const disminuir = () => {
-    const next = Math.max(0, cantidad - 1);
-    setCantidad(next);
-    syncStorage(next);
-  };
-
-  const handleChange = (value: string) => {
-    const n = Number(value);
-    if (!Number.isFinite(n)) return;
-    const next = Math.max(0, Math.floor(n));
-    setCantidad(next);
-    syncStorage(next);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
-      <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all">
-        {/* Header */}
-        <div className="flex items-center gap-3 p-6 pb-2">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
-            <CheckCircleIcon />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">¡Producto agregado!</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Se añadió al carrito correctamente</p>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-white">
-            <RemoveIcon className="rotate-45" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-6">
-          <div className="flex items-start gap-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-            <div className="shrink-0 w-24 h-24 bg-white dark:bg-gray-700 rounded-lg p-2 flex items-center justify-center">
-              <img src={producto.imagen} alt={producto.nombre} className="w-full h-full object-contain" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-blue-900 dark:text-white mb-1 line-clamp-2">{producto.nombre}</h4>
-              <p className="text-2xl font-extrabold text-orange-500 mb-3">S/ {producto.precio.toFixed(2)}</p>
-
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Cantidad:</span>
-                <div className="flex items-center border-2 border-gray-200 dark:border-gray-600 rounded-xl overflow-hidden bg-white dark:bg-gray-700">
-                  <button
-                    onClick={disminuir}
-                    className="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <RemoveIcon sx={{ fontSize: 16 }} className="text-gray-700 dark:text-gray-300" />
-                  </button>
-                  <input
-                    type="number"
-                    value={cantidad}
-                    onChange={(e) => handleChange(e.target.value)}
-                    className="w-12 text-center outline-none bg-transparent font-semibold text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <button
-                    onClick={incrementar}
-                    className="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <AddIcon sx={{ fontSize: 16 }} className="text-gray-700 dark:text-gray-300" />
-                  </button>
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Subtotal:</span>
-                <span className="text-xl font-bold text-blue-900 dark:text-white">
-                  S/ {(producto.precio * cantidad).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 pt-0 flex flex-col sm:flex-row justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-6 py-2.5 font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-          >
-            Seguir comprando
-          </button>
-          <button
-            onClick={() => {
-              onClose();
-              window.dispatchEvent(new Event(DRAWER_OPEN_EVENT));
-            }}
-            className="flex items-center justify-center gap-2 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition-all"
-          >
-            Ir al carrito
-            <ArrowForwardIcon sx={{ fontSize: 18 }} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
