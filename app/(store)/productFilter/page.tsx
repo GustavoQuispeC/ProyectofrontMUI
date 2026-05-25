@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProductFilterSidebar } from "@/components/ProductFilterSidebar";
 import { Product, ProductGrid, PRODUCTS, ProductToolbar } from "@/components/product";
@@ -54,6 +54,7 @@ export default function Page() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAddModalOpen, setAddModalOpen] = useState(false);
+  const lastUrlRef = useRef<string>("");
 
   useEffect(() => {
     if (!searchParams) return;
@@ -77,13 +78,19 @@ export default function Page() {
     setReadyToSync(true);
   }, [searchParams]);
 
+  // Sincronizar filtros a URL solo cuando cambien, evitando renders innecesarios
   useEffect(() => {
     if (!readyToSync) return;
 
     const queryString = buildSearchParams(filters, sortBy);
-    const href = `/productFilter${queryString ? `?${queryString}` : ""}`;
-    router.replace(href);
-  }, [filters, sortBy, router, readyToSync]);
+    const newUrl = `/productFilter${queryString ? `?${queryString}` : ""}`;
+    
+    // Solo hacer replace si la URL cambió realmente
+    if (lastUrlRef.current !== newUrl) {
+      lastUrlRef.current = newUrl;
+      router.replace(newUrl);
+    }
+  }, [filters, sortBy, readyToSync, router]);
 
   useEffect(() => {
     setPage(1);
