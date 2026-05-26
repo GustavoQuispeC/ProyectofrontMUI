@@ -9,13 +9,11 @@ export function usePermisosMensuales(canAccess: boolean, anio: number, mes: numb
     refetch,
   } = useQuery({
     queryKey: ["permisosMensuales", anio, mes],
-
     queryFn: () => listarPermisosMensualApi(anio, mes),
-
-    staleTime: 1000 * 60 * 5,
-
+    staleTime: 0,
+    refetchInterval: 1000 * 30, // cada 30 segundos
+    refetchOnWindowFocus: true,
     retry: 1,
-
     enabled: canAccess && anio > 0 && mes > 0,
   });
 

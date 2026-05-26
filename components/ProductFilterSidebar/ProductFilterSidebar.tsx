@@ -1,8 +1,4 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { DRAWER_OPEN_EVENT } from "@/components/cartdrawer/Cartdrawer";
-import { CART_EVENT, getCartSummary } from "@/components/cartdrawer/cartService";
 import { ProductFilters } from "./filter.types";
 import { BRANDS, CATEGORIES, OFFERS, RATINGS, MAX_PRICE } from "./constants";
 import FilterSection from "./FilterSection";
@@ -22,26 +18,6 @@ interface Props {
 }
 
 export default function ProductFilterSidebar({ filters, onFiltersChange, onClear, className }: Props) {
-  const [cartCount, setCartCount] = useState(0);
-  const [cartTotal, setCartTotal] = useState(0);
-
-  useEffect(() => {
-    const refresh = () => {
-      const { totalItems, totalAmount } = getCartSummary();
-      setCartCount(totalItems);
-      setCartTotal(totalAmount);
-    };
-
-    refresh();
-    window.addEventListener(CART_EVENT, refresh);
-    window.addEventListener("storage", refresh);
-
-    return () => {
-      window.removeEventListener(CART_EVENT, refresh);
-      window.removeEventListener("storage", refresh);
-    };
-  }, []);
-
   const baseClass = "w-72 xl:w-80 shrink-0 border-r border-slate-200 dark:border-neutral-800 min-h-screen sticky top-0";
 
   return (
@@ -181,7 +157,7 @@ export default function ProductFilterSidebar({ filters, onFiltersChange, onClear
           </FilterSection>
         </div>
 
-        <div className="mt-6 rounded-3xl border border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-950 p-4">
+        {/* <div className="mt-6 rounded-3xl border border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-950 p-4">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div>
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Resumen del carrito</p>
@@ -210,10 +186,8 @@ export default function ProductFilterSidebar({ filters, onFiltersChange, onClear
           >
             Ver carrito
           </button>
-        </div>
+        </div> */}
       </div>
-
     </aside>
   );
 }
-

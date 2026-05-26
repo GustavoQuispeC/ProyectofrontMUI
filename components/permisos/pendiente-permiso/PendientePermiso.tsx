@@ -16,7 +16,6 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { Visibility as VisibilityIcon } from "@mui/icons-material";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { useMounted } from "@/shared/hooks/useMounted";
 import { useState } from "react";
@@ -46,7 +45,7 @@ const chipCondicion = (condicion: Condicion) => {
 export default function ListarPermisosPendientes() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarPermisosPendientes) : false;
-  const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin";
+  const conPrivilegio = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin";
   const mounted = useMounted(); //? controla el estado de montaje
   const { permisosPendientes, loading: loadingPermisos } = usePermisosPendientes(canAccess);
   const [page, setPage] = useState(0);
@@ -137,22 +136,24 @@ export default function ListarPermisosPendientes() {
                   <TableRow key={permiso.id} hover>
                     <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
                     <TableCell>
-                      <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
+                      <Typography variant="body2" noWrap sx={{ maxWidth: 250 }}>
                         {permiso.nombreEmpleado}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">{permiso.fecha}</Typography>
+                      <Typography variant="body2" sx={{ maxWidth: 100 }}>
+                        {permiso.fecha}
+                      </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
+                      <Typography variant="body2" sx={{ maxWidth: 100 }}>
                         {permiso.horaInicio} - {permiso.horaFin}
                       </Typography>
                     </TableCell>
-                    {/* ✅ permiso.duracionMin en lugar de permisosPendientes.duracionMin */}
+                    {/*permiso.duracionMin en lugar de permisosPendientes.duracionMin */}
                     <TableCell>{`${Math.floor(permiso.duracionMin / 60)}h ${permiso.duracionMin % 60}m`}</TableCell>
                     <TableCell>
-                      <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
+                      <Typography variant="body2" noWrap sx={{ maxWidth: 220 }}>
                         {permiso.motivo}
                       </Typography>
                     </TableCell>
@@ -167,35 +168,38 @@ export default function ListarPermisosPendientes() {
                       </Tooltip>
                     </TableCell>
                     <TableCell align="center">
-                      <Tooltip title="Ver detalle">
+                      {/* <Tooltip title="Ver detalle">
                         <IconButton size="small" color="info">
                           <VisibilityIcon fontSize="small" />
                         </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Aprobar">
-                        <span>
-                          <IconButton
-                            size="small"
-                            color="success"
-                            onClick={() => aprobarPermiso(permiso.id)}
-                            disabled={aprobando}
-                          >
-                            <CheckIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-
-                      <Tooltip title="Rechazar">
-                        <span>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleOpenDialog(permiso.id, permiso.nombreEmpleado)}
-                          >
-                            <ClearIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
+                      </Tooltip> */}
+                      {conPrivilegio && (
+                        <Tooltip title="Aprobar">
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="success"
+                              onClick={() => aprobarPermiso(permiso.id)}
+                              disabled={aprobando}
+                            >
+                              <CheckIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
+                      {conPrivilegio && (
+                        <Tooltip title="Rechazar">
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleOpenDialog(permiso.id, permiso.nombreEmpleado)}
+                            >
+                              <ClearIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

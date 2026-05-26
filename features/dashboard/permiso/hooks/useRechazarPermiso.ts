@@ -9,6 +9,7 @@ export function useRechazarPermiso() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["permisos"] });
       queryClient.invalidateQueries({ queryKey: ["permisosPendientes"] });
+      queryClient.invalidateQueries({ queryKey: ["permisosMensuales"] });
     },
   });
 

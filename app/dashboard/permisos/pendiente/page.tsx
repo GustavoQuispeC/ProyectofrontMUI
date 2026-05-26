@@ -5,8 +5,8 @@ import Box from "@mui/material/Box";
 
 export default function ListarPermisosPendientesPage() {
   return (
-    <Box sx={{ display: "flex" }}>
-      <ListarPermisosPendientes />
-    </Box>
+    // <Box sx={{ display: "flex" }}>
+    <ListarPermisosPendientes />
+    // </Box>
   );
 }

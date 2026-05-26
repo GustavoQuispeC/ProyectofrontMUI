@@ -15,6 +15,10 @@ import { Controller, useForm } from "react-hook-form";
 import {
   Avatar,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   FormControl,
   InputLabel,
@@ -40,6 +44,10 @@ import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import { AccessTime, CleaningServices, EventNote } from "@mui/icons-material";
 import Search from "@mui/icons-material/Search";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import { useRouter } from "next/navigation";
+import ClearIcon from "@mui/icons-material/Clear";
+import { useRechazarPermiso } from "@/features/dashboard/permiso/hooks/useRechazarPermiso";
 
 const meses = [
   { value: 1, label: "Enero" },
@@ -55,6 +63,8 @@ const meses = [
   { value: 11, label: "Noviembre" },
   { value: 12, label: "Diciembre" },
 ];
+
+//! Muestra el estado del permiso
 const chipCondicion = (condicion: Condicion) => {
   const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
     Pendiente: { color: "warning", label: "Pendiente" },
@@ -63,7 +73,8 @@ const chipCondicion = (condicion: Condicion) => {
   };
   return <Chip size="small" color={config[condicion].color} label={config[condicion].label} />;
 };
-// Iniciales para el avatar
+
+//! Iniciales para el avatar
 const getInitials = (name: string) =>
   name
     .split(" ")
@@ -72,16 +83,31 @@ const getInitials = (name: string) =>
     .join("")
     .toUpperCase();
 
-// Color de avatar por empleadoId
+//! Color de avatar por empleadoId
 const avatarColor = (id: number) => {
-  const colors = ["#5C6BC0", "#26A69A", "#EF5350", "#AB47BC", "#FF7043", "#29B6F6", "#66BB6A"];
+  const colors = [
+    "#5C6BC0",
+    "#26A69A",
+    "#EF5350",
+    "#AB47BC",
+    "#FF7043",
+    "#29B6F6",
+    "#66BB6A",
+    "#8D6E63",
+    "#D4E157",
+    "#546E7A",
+  ];
   return colors[id % colors.length];
 };
+
+//! Props para las filas
 interface RowProps {
   row: ListarPermisoMensual;
+
+  onRechazar: (id: number, nombreEmpleado: string) => void;
 }
 
-// Función para formatear horas a formato "Xh Ym"
+//! Función para formatear horas a formato "Xh Ym"
 const formatHoras = (horas: number): string => {
   const h = Math.floor(horas);
   const m = Math.round((horas - h) * 60);
@@ -90,7 +116,8 @@ const formatHoras = (horas: number): string => {
   return `${h}h ${m}min`;
 };
 
-function Row({ row }: RowProps) {
+//! Fila de la tabla con detalle
+function Row({ row, onRechazar }: RowProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -196,6 +223,7 @@ function Row({ row }: RowProps) {
                     <TableCell>Motivo</TableCell>
                     <TableCell>Lugar</TableCell>
                     <TableCell align="center">Estado</TableCell>
+                    <TableCell align="center">Acciones</TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -239,6 +267,22 @@ function Row({ row }: RowProps) {
                         </Typography>
                       </TableCell>
                       <TableCell align="center">{chipCondicion(permiso.condicion as Condicion)}</TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="Rechazar">
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onRechazar(permiso.id, row.nombreCompleto);
+                              }}
+                            >
+                              <ClearIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -251,18 +295,27 @@ function Row({ row }: RowProps) {
   );
 }
 
+//! Funcion fecha actual
 const fechaActual = new Date();
 
+//! Valores por defecto del formulario
 const defaultValues: PermisoMensualForm = {
   anio: fechaActual.getFullYear(),
   mes: fechaActual.getMonth() + 1,
 };
+
 export default function ListarPermisosMensual() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarPermisosMensual) : false;
   const [filtros, setFiltros] = useState<PermisoMensualForm>(defaultValues);
+  const { rechazarPermiso, loading: rechazando } = useRechazarPermiso();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<{ id: number; nombreEmpleado: string } | null>(null);
+  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const { permisosMensuales, loading: loadingPermisos } = usePermisosMensuales(canAccess, filtros.anio, filtros.mes);
   const mounted = useMounted();
-
+  const router = useRouter();
+  //! Formulario y validación
   const {
     control,
     handleSubmit,
@@ -273,16 +326,37 @@ export default function ListarPermisosMensual() {
     defaultValues,
     mode: "onSubmit",
   });
-
-  const { permisosMensuales, loading: loadingPermisos } = usePermisosMensuales(canAccess, filtros.anio, filtros.mes);
-
+  //! Manejo de envío del formulario
   const onSubmit = (data: PermisoMensualForm) => setFiltros(data);
 
+  //! Limpia los filtros y resultados
   const handleClear = () => {
     reset(defaultValues);
     setFiltros({ anio: 0, mes: 0 });
   };
 
+  //! Abre el diálogo de rechazo
+  const handleOpenDialog = (id: number, nombreEmpleado: string) => {
+    setSelectedRow({ id, nombreEmpleado });
+    setOpenDialog(true);
+  };
+
+  //! Cierra el diálogo de rechazo
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedRow(null);
+    setMotivoRechazo("");
+  };
+
+  //! guarda el rechazo del permiso
+  const handleRechazar = () => {
+    if (!selectedRow) return;
+    if (!motivoRechazo.trim()) return; // ← falta esta validación
+    rechazarPermiso({ id: selectedRow.id, motivoRechazo });
+    handleCloseDialog();
+  };
+
+  //! Memoriza las filas
   const rows = React.useMemo(() => {
     if (filtros.anio === 0 || filtros.mes === 0) return [];
     return permisosMensuales;
@@ -354,6 +428,15 @@ export default function ListarPermisosMensual() {
                   Buscar
                 </Button>
                 <Button
+                  size="small"
+                  variant="contained"
+                  color="warning"
+                  startIcon={<ArrowBack fontSize="small" />}
+                  onClick={() => router.push("/dashboard/permisos/pendiente")}
+                >
+                  Volver
+                </Button>
+                <Button
                   variant="outlined"
                   color="error"
                   startIcon={<CleaningServices />}
@@ -415,11 +498,41 @@ export default function ListarPermisosMensual() {
                 </TableCell>
               </TableRow>
             ) : (
-              rows.map((row) => <Row key={row.empleadoId} row={row} />)
+              rows.map((row) => <Row key={row.empleadoId} row={row} onRechazar={handleOpenDialog} />)
             )}
           </TableBody>
         </Table>
       </TableContainer>
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="xs" fullWidth>
+        <DialogTitle>Rechazar permiso</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            ¿Está seguro que desea rechazar el permiso de <strong>{selectedRow?.nombreEmpleado}</strong>?
+          </Typography>
+          <TextField
+            fullWidth
+            label="Motivo de rechazo"
+            multiline
+            rows={3}
+            value={motivoRechazo}
+            onChange={(e) => setMotivoRechazo(e.target.value)}
+            placeholder="Indique el motivo del rechazo..."
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} disabled={rechazando}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleRechazar}
+            disabled={rechazando || !motivoRechazo.trim()}
+          >
+            {rechazando ? "Rechazando..." : "Rechazar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -27,7 +27,6 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  IconButton,
   Tooltip,
   Avatar,
   FormHelperText,
@@ -37,8 +36,6 @@ import {
   ArrowBack as ArrowBackIcon,
   Refresh as RefreshIcon,
   Save as SaveIcon,
-  Visibility as VisibilityIcon,
-  Edit as EditIcon,
   Person as PersonIcon,
   Work as WorkIcon,
 } from "@mui/icons-material";
@@ -61,6 +58,7 @@ import { registrarPermiso } from "@/features/dashboard/permiso/permiso.logic";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { usePermisos } from "@/features/dashboard/permiso/hooks/usePermiso";
 import { useMounted } from "@/shared/hooks/useMounted";
+import { useRouter } from "next/navigation";
 
 const defaultValues: RegistrarPermisoForm = {
   empleadoId: 0,
@@ -111,8 +109,9 @@ const chipCondicion = (condicion: Condicion) => {
 
 export default function RegistrarPermiso() {
   const user = getAuthUser();
-  const canAccess = user ? hasPermission(user.rol, permissions.registrarUsuarios) : false;
+  const canAccess = user ? hasPermission(user.rol, permissions.registrarPermiso) : false;
   const puedeAprobar = user?.rol === "Gerente" || user?.rol === "Administrador" || user?.rol === "SuperAdmin";
+  const router = useRouter();
 
   const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
   const [saving, setSaving] = useState(false);
@@ -422,7 +421,6 @@ export default function RegistrarPermiso() {
                 <RadioGroup row value={condicion} onChange={(e) => setCondicion(e.target.value as Condicion)}>
                   <FormControlLabel value="Pendiente" control={<Radio color="warning" />} label="Pendiente" />
                   <FormControlLabel value="Aprobado" control={<Radio color="success" />} label="Aprobado" />
-                  <FormControlLabel value="Rechazado" control={<Radio color="error" />} label="Rechazado" />
                 </RadioGroup>
               </FormControl>
             </Grid>
@@ -448,31 +446,32 @@ export default function RegistrarPermiso() {
       <Paper variant="outlined" sx={{ p: 2.5, mb: 2 }}>
         <Grid container sx={{ gap: 2 }}>
           {/* Filtros */}
-          <Grid size={{ xs: 12 }}>
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Año</InputLabel>
-                <Select value={anioFiltro} label="Año" onChange={(e) => setAnioFiltro(e.target.value)}>
-                  {anios.map((a) => (
-                    <MenuItem key={a} value={a}>
-                      {a}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth size="small">
-                <InputLabel>Mes</InputLabel>
-                <Select value={mesFiltro} label="Mes" onChange={(e) => setMesFiltro(e.target.value)}>
-                  {meses.map((m) => (
-                    <MenuItem key={m.value} value={m.value}>
-                      {m.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid>
-
+          {puedeAprobar && (
+            <Grid size={{ xs: 12 }}>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Año</InputLabel>
+                  <Select value={anioFiltro} label="Año" onChange={(e) => setAnioFiltro(e.target.value)}>
+                    {anios.map((a) => (
+                      <MenuItem key={a} value={a}>
+                        {a}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Mes</InputLabel>
+                  <Select value={mesFiltro} label="Mes" onChange={(e) => setMesFiltro(e.target.value)}>
+                    {meses.map((m) => (
+                      <MenuItem key={m.value} value={m.value}>
+                        {m.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Grid>
+          )}
           {/* Botones */}
           <Grid size={{ xs: 12 }}>
             <Box
@@ -489,6 +488,7 @@ export default function RegistrarPermiso() {
                 startIcon={<ArrowBackIcon />}
                 color="inherit"
                 sx={{ flex: { xs: 1, sm: "unset" } }}
+                onClick={() => router.push("/dashboard/permisos/pendiente")}
               >
                 Volver
               </Button>
@@ -517,124 +517,107 @@ export default function RegistrarPermiso() {
       </Paper>
 
       {/* ── Historial ── */}
-      <Divider sx={{ my: 3 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-          HISTORIAL DE PERMISOS
-        </Typography>
-      </Divider>
 
-      {selectedEmployee && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          Mostrando permisos de <strong>{selectedEmployee.nombreCompleto}</strong> —{" "}
-          {meses.find((m) => m.value === mesFiltro)?.label} {anioFiltro}
-        </Alert>
+      {puedeAprobar && selectedEmployee && (
+        <Divider sx={{ my: 3 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+            HISTORIAL DE PERMISOS
+          </Typography>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Mostrando permisos de <strong>{selectedEmployee.nombreCompleto}</strong> —{" "}
+            {meses.find((m) => m.value === mesFiltro)?.label} {anioFiltro}
+          </Alert>
+        </Divider>
       )}
 
-      <TableContainer component={Paper} variant="outlined">
-        <Table size="small">
-          <TableHead>
-            <TableRow sx={{ bgcolor: "grey.50" }}>
-              {["N°", "Empleado", "Fecha", "Horario", "Duración", "Motivo", "Lugar", "Estado", "Acciones"].map(
-                (col) => (
+      {puedeAprobar && (
+        <TableContainer component={Paper} variant="outlined">
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: "grey.50" }}>
+                {["N°", "Empleado", "Fecha", "Horario", "Duración", "Motivo", "Lugar", "Estado"].map((col) => (
                   <TableCell key={col} align={col === "Acciones" ? "center" : "left"}>
                     <Typography variant="caption" sx={{ fontWeight: 700 }}>
                       {col}
                     </Typography>
                   </TableCell>
-                ),
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loadingPermisos ? (
+                <TableRow>
+                  <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Cargando...
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : permisos.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      No se encontraron permisos para el periodo seleccionado.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                permisos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((permiso, idx) => {
+                  return (
+                    <TableRow key={permiso.id} hover>
+                      <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
+                          {permiso.nombreEmpleado}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{permiso.fecha}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {permiso.horaInicio} - {permiso.horaFin}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{`${Math.floor(permiso.duracionMin / 60)}h ${permiso.duracionMin % 60}m`}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
+                          {permiso.motivo}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
+                          {permiso.lugar}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title={permiso.motivoRechazo || ""} arrow>
+                          <span>{chipCondicion(permiso.condicion as Condicion)}</span>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loadingPermisos ? (
-              <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Cargando...
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : permisos.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    No se encontraron permisos para el periodo seleccionado.
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              permisos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((permiso, idx) => {
-                const yaDefinido = permiso.condicion === "Aprobado" || permiso.condicion === "Rechazado";
-                const puedeEditar = !yaDefinido || puedeAprobar;
+            </TableBody>
+          </Table>
 
-                return (
-                  <TableRow key={permiso.id} hover>
-                    <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
-                        {permiso.nombreEmpleado}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{permiso.fecha}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {permiso.horaInicio} - {permiso.horaFin}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{`${Math.floor(permiso.duracionMin / 60)}h ${permiso.duracionMin % 60}m`}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
-                        {permiso.motivo}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" noWrap sx={{ maxWidth: 120 }}>
-                        {permiso.lugar}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip title={permiso.motivoRechazo || ""} arrow>
-                        <span>{chipCondicion(permiso.condicion as Condicion)}</span>
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Tooltip title="Ver detalle">
-                        <IconButton size="small" color="info">
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={!puedeEditar ? "No puede editar un permiso ya procesado" : "Editar"}>
-                        <span>
-                          <IconButton size="small" color="warning" disabled={!puedeEditar}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-
-        <TablePagination
-          component="div"
-          count={permisos.length}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          rowsPerPageOptions={[5, 10, 25]}
-          labelRowsPerPage="Filas por página:"
-          labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
-        />
-      </TableContainer>
+          <TablePagination
+            component="div"
+            count={permisos.length}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[5, 10, 25]}
+            labelRowsPerPage="Filas por página:"
+            labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
+          />
+        </TableContainer>
+      )}
     </Box>
   );
 }
