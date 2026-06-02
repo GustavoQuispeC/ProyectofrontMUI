@@ -56,7 +56,7 @@ export function NavDesktop({
         onToggle={onToggleDropdown}
         trigger={productTrigger}
       >
-        <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+        <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-gray-800">
          Categorias
         </div>
 

@@ -22,7 +22,7 @@ export function NavLink({
   const className = `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 whitespace-nowrap ${
     active
       ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+      : "text-gray-500 hover:bg-gray-100 hover:text-orange-500 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
   }`;
 
   // ─── Si tiene href → navegación ─────────────────────────────

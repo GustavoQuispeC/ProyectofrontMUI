@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import ViewInArOutlinedIcon from "@mui/icons-material/ViewInArOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { NavDesktop } from "./components/NavDesktop";
 import { NavMobile } from "./components/NavMobile";
 import { NavActions } from "./components/NavActions";
 import type { DropdownId } from "./types";
+import Image from "next/image";
 
 export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<DropdownId>(null);
@@ -75,14 +75,16 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center h-14 gap-2">
-            {/* Brand */}
-            <a href="#" className="flex items-center gap-2 shrink-0 group mr-2">
-              <div className="w-8 h-8 bg-blue-600 group-hover:bg-blue-700 rounded-lg flex items-center justify-center text-white transition-colors duration-200">
-                <ViewInArOutlinedIcon fontSize="small" />
-              </div>
-              <span className="text-[15px] font-semibold text-text-blue-900 group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors duration-200">
-                Grupo Famet SAC
-              </span>
+            <a href="/" className="flex items-center gap-2 shrink-0 group mr-2">
+           <Image
+            src="/Logo1Famet.png"
+            alt="Grupo Famet"
+            width={96}
+            height={16}
+            priority
+            className="h-16 pb-3 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+          />
+                            
             </a>
 
             {/* Desktop links */}

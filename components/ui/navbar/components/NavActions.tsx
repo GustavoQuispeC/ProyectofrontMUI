@@ -75,11 +75,11 @@ export function NavActions({
       <div
         className={`hidden md:flex items-center gap-2 px-3 h-8 rounded-lg border transition-all duration-200 ${
           searchFocused
-            ? "border-blue-500 bg-background w-48"
+            ? "border-blue-300 bg-background w-48"
             : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 w-32"
         }`}
       >
-        <SearchIcon fontSize="small" className="text-gray-400 shrink-0" style={{ fontSize: 16 }} />
+        <SearchIcon fontSize="small" className="text-gray-500 shrink-0" style={{ fontSize: 16 }} />
         <input
           type="text"
           placeholder="Buscar..."
@@ -175,7 +175,7 @@ export function NavActions({
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-150"
         >
           <LoginOutlinedIcon style={{ fontSize: 16 }} />
-          Iniciar 
+          Mi cuenta
         </button>
       )}
     </div>
