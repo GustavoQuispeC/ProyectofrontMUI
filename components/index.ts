@@ -10,4 +10,4 @@ export { default as RegistrarEmpleado } from "./empleados/registrar-empleado/Reg
 export { default as RegistrarUsuario } from "./usuario/registrar-usuario/RegistrarUsuario";
 export { default as RegistrarPermisos } from "./permisos/registrar-permiso/RegistrarPermiso";
 export { default as ListarPermisosPendientes } from "./permisos/pendiente-permiso/PendientePermiso";
-
+export { default as ListarVacaciones } from "./vacaciones/listar-vacaciones/ListarVacaciones";
