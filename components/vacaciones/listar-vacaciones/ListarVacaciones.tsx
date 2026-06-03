@@ -12,6 +12,10 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { useVacacionesGenerales } from "@/features/dashboard/vacaciones/hooks/useVacacionesGenerales";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { permissions } from "@/shared/auth/auth.permissions";
 
 function createData(name: string, calories: number, fat: number, carbs: number, protein: number, price: number) {
   return {
@@ -99,7 +103,11 @@ const rows = [
   createData("Cupcake", 305, 3.7, 67, 4.3, 2.5),
   createData("Gingerbread", 356, 16.0, 49, 3.9, 1.5),
 ];
-export default function ListarVacaciones() {
+export default function ListarVacacionesGenerales() {
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.listarVacacionesGenerales) : false;
+  const { vacacionesGenerales, loading: loadingPermisos } = useVacacionesGenerales(canAccess);
+  console.log(vacacionesGenerales);
   return (
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
       <TableContainer component={Paper}>

@@ -23,4 +23,7 @@ export const permissions = {
   aprobarPermiso: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   rechazarPermiso: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   listarPermisosMensual: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
+
+  //Vacaciones
+  listarVacacionesGenerales: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
 };
