@@ -10,23 +10,18 @@ export enum EstadoPeriodoVacacional {
   Completo = "Completo",
 }
 
-export interface Vacacion {
-  vacacionId: number;
-
-  fechaInicio: string;
-  fechaFin: string;
-
-  diasCalendario: number;
-  cantidadDomingos: number;
-
-  observacion: string;
-
-  estado: EstadoVacacion;
-
-  aprobadoPor: string | null;
-
-  fechaSolicitud: string;
-  fechaAprobacion: string | null;
+export interface ListarEmpleadoVacaciones {
+  empleadoId: number;
+  codigoEmpleado: string;
+  nombreCompleto: string;
+  fechaIngreso: string;
+  diasTotalesDisponibles: number;
+  diasTotalesUsados: number;
+  diasTotalesAsignados: number;
+  cantidadPeriodos: number;
+  cantidadVacaciones: number;
+  porcentajeConsumido: number;
+  periodosVacacionales: PeriodoVacacional[];
 }
 
 export interface PeriodoVacacional {
@@ -51,27 +46,15 @@ export interface PeriodoVacacional {
 
   vacaciones: Vacacion[];
 }
-
-export interface ListarEmpleadoVacaciones {
-  empleadoId: number;
-
-  codigoEmpleado: string;
-
-  nombreCompleto: string;
-
-  fechaIngreso: string;
-
-  diasTotalesDisponibles: number;
-  diasTotalesUsados: number;
-  diasTotalesAsignados: number;
-
-  cantidadPeriodos: number;
-
-  cantidadVacaciones: number;
-
-  porcentajeConsumido: number;
-
-  periodosVacacionales: PeriodoVacacional[];
+export interface Vacacion {
+  vacacionId: number;
+  fechaInicio: string;
+  fechaFin: string;
+  diasCalendario: number;
+  cantidadDomingos: number;
+  observacion: string;
+  estado: EstadoVacacion;
+  aprobadoPor: string | null;
+  fechaSolicitud: string;
+  fechaAprobacion: string | null;
 }
-
-export type EmpleadosVacacionesResponse = ListarEmpleadoVacaciones[];
