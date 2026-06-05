@@ -74,14 +74,14 @@ const getInitials = (name: string) =>
     .toUpperCase();
 
 const avatarPalette = [
-  { bg: "#E8EDF5", color: "#2C3E6B" },
-  { bg: "#E5F0EC", color: "#1F4D3A" },
-  { bg: "#F0EBF5", color: "#4A2D6B" },
-  { bg: "#F5EDE8", color: "#6B3020" },
-  { bg: "#EBF0F5", color: "#1E3D5C" },
-  { bg: "#F5F0E8", color: "#5C4A1E" },
-  { bg: "#EDF5ED", color: "#234D23" },
-  { bg: "#F5EBF0", color: "#6B1F45" },
+  { bg: "#2458da", color: "#ffffff" },
+  { bg: "#15a167", color: "#ffffff" },
+  { bg: "#621cb1", color: "#ffffff" },
+  { bg: "#842910", color: "#ffffff" },
+  { bg: "#125393", color: "#ffffff" },
+  { bg: "#7e6014", color: "#ffffff" },
+  { bg: "#136413", color: "#ffffff" },
+  { bg: "#6a0c3b", color: "#ffffff" },
 ];
 
 const avatarStyle = (id: number) => avatarPalette[id % avatarPalette.length];
@@ -93,29 +93,6 @@ const formatDate = (date: string) =>
     month: "2-digit",
     year: "numeric",
   });
-
-// =====================================================
-// ESTILOS COMPARTIDOS
-// =====================================================
-
-const cellBase = {
-  fontSize: 13,
-  py: "7px",
-  px: "12px",
-  whiteSpace: "nowrap" as const,
-};
-
-const headerCellSx = {
-  fontSize: 11,
-  fontWeight: 700,
-  color: "text.secondary",
-  letterSpacing: "0.05em",
-  textTransform: "uppercase" as const,
-  py: "8px",
-  px: "12px",
-  whiteSpace: "nowrap" as const,
-  bgcolor: "#F0F2F5",
-};
 
 //! NIVEL 3 — SOLICITUDES (vacaciones de un período)
 interface VacacionesTableProps {
@@ -129,24 +106,16 @@ function VacacionesTable({ vacaciones }: VacacionesTableProps) {
         <TableHead>
           <TableRow sx={{ bgcolor: "#ECEEF2" }}>
             {/* indent nivel 3 */}
-            <TableCell sx={{ ...headerCellSx, width: 64, bgcolor: "#DCDFE6", borderRight: "1px solid #D0D3DA" }} />
-            <TableCell sx={{ ...headerCellSx, borderRight: "1px solid", borderColor: "divider" }}>ID</TableCell>
-            <TableCell sx={{ ...headerCellSx, borderRight: "1px solid", borderColor: "divider" }}>Solicitud</TableCell>
-            <TableCell sx={{ ...headerCellSx, borderRight: "1px solid", borderColor: "divider" }}>Inicio</TableCell>
-            <TableCell sx={{ ...headerCellSx, borderRight: "1px solid", borderColor: "divider" }}>Fin</TableCell>
-            <TableCell sx={{ ...headerCellSx, textAlign: "center", borderRight: "1px solid", borderColor: "divider" }}>
-              Días
-            </TableCell>
-            <TableCell sx={{ ...headerCellSx, textAlign: "center", borderRight: "1px solid", borderColor: "divider" }}>
-              Domingos
-            </TableCell>
-            <TableCell sx={{ ...headerCellSx, borderRight: "1px solid", borderColor: "divider" }}>
-              Observación
-            </TableCell>
-            <TableCell sx={{ ...headerCellSx, borderRight: "1px solid", borderColor: "divider" }}>
-              Aprobado por
-            </TableCell>
-            <TableCell sx={{ ...headerCellSx }}>Estado</TableCell>
+            <TableCell />
+            <TableCell>ID</TableCell>
+            <TableCell>Solicitud</TableCell>
+            <TableCell>Inicio</TableCell>
+            <TableCell>Fin</TableCell>
+            <TableCell>Días</TableCell>
+            <TableCell>Domingos</TableCell>
+            <TableCell>Observación</TableCell>
+            <TableCell>Aprobado por</TableCell>
+            <TableCell>Estado</TableCell>
           </TableRow>
         </TableHead>
 
@@ -162,44 +131,30 @@ function VacacionesTable({ vacaciones }: VacacionesTableProps) {
             </TableRow>
           ) : (
             vacaciones.map((v: Vacacion) => (
-              <TableRow
-                key={v.vacacionId}
-                sx={{
-                  "&:hover": { bgcolor: "#F3F4F6" },
-                  "& td": { borderBottom: "1px solid #ECEEF1" },
-                }}
-              >
+              <TableRow key={v.vacacionId}>
                 {/* indent */}
-                <TableCell sx={{ width: 64, p: 0, bgcolor: "#DCDFE6", borderRight: "1px solid #D0D3DA" }} />
-                <TableCell sx={{ ...cellBase, color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>
-                  #{v.vacacionId}
-                </TableCell>
-                <TableCell sx={{ ...cellBase, color: "text.secondary" }}>{formatDate(v.fechaSolicitud)}</TableCell>
-                <TableCell sx={{ ...cellBase }}>{formatDate(v.fechaInicio)}</TableCell>
-                <TableCell sx={{ ...cellBase }}>{formatDate(v.fechaFin)}</TableCell>
-                <TableCell
-                  sx={{ ...cellBase, textAlign: "center", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}
-                >
-                  {v.diasCalendario}
-                </TableCell>
-                <TableCell sx={{ ...cellBase, textAlign: "center", fontVariantNumeric: "tabular-nums" }}>
-                  {v.cantidadDomingos}
-                </TableCell>
-                <TableCell sx={{ ...cellBase, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
+                <TableCell />
+                <TableCell>#{v.vacacionId}</TableCell>
+                <TableCell>{formatDate(v.fechaSolicitud)}</TableCell>
+                <TableCell>{formatDate(v.fechaInicio)}</TableCell>
+                <TableCell>{formatDate(v.fechaFin)}</TableCell>
+                <TableCell sx={{ textAlign: "center", fontWeight: 600 }}>{v.diasCalendario}</TableCell>
+                <TableCell sx={{ textAlign: "center" }}>{v.cantidadDomingos}</TableCell>
+                <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
                   {v.observacion || (
                     <Typography component="span" sx={{ color: "text.disabled", fontSize: 12 }}>
                       —
                     </Typography>
                   )}
                 </TableCell>
-                <TableCell sx={{ ...cellBase, color: "text.secondary" }}>
+                <TableCell>
                   {v.aprobadoPor || (
                     <Typography component="span" sx={{ color: "text.disabled", fontSize: 12 }}>
                       —
                     </Typography>
                   )}
                 </TableCell>
-                <TableCell sx={{ ...cellBase }}>
+                <TableCell>
                   <Chip
                     size="small"
                     color={EstadoVacacionColor[v.estado]}
@@ -239,47 +194,35 @@ function PeriodoRow({ periodo, isLast }: PeriodoRowProps) {
         }}
       >
         {/* indent nivel 2 */}
-        <TableCell sx={{ width: 32, p: 0 }} />
+        <TableCell />
 
         {/* toggle */}
-        <TableCell sx={{ width: 40, px: 0.5, textAlign: "center", borderRight: "1px solid #E4E7EC" }}>
-          <IconButton size="small" disableRipple sx={{ p: 0.25, color: "text.secondary" }}>
+        <TableCell sx={{ px: 0.5, textAlign: "center" }}>
+          <IconButton size="small" disableRipple>
             {open ? <KeyboardArrowUp sx={{ fontSize: 16 }} /> : <KeyboardArrowDown sx={{ fontSize: 16 }} />}
           </IconButton>
         </TableCell>
 
         <TableCell
           sx={{
-            ...cellBase,
-            color: "text.secondary",
             fontWeight: 600,
-            fontVariantNumeric: "tabular-nums",
-            borderRight: "1px solid #E4E7EC",
           }}
         >
           #{periodo.vacacionSaldoId}
         </TableCell>
-        <TableCell sx={{ ...cellBase, borderRight: "1px solid #E4E7EC" }}>
-          {formatDate(periodo.periodoInicio)}
-        </TableCell>
-        <TableCell sx={{ ...cellBase, borderRight: "1px solid #E4E7EC" }}>{formatDate(periodo.periodoFin)}</TableCell>
-        <TableCell sx={{ ...cellBase, color: "text.secondary", borderRight: "1px solid #E4E7EC" }}>
-          {formatDate(periodo.fechaGeneracion)}
-        </TableCell>
+        <TableCell>{formatDate(periodo.periodoInicio)}</TableCell>
+        <TableCell>{formatDate(periodo.periodoFin)}</TableCell>
+        <TableCell>{formatDate(periodo.fechaGeneracion)}</TableCell>
         <TableCell
           sx={{
-            ...cellBase,
             textAlign: "center",
-            fontVariantNumeric: "tabular-nums",
           }}
         >
           {periodo.diasAsignados}
         </TableCell>
         <TableCell
           sx={{
-            ...cellBase,
             textAlign: "center",
-            fontVariantNumeric: "tabular-nums",
             color: periodo.diasUsados > 0 ? "#92400E" : "text.secondary",
           }}
         >
@@ -287,28 +230,21 @@ function PeriodoRow({ periodo, isLast }: PeriodoRowProps) {
         </TableCell>
         <TableCell
           sx={{
-            ...cellBase,
             textAlign: "center",
-            fontVariantNumeric: "tabular-nums",
             color: "#065F46",
             fontWeight: 600,
-            borderRight: "1px solid #E4E7EC",
           }}
         >
           {periodo.diasDisponibles}
         </TableCell>
         <TableCell
           sx={{
-            ...cellBase,
             textAlign: "center",
-            fontVariantNumeric: "tabular-nums",
-            color: "text.secondary",
-            borderRight: "1px solid #E4E7EC",
           }}
         >
           {periodo.cantidadDomingosAcumulados}
         </TableCell>
-        <TableCell sx={{ ...cellBase, textAlign: "center", borderRight: "1px solid #E4E7EC" }}>
+        <TableCell sx={{ textAlign: "center" }}>
           <Chip
             size="small"
             color={
@@ -320,16 +256,13 @@ function PeriodoRow({ periodo, isLast }: PeriodoRowProps) {
         </TableCell>
         <TableCell
           sx={{
-            ...cellBase,
             textAlign: "center",
-            fontVariantNumeric: "tabular-nums",
             color: "text.secondary",
-            borderRight: "1px solid #E4E7EC",
           }}
         >
           {periodo.cantidadVacaciones}
         </TableCell>
-        <TableCell sx={{ ...cellBase }}>
+        <TableCell>
           <Chip
             size="small"
             color={EstadoPeriodoColor[periodo.estado]}
@@ -366,8 +299,6 @@ function Row({ row }: RowProps) {
   const [open, setOpen] = React.useState(false);
   const palette = avatarStyle(row.empleadoId);
 
-  const consumoColor = row.porcentajeConsumido >= 80 ? "error" : row.porcentajeConsumido >= 50 ? "warning" : "success";
-
   return (
     <>
       {/* FILA EMPLEADO */}
@@ -385,7 +316,7 @@ function Row({ row }: RowProps) {
           },
         }}
       >
-        <TableCell width={44} sx={{ pl: 1.5 }}>
+        <TableCell sx={{ pl: 1.5 }}>
           <IconButton size="small" disableRipple sx={{ color: "text.secondary" }}>
             {open ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
           </IconButton>
@@ -459,14 +390,6 @@ function Row({ row }: RowProps) {
             {row.diasTotalesDisponibles}
           </Typography>
         </TableCell>
-        <TableCell align="center">
-          <Chip
-            size="small"
-            color={consumoColor}
-            label={`${row.porcentajeConsumido}%`}
-            sx={{ fontSize: 12, height: 22, fontWeight: 700, minWidth: 52 }}
-          />
-        </TableCell>
       </TableRow>
 
       {/* DETALLE EXPANDIDO — períodos */}
@@ -479,34 +402,20 @@ function Row({ row }: RowProps) {
                 <TableHead>
                   <TableRow>
                     {/* indent */}
-                    <TableCell
-                      sx={{ ...headerCellSx, width: 32, bgcolor: "#E0E3E8", borderRight: "1px solid #D0D3DA", p: 0 }}
-                    />
+                    <TableCell />
                     {/* toggle */}
-                    <TableCell sx={{ ...headerCellSx, width: 40, borderRight: "1px solid #D8DBE2" }} />
-                    <TableCell sx={{ ...headerCellSx, borderRight: "1px solid #D8DBE2" }}>ID</TableCell>
-                    <TableCell sx={{ ...headerCellSx, borderRight: "1px solid #D8DBE2" }}>Per. Inicio</TableCell>
-                    <TableCell sx={{ ...headerCellSx, borderRight: "1px solid #D8DBE2" }}>Per. Fin</TableCell>
-                    <TableCell sx={{ ...headerCellSx, borderRight: "1px solid #D8DBE2" }}>Generación</TableCell>
-                    <TableCell sx={{ ...headerCellSx, textAlign: "center", borderRight: "1px solid #D8DBE2" }}>
-                      Asignados
-                    </TableCell>
-                    <TableCell sx={{ ...headerCellSx, textAlign: "center", borderRight: "1px solid #D8DBE2" }}>
-                      Usados
-                    </TableCell>
-                    <TableCell sx={{ ...headerCellSx, textAlign: "center", borderRight: "1px solid #D8DBE2" }}>
-                      Disponibles
-                    </TableCell>
-                    <TableCell sx={{ ...headerCellSx, textAlign: "center", borderRight: "1px solid #D8DBE2" }}>
-                      Domingos
-                    </TableCell>
-                    <TableCell sx={{ ...headerCellSx, textAlign: "center", borderRight: "1px solid #D8DBE2" }}>
-                      Consumo
-                    </TableCell>
-                    <TableCell sx={{ ...headerCellSx, textAlign: "center", borderRight: "1px solid #D8DBE2" }}>
-                      Solicitudes
-                    </TableCell>
-                    <TableCell sx={{ ...headerCellSx }}>Estado</TableCell>
+                    <TableCell />
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>ID</TableCell>
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Per. Inicio</TableCell>
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Per. Fin</TableCell>
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Generación</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Asignados</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Usados</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Disponibles</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Total Domingos</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Consumo</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Solicitudes</TableCell>
+                    <TableCell>Estado</TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -570,22 +479,7 @@ export default function ListarVacacionesGenerales() {
       >
         <Table sx={{ tableLayout: "auto", minWidth: 900 }}>
           <TableHead>
-            <TableRow
-              sx={{
-                bgcolor: "#F0F2F5",
-                borderBottom: "2px solid",
-                borderColor: "divider",
-                "& th": {
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "text.secondary",
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  py: 1.25,
-                  whiteSpace: "nowrap",
-                },
-              }}
-            >
+            <TableRow>
               <TableCell width={44} />
               <TableCell>Código</TableCell>
               <TableCell>Empleado</TableCell>
@@ -595,7 +489,6 @@ export default function ListarVacacionesGenerales() {
               <TableCell align="center">Asignados</TableCell>
               <TableCell align="center">Usados</TableCell>
               <TableCell align="center">Disponibles</TableCell>
-              <TableCell align="center">Consumo</TableCell>
             </TableRow>
           </TableHead>
 
