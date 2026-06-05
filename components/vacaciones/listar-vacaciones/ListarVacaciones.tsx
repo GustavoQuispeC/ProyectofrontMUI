@@ -35,11 +35,10 @@ import {
 } from "@/features/dashboard/vacaciones/vacaciones.type";
 
 import { ChipProps } from "@mui/material";
+import { useMounted } from "@/shared/hooks/useMounted";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
-// =====================================================
-// LABELS
-// =====================================================
-
+//! LABELS
 export const EstadoVacacionLabel: Record<EstadoVacacion, string> = {
   [EstadoVacacion.Pendiente]: "Pendiente",
   [EstadoVacacion.Aprobado]: "Aprobado",
@@ -52,10 +51,7 @@ export const EstadoPeriodoLabel: Record<EstadoPeriodoVacacional, string> = {
   [EstadoPeriodoVacacional.Completo]: "Completo",
 };
 
-// =====================================================
-// COLORS
-// =====================================================
-
+//! COLORS
 export const EstadoVacacionColor: Record<EstadoVacacion, ChipProps["color"]> = {
   [EstadoVacacion.Pendiente]: "warning",
   [EstadoVacacion.Aprobado]: "success",
@@ -68,10 +64,7 @@ export const EstadoPeriodoColor: Record<EstadoPeriodoVacacional, ChipProps["colo
   [EstadoPeriodoVacacional.Completo]: "success",
 };
 
-// =====================================================
-// HELPERS
-// =====================================================
-
+//! Avatar helper
 const getInitials = (name: string) =>
   name
     .split(" ")
@@ -93,6 +86,7 @@ const avatarPalette = [
 
 const avatarStyle = (id: number) => avatarPalette[id % avatarPalette.length];
 
+//! Formateo de fechas
 const formatDate = (date: string) =>
   new Date(date).toLocaleDateString("es-PE", {
     day: "2-digit",
@@ -123,10 +117,7 @@ const headerCellSx = {
   bgcolor: "#F0F2F5",
 };
 
-// =====================================================
-// NIVEL 3 — SOLICITUDES (vacaciones de un período)
-// =====================================================
-
+//! NIVEL 3 — SOLICITUDES (vacaciones de un período)
 interface VacacionesTableProps {
   vacaciones: Vacacion[];
 }
@@ -225,10 +216,7 @@ function VacacionesTable({ vacaciones }: VacacionesTableProps) {
   );
 }
 
-// =====================================================
-// NIVEL 2 — FILA DE PERÍODO (expandible → solicitudes)
-// =====================================================
-
+//! NIVEL 2 — FILA DE PERÍODO (expandible → solicitudes)
 interface PeriodoRowProps {
   periodo: PeriodoVacacional;
   isLast: boolean;
@@ -251,7 +239,7 @@ function PeriodoRow({ periodo, isLast }: PeriodoRowProps) {
         }}
       >
         {/* indent nivel 2 */}
-        <TableCell sx={{ width: 32, p: 0, bgcolor: "#E0E3E8", borderRight: "1px solid #D0D3DA" }} />
+        <TableCell sx={{ width: 32, p: 0 }} />
 
         {/* toggle */}
         <TableCell sx={{ width: 40, px: 0.5, textAlign: "center", borderRight: "1px solid #E4E7EC" }}>
@@ -283,7 +271,6 @@ function PeriodoRow({ periodo, isLast }: PeriodoRowProps) {
             ...cellBase,
             textAlign: "center",
             fontVariantNumeric: "tabular-nums",
-            borderRight: "1px solid #E4E7EC",
           }}
         >
           {periodo.diasAsignados}
@@ -294,7 +281,6 @@ function PeriodoRow({ periodo, isLast }: PeriodoRowProps) {
             textAlign: "center",
             fontVariantNumeric: "tabular-nums",
             color: periodo.diasUsados > 0 ? "#92400E" : "text.secondary",
-            borderRight: "1px solid #E4E7EC",
           }}
         >
           {periodo.diasUsados}
@@ -371,10 +357,7 @@ function PeriodoRow({ periodo, isLast }: PeriodoRowProps) {
   );
 }
 
-// =====================================================
-// NIVEL 1 — FILA DE EMPLEADO (expandible → períodos)
-// =====================================================
-
+//! NIVEL 1 — FILA DE EMPLEADO (expandible → períodos)
 interface RowProps {
   row: ListarEmpleadoVacaciones;
 }
@@ -425,9 +408,9 @@ function Row({ row }: RowProps) {
         <TableCell>
           <Stack
             sx={{
-              direction: "row",
+              flexDirection: "row",
               alignItems: "center",
-              spacing: 1.25,
+              gap: 1.25,
             }}
           >
             <Avatar
@@ -556,14 +539,22 @@ function Row({ row }: RowProps) {
   );
 }
 
-// =====================================================
-// COMPONENTE PRINCIPAL
-// =====================================================
-
+//! COMPONENTE PRINCIPAL
 export default function ListarVacacionesGenerales() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarVacacionesGenerales) : false;
   const { vacacionesGenerales, loading } = useVacacionesGenerales(canAccess);
+  const mounted = useMounted();
+
+  if (!mounted) return null;
+  if (!canAccess) return <AccessDenied />;
+
+  //! ── Efecto de montaje ──
+  if (!mounted) return null;
+  //* Validando permiso de acceso
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
 
   return (
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>

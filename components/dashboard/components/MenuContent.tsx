@@ -85,6 +85,7 @@ import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import GroupIcon from "@mui/icons-material/Group";
 import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 
 import Link from "next/link";
 
@@ -128,15 +129,20 @@ const mainListItems: MenuItemType[] = [
   },
 
   {
-    text: "Clients",
+    text: "Clientes",
     icon: <AccountBoxIcon />,
     href: "/dashboard/clientes",
   },
 
   {
     text: "Permisos",
-    icon: <AssignmentRoundedIcon />,
+    icon: <PendingActionsIcon />,
     href: "/dashboard/permisos/pendiente",
+  },
+  {
+    text: "Vacaciones",
+    icon: <AssignmentRoundedIcon />,
+    href: "/dashboard/vacaciones/listar",
   },
 ];
 
