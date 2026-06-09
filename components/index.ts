@@ -11,3 +11,4 @@ export { default as RegistrarUsuario } from "./usuario/registrar-usuario/Registr
 export { default as RegistrarPermisos } from "./permisos/registrar-permiso/RegistrarPermiso";
 export { default as ListarPermisosPendientes } from "./permisos/pendiente-permiso/PendientePermiso";
 export { default as ListarVacaciones } from "./vacaciones/listar-vacaciones/ListarVacaciones";
+export { default as RegistrarVacaciones } from "./vacaciones/registrar-vacaciones/registrarVacaciones";
