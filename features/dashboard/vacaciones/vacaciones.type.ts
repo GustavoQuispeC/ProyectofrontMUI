@@ -1,8 +1,8 @@
 export enum EstadoVacacion {
-  Pendiente = 1,
-  Aprobado = 2,
-  Rechazado = 3,
-  Cancelado = 4,
+  Pendiente = "Pendiente",
+  Aprobado = "Aprobado",
+  Rechazado = "Rechazado",
+  Cancelado = "Cancelado",
 }
 
 export enum EstadoPeriodoVacacional {
@@ -26,24 +26,16 @@ export interface ListarEmpleadoVacaciones {
 
 export interface PeriodoVacacional {
   vacacionSaldoId: number;
-
   periodoInicio: string;
   periodoFin: string;
-
   fechaGeneracion: string;
-
   diasAsignados: number;
   diasUsados: number;
   diasDisponibles: number;
-
   cantidadDomingosAcumulados: number;
-
   porcentajeConsumido: number;
-
   cantidadVacaciones: number;
-
   estado: EstadoPeriodoVacacional;
-
   vacaciones: Vacacion[];
 }
 export interface Vacacion {
