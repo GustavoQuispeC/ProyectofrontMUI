@@ -13,6 +13,8 @@ import {
   Autocomplete,
   Divider,
   CircularProgress,
+  FormControl,
+  FormHelperText,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -22,64 +24,38 @@ import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import "dayjs/locale/es";
+import { useState } from "react";
+import { EmpleadoAutocomplete } from "@/features/dashboard/empleado/empleado.types";
+import { Controller, useForm } from "react-hook-form";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { RegistrarVacacionesForm, RegistrarVacacionesSchema } from "@/features/dashboard/vacaciones/vacaciones.schema";
+import { toastPromise } from "@/shared/utils/toast";
+import { registrarVacaciones } from "@/features/dashboard/vacaciones/vacaciones.logic";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
+import { permissions } from "@/shared/auth/auth.permissions";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { useQueryClient } from "@tanstack/react-query";
+import { useMounted } from "@/shared/hooks/useMounted";
+import { useEmpleadosAutocomplete } from "@/features/dashboard/empleado/hooks/useEmpleadosAutocomplete";
+import { useRouter } from "next/navigation";
 
-// ─── Tipos locales ────────────────────────────────────────────────────────────
-
-interface EmpleadoOption {
-  empleadoId: number;
-  nombreCompleto: string;
-  codigoEmpleado: string;
-}
-
-interface RegistrarVacacionForm {
-  empleado: EmpleadoOption | null;
-  fechaInicio: Dayjs | null;
-  fechaFin: Dayjs | null;
-  observacion: string;
-}
-
-const EMPTY_FORM: RegistrarVacacionForm = {
-  empleado: null,
-  fechaInicio: null,
-  fechaFin: null,
+const defaultValues: RegistrarVacacionesForm = {
+  empleadoId: 0,
+  fechaInicio: "",
+  fechaFin: "",
   observacion: "",
 };
 
-// ─── Datos de ejemplo (reemplazar con hook real) ──────────────────────────────
-
-const EMPLEADOS_MOCK: EmpleadoOption[] = [
-  { empleadoId: 21, nombreCompleto: "Ana García López", codigoEmpleado: "EMP-021" },
-  { empleadoId: 22, nombreCompleto: "Carlos Mendoza Ríos", codigoEmpleado: "EMP-022" },
-  { empleadoId: 23, nombreCompleto: "Lucía Torres Vega", codigoEmpleado: "EMP-023" },
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-
-const avatarPalette = [
-  { bg: "#2458da", color: "#ffffff" },
-  { bg: "#15a167", color: "#ffffff" },
-  { bg: "#621cb1", color: "#ffffff" },
-  { bg: "#842910", color: "#ffffff" },
-  { bg: "#125393", color: "#ffffff" },
-];
-const avatarStyle = (id: number) => avatarPalette[id % avatarPalette.length];
-
-function calcDias(inicio: Dayjs | null, fin: Dayjs | null): number | null {
-  if (!inicio || !fin || fin.isBefore(inicio)) return null;
-  return fin.diff(inicio, "day") + 1;
+function calcularDias(inicio: string, fin: string): number | null {
+  if (!inicio || !fin) return null;
+  const d1 = dayjs(inicio);
+  const d2 = dayjs(fin);
+  if (!d1.isValid() || !d2.isValid() || d2.isBefore(d1)) return null;
+  return d2.diff(d1, "day") + 1;
 }
-
-// ─── SECCIÓN WRAPPER ──────────────────────────────────────────────────────────
 
 interface SectionProps {
   title: string;
@@ -118,57 +94,64 @@ function Section({ title, children }: SectionProps) {
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 
 export default function RegistrarVacacion() {
-  const [form, setForm] = React.useState<RegistrarVacacionForm>(EMPTY_FORM);
-  const [loading, setLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState<Partial<Record<keyof RegistrarVacacionForm, string>>>({});
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.registrarVacaciones) : false;
+  const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
+  const [saving, setSaving] = useState(false);
+  const mounted = useMounted();
+  const queryClient = useQueryClient();
+  const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
+  const router = useRouter();
 
-  const diasCalculados = calcDias(form.fechaInicio, form.fechaFin);
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<RegistrarVacacionesForm>({
+    resolver: standardSchemaResolver(RegistrarVacacionesSchema),
+    defaultValues,
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    shouldFocusError: true,
+  });
 
-  // ── Validación ───────────────────────────────────────────────────────────────
-  function validate(): boolean {
-    const next: typeof errors = {};
-    if (!form.empleado) next.empleado = "Selecciona un empleado";
-    if (!form.fechaInicio) next.fechaInicio = "Fecha de inicio requerida";
-    if (!form.fechaFin) next.fechaFin = "Fecha de fin requerida";
-    if (form.fechaInicio && form.fechaFin && form.fechaFin.isBefore(form.fechaInicio)) {
-      next.fechaFin = "La fecha fin no puede ser anterior al inicio";
-    }
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  }
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const fechaInicio = watch("fechaInicio");
+  const fechaFin = watch("fechaFin");
 
-  // ── Guardar ──────────────────────────────────────────────────────────────────
-  async function handleGuardar() {
-    if (!validate()) return;
-    setLoading(true);
+  const diasCalculados = calcularDias(fechaInicio, fechaFin);
+
+  const resetForm = () => {
+    reset(defaultValues);
+    setSelectedEmployee(null);
+  };
+
+  const onSubmit = async (data: RegistrarVacacionesForm) => {
     try {
-      const payload = {
-        empleadoId: form.empleado!.empleadoId,
-        fechaInicio: form.fechaInicio!.format("YYYY-MM-DDTHH:mm:ss"),
-        fechaFin: form.fechaFin!.format("YYYY-MM-DDTHH:mm:ss"),
-        observacion: form.observacion.trim(),
-      };
-      // TODO: reemplazar con llamada real al API
-      console.log("Payload →", payload);
-      await new Promise((r) => setTimeout(r, 1000)); // simulación
+      setSaving(true);
+      await toastPromise(
+        registrarVacaciones({
+          empleadoId: data.empleadoId,
+          fechaInicio: data.fechaInicio,
+          fechaFin: data.fechaFin,
+          observacion: data.observacion,
+        }),
+        {
+          loading: "Registrando...",
+          success: "Se ha registrado correctamente",
+          error: "Error al registrar",
+        },
+      );
+      resetForm();
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
-  }
+  };
 
-  // ── Limpiar ──────────────────────────────────────────────────────────────────
-  function handleLimpiar() {
-    setForm(EMPTY_FORM);
-    setErrors({});
-  }
-
-  // ── Volver ───────────────────────────────────────────────────────────────────
-  function handleVolver() {
-    // TODO: reemplazar con router.back() o navegación real
-    console.log("Volver");
-  }
-
-  const palette = form.empleado ? avatarStyle(form.empleado.empleadoId) : null;
+  if (!mounted) return null;
+  if (!canAccess) return <AccessDenied />;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
@@ -213,47 +196,38 @@ export default function RegistrarVacacion() {
         <Stack sx={{ gap: 2 }}>
           {/* ── SECCIÓN 1: EMPLEADO ── */}
           <Section title="Información del empleado">
-            <Autocomplete
-              options={EMPLEADOS_MOCK}
-              getOptionLabel={(o) => `${o.codigoEmpleado} — ${o.nombreCompleto}`}
-              value={form.empleado}
-              onChange={(_, value) => {
-                setForm((prev) => ({ ...prev, empleado: value }));
-                setErrors((prev) => ({ ...prev, empleado: undefined }));
-              }}
-              renderOption={(props, option) => {
-                const p = avatarStyle(option.empleadoId);
-                return (
-                  <Box component="li" {...props} key={option.empleadoId}>
-                    <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.25 }}>
-                      <Avatar
-                        sx={{ width: 26, height: 26, fontSize: 10, fontWeight: 700, bgcolor: p.bg, color: p.color }}
-                      >
-                        {getInitials(option.nombreCompleto)}
-                      </Avatar>
-                      <Box>
-                        <Typography sx={{ fontSize: 13, fontWeight: 500 }}>{option.nombreCompleto}</Typography>
-                        <Typography sx={{ fontSize: 11, color: "text.secondary" }}>{option.codigoEmpleado}</Typography>
-                      </Box>
-                    </Stack>
-                  </Box>
-                );
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Buscar empleado"
-                  error={!!errors.empleado}
-                  helperText={errors.empleado}
-                  size="small"
+            <Controller
+              name="empleadoId"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  options={empleados ?? []}
+                  loading={loadingEmployees}
+                  value={empleados.find((x) => x.id === field.value) ?? null}
+                  onChange={(_, value) => {
+                    field.onChange(value?.id ?? 0);
+                    setSelectedEmployee(value);
+                  }}
+                  getOptionLabel={(option) => option.nombreCompleto ?? ""}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  noOptionsText="Sin resultados"
+                  loadingText="Cargando..."
+                  sx={{ mb: 2 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Buscar empleado"
+                      placeholder="Seleccione un empleado"
+                      error={!!errors.empleadoId}
+                      helperText={errors.empleadoId?.message}
+                      fullWidth
+                    />
+                  )}
                 />
               )}
-              noOptionsText="Sin coincidencias"
-              fullWidth
             />
 
-            {/* Preview del empleado seleccionado */}
-            {form.empleado && palette && (
+            {selectedEmployee && (
               <Box
                 sx={{
                   mt: 1.5,
@@ -267,21 +241,9 @@ export default function RegistrarVacacion() {
                   gap: 1.25,
                 }}
               >
-                <Avatar
-                  sx={{
-                    width: 30,
-                    height: 30,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    bgcolor: palette.bg,
-                    color: palette.color,
-                  }}
-                >
-                  {getInitials(form.empleado.nombreCompleto)}
-                </Avatar>
                 <Box>
-                  <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{form.empleado.nombreCompleto}</Typography>
-                  <Typography sx={{ fontSize: 11, color: "text.secondary" }}>{form.empleado.codigoEmpleado}</Typography>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{selectedEmployee.nombreCompleto}</Typography>
+                  <Typography sx={{ fontSize: 11, color: "text.secondary" }}>{selectedEmployee.id}</Typography>
                 </Box>
               </Box>
             )}
@@ -296,43 +258,42 @@ export default function RegistrarVacacion() {
                 alignItems: { xs: "stretch", sm: "flex-start" },
               }}
             >
-              {/* Fecha inicio */}
-              <DatePicker
-                label="Fecha de inicio"
-                value={form.fechaInicio}
-                onChange={(value) => {
-                  setForm((prev) => ({ ...prev, fechaInicio: value }));
-                  setErrors((prev) => ({ ...prev, fechaInicio: undefined }));
-                }}
-                format="DD/MM/YYYY"
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                    error: !!errors.fechaInicio,
-                    helperText: errors.fechaInicio,
-                  },
-                }}
+              {/* Fecha inicio — ✅ FIX 4: sin LocalizationProvider extra */}
+              <Controller
+                name="fechaInicio"
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth error={!!errors.fechaInicio}>
+                    <DatePicker
+                      label="Fecha de inicio"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
+                      slotProps={{
+                        textField: { size: "medium", fullWidth: true, error: !!errors.fechaInicio },
+                      }}
+                    />
+                    <FormHelperText>{errors.fechaInicio?.message}</FormHelperText>
+                  </FormControl>
+                )}
               />
 
-              {/* Fecha fin */}
-              <DatePicker
-                label="Fecha de fin"
-                value={form.fechaFin}
-                minDate={form.fechaInicio ?? undefined}
-                onChange={(value) => {
-                  setForm((prev) => ({ ...prev, fechaFin: value }));
-                  setErrors((prev) => ({ ...prev, fechaFin: undefined }));
-                }}
-                format="DD/MM/YYYY"
-                slotProps={{
-                  textField: {
-                    size: "small",
-                    fullWidth: true,
-                    error: !!errors.fechaFin,
-                    helperText: errors.fechaFin,
-                  },
-                }}
+              {/* Fecha fin — ✅ FIX 4: sin LocalizationProvider extra */}
+              <Controller
+                name="fechaFin"
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth error={!!errors.fechaFin}>
+                    <DatePicker
+                      label="Fecha de fin"
+                      value={field.value ? dayjs(field.value) : null}
+                      onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
+                      slotProps={{
+                        textField: { size: "medium", fullWidth: true, error: !!errors.fechaFin },
+                      }}
+                    />
+                    <FormHelperText>{errors.fechaFin?.message}</FormHelperText>
+                  </FormControl>
+                )}
               />
 
               {/* Días calculados */}
@@ -363,7 +324,11 @@ export default function RegistrarVacacion() {
                   {diasCalculados !== null ? diasCalculados : "—"}
                 </Typography>
                 <Typography
-                  sx={{ fontSize: 10, color: diasCalculados !== null ? "#4ADE80" : "text.disabled", mt: 0.25 }}
+                  sx={{
+                    fontSize: 10,
+                    color: diasCalculados !== null ? "#4ADE80" : "text.disabled",
+                    mt: 0.25,
+                  }}
                 >
                   {diasCalculados === 1 ? "día" : "días"}
                 </Typography>
@@ -373,17 +338,21 @@ export default function RegistrarVacacion() {
 
           {/* ── SECCIÓN 3: DETALLES ── */}
           <Section title="Detalles de la vacación">
-            <TextField
-              label="Observación"
-              placeholder="Motivo o detalle adicional de las vacaciones..."
-              value={form.observacion}
-              onChange={(e) => setForm((prev) => ({ ...prev, observacion: e.target.value }))}
-              multiline
-              minRows={3}
-              maxRows={6}
-              fullWidth
-              size="small"
-              helperText={`${form.observacion.length}/500`}
+            <Controller
+              name="observacion"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Observación"
+                  multiline
+                  rows={3}
+                  fullWidth
+                  placeholder="Describa la observación..."
+                  error={!!errors.observacion}
+                  helperText={errors.observacion?.message}
+                />
+              )}
             />
           </Section>
 
@@ -401,9 +370,14 @@ export default function RegistrarVacacion() {
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
-              onClick={handleVolver}
-              disabled={loading}
-              sx={{ borderColor: "divider", color: "text.secondary", "&:hover": { borderColor: "text.secondary" } }}
+              onClick={() => router.push("/dashboard/vacaciones/listar")}
+              // ✅ FIX 2: usar "saving" consistentemente
+              disabled={saving}
+              sx={{
+                borderColor: "divider",
+                color: "text.secondary",
+                "&:hover": { borderColor: "text.secondary" },
+              }}
             >
               Volver
             </Button>
@@ -411,8 +385,8 @@ export default function RegistrarVacacion() {
             <Button
               variant="outlined"
               startIcon={<RefreshIcon />}
-              onClick={handleLimpiar}
-              disabled={loading}
+              onClick={resetForm}
+              disabled={saving}
               color="warning"
             >
               Limpiar
@@ -420,13 +394,13 @@ export default function RegistrarVacacion() {
 
             <Button
               variant="contained"
-              startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
-              onClick={handleGuardar}
-              disabled={loading}
+              startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+              onClick={handleSubmit(onSubmit)}
+              disabled={saving}
               disableElevation
               sx={{ minWidth: 120 }}
             >
-              {loading ? "Guardando..." : "Guardar"}
+              {saving ? "Guardando..." : "Guardar"}
             </Button>
           </Stack>
         </Stack>
