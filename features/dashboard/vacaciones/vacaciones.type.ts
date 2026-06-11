@@ -50,3 +50,10 @@ export interface Vacacion {
   fechaSolicitud: string;
   fechaAprobacion: string | null;
 }
+
+export interface RegistrarVacaciones {
+  empleadoId: number;
+  fechaInicio: string;
+  fechaFin: string;
+  observacion: string;
+}
