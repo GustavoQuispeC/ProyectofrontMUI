@@ -39,7 +39,7 @@ import { useMounted } from "@/shared/hooks/useMounted";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import Link from "next/link";
 import { useVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/useVacacionesPendientes";
-import VacacionesDialog from "./VacacionesDialog";
+import VacacionesDialog from "../VacacionesDialog";
 import { indigo } from "@mui/material/colors";
 const accent = indigo["500"];
 
