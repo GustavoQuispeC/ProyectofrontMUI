@@ -305,7 +305,7 @@ function Row({ row, onVerDetalle }: RowProps) {
                           fontStyle: "italic",
                         }}
                       >
-                        Sin períodos registrados
+                        Sin períodos registrados.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -375,16 +375,25 @@ export default function ListarVacacionesPendientes() {
         </Button>
         <Button
           component={Link}
-          href="/dashboard/permisos/mensual"
+          href="/dashboard/vacaciones/aprobadas"
           variant="contained"
           sx={{ ml: 1 }}
           color="success"
           startIcon={<AssessmentIcon />}
         >
-          Ver todos
+          Ver Aprobadas
         </Button>
-      </Box>
 
+      </Box>
+        <Typography
+            variant="h5"
+            color={"primary"}
+            sx={{
+                mb: 2,
+
+            }}>
+            Vacaciones pendientes
+        </Typography>
       <TableContainer
         component={Paper}
         elevation={0}

@@ -10,7 +10,7 @@ export async function registrarVacacionesApi(data: RegistrarVacaciones): Promise
 
 //! Listar vacaciones aprobadas
 export async function listarVacacionesApi(): Promise<ListarEmpleadoVacaciones[]> {
-  return apiVacaciones(`${apiUrl}/Vacacion/reporte-general`, {
+  return apiVacaciones(`${apiUrl}/Vacacion/aprobadas`, {
     method: "GET",
   });
 }

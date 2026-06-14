@@ -142,7 +142,7 @@ const mainListItems: MenuItemType[] = [
   {
     text: "Vacaciones",
     icon: <AssignmentRoundedIcon />,
-    href: "/dashboard/vacaciones/listar",
+    href: "/dashboard/vacaciones/pendientes",
   },
 ];
 

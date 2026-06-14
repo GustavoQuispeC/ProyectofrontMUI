@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { listarVacacionesGenerales } from "../vacaciones.logic";
 
-export function useVacacionesGenerales(canAccess: boolean) {
+export function useVacacionesAprobadas(canAccess: boolean) {
   const {
     data: vacacionesGenerales = [],
     isLoading: loading,

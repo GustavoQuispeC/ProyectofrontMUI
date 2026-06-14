@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import {
     Avatar,
@@ -27,7 +26,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 
-import { useVacacionesGenerales } from "@/features/dashboard/vacaciones/hooks/useVacacionesGenerales";
+import { useVacacionesAprobadas } from "@/features/dashboard/vacaciones/hooks/useVacacionesAprobadas";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { permissions } from "@/shared/auth/auth.permissions";
@@ -343,10 +342,10 @@ function Row({ row, onVerDetalle }: RowProps) {
 // ─────────────────────────────────────────────────────────────────────────────
 //! COMPONENTE PRINCIPAL
 // ─────────────────────────────────────────────────────────────────────────────
-export default function ListarVacacionesGenerales() {
+export default function ListarVacacionesAprobadas() {
     const user = getAuthUser();
     const canAccess = user ? hasPermission(user.rol, permissions.listarVacacionesGenerales) : false;
-    const { vacacionesGenerales, loading } = useVacacionesGenerales(canAccess);
+    const { vacacionesGenerales, loading } = useVacacionesAprobadas(canAccess);
     const mounted = useMounted();
 
     const theme = useTheme();
@@ -387,17 +386,19 @@ export default function ListarVacacionesGenerales() {
                 >
                     Gestionar Vacaciones
                 </Button>
-                <Button
-                    component={Link}
-                    href="/dashboard/permisos/mensual"
-                    variant="contained"
-                    sx={{ ml: 1 }}
-                    color="success"
-                    startIcon={<AssessmentIcon />}
-                >
-                    Ver todos
-                </Button>
+
             </Box>
+            <Typography
+                variant="h5"
+                color={"primary"}
+                sx={{
+                    mb: 2,
+
+                }}>
+                Vacaciones aprobadas
+            </Typography>
+
+
 
             <TableContainer
                 component={Paper}

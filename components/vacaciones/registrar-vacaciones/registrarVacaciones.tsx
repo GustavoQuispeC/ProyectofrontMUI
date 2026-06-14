@@ -370,7 +370,7 @@ export default function RegistrarVacacion() {
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
-              onClick={() => router.push("/dashboard/vacaciones/listar")}
+              onClick={() => router.push("/dashboard/vacaciones/pendientes")}
               // ✅ FIX 2: usar "saving" consistentemente
               disabled={saving}
               sx={{
