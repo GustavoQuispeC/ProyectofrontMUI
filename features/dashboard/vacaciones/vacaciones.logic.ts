@@ -5,6 +5,8 @@ import { listarVacacionesApi as listarVacacionesGeneralesService } from "./vacac
 import { listarVacacionesPendientesApi as listarVacacionesPendientesService } from "./vacaciones.service";
 import { RegistrarVacaciones } from "./vacaciones.type";
 import { registrarVacacionesApi as registrarVacacionesService } from "./vacaciones.service";
+import { aprobarVacacionesApi as aprobarVacacionesService } from "./vacaciones.service";
+
 
 //! Registrar vacaciones
 export async function registrarVacaciones(payload: RegistrarVacaciones): Promise<{ vacacionId: number }> {
@@ -44,4 +46,17 @@ export async function listarVacacionesPendientes() {
     throw new Error("No tienes privilegios para listar vacaciones pendientes");
   }
   return listarVacacionesPendientesService();
+}
+
+//! Aprobar vacaciones
+export async function aprobarVacaciones(id:number){
+  const user = getAuthUser();
+  if(!user){
+    throw new Error("No autenticado");
+  }
+  if(!hasPermission(user.rol, permissions.aprobarVacaciones)){
+    throw new Error("No tienes privilegios para aprobar vacaciones");
+  }else{
+    return aprobarVacacionesService(id);
+  }
 }

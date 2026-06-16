@@ -21,3 +21,11 @@ export async function listarVacacionesPendientesApi(): Promise<ListarEmpleadoVac
     method: "GET",
   });
 }
+
+//! Aprobar permisos
+export async function aprobarVacacionesApi(id: number): Promise<void> {
+  return apiVacaciones(`${apiUrl}/Vacacion/${id}/aprobar`, {
+    method: "PUT",
+  });
+
+}

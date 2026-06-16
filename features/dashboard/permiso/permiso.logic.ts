@@ -8,7 +8,7 @@ import { aprobarPermisoApi as aprobarPermisoService } from "./permiso.service";
 import { rechazarPermisoApi as rechazarPermisoService } from "./permiso.service";
 import { listarPermisosMensualApi as listarPermisosMensualService } from "./permiso.service";
 
-//! Registrar persmiso
+//! Registrar permiso
 export async function registrarPermiso(payload: RegistrarPermiso): Promise<{ permisoId: number }> {
   const user = getAuthUser();
   if (!user) {

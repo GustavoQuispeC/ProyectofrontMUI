@@ -28,4 +28,5 @@ export const permissions = {
   listarVacacionesGenerales: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   listarVacacionesPendientes: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   registrarVacaciones: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
+  aprobarVacaciones: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
 };

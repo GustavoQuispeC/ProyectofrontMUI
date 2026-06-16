@@ -8,8 +8,8 @@ export function useAprobarPermiso() {
     mutationFn: (id: number) => aprobarPermisoApi(id),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["permisos"],
+          queryClient.invalidateQueries({
+            queryKey: ["permisos"],
       });
 
       queryClient.invalidateQueries({

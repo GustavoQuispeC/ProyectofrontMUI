@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import {
   Avatar,
@@ -30,58 +29,23 @@ import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { permissions } from "@/shared/auth/auth.permissions";
 import {
-  EstadoPeriodoVacacional,
   ListarEmpleadoVacaciones,
   PeriodoVacacional,
 } from "@/features/dashboard/vacaciones/vacaciones.type";
-import { ChipProps, useTheme, useMediaQuery } from "@mui/material";
+import { useTheme, useMediaQuery } from "@mui/material";
 import { useMounted } from "@/shared/hooks/useMounted";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import Link from "next/link";
 import { useVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/useVacacionesPendientes";
 import VacacionesDialog from "../VacacionesDialog";
 import { indigo } from "@mui/material/colors";
+import {
+    avatarStyle,
+    EstadoPeriodoColor,
+    formatDate,
+    getInitials
+} from "@/features/dashboard/vacaciones/vacaciones.constants";
 const accent = indigo["500"];
-
-//! ─── Labels / Colors ─────────────────────────────────────────────────────────
-export const EstadoPeriodoLabel: Record<EstadoPeriodoVacacional, string> = {
-  [EstadoPeriodoVacacional.Incompleto]: "Incompleto",
-  [EstadoPeriodoVacacional.Completo]: "Completo",
-};
-
-export const EstadoPeriodoColor: Record<EstadoPeriodoVacacional, ChipProps["color"]> = {
-  [EstadoPeriodoVacacional.Incompleto]: "warning",
-  [EstadoPeriodoVacacional.Completo]: "success",
-};
-
-// ─── Avatar helpers ───────────────────────────────────────────────────────────
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-
-const avatarPalette = [
-  { bg: "#2458da", color: "#ffffff" },
-  { bg: "#15a167", color: "#ffffff" },
-  { bg: "#621cb1", color: "#ffffff" },
-  { bg: "#842910", color: "#ffffff" },
-  { bg: "#125393", color: "#ffffff" },
-  { bg: "#7e6014", color: "#ffffff" },
-  { bg: "#136413", color: "#ffffff" },
-  { bg: "#6a0c3b", color: "#ffffff" },
-];
-
-const avatarStyle = (id: number) => avatarPalette[id % avatarPalette.length];
-
-const formatDate = (date: string) =>
-  new Date(date).toLocaleDateString("es-PE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 
 //! NIVEL 2 — FILA DE PERÍODO
 interface PeriodoRowProps {
@@ -149,7 +113,7 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
         <Chip
           size="small"
           color={EstadoPeriodoColor[periodo.estado]}
-          label={EstadoPeriodoLabel[periodo.estado]}
+          label={periodo.estado}
           sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
         />
       </TableCell>
@@ -459,7 +423,7 @@ export default function ListarVacacionesPendientes() {
       </TableContainer>
 
       {/* Dialog de solicitudes del período */}
-      <VacacionesDialog open={dialogOpen} onClose={handleCloseDialog} periodo={selectedPeriodo} />
+      <VacacionesDialog open={dialogOpen} onClose={handleCloseDialog} periodo={selectedPeriodo} modo={"pendientes"} />
     </Box>
   );
 }
