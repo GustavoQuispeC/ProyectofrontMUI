@@ -141,7 +141,7 @@ export default function RegistrarVacacion() {
         {
           loading: "Registrando...",
           success: "Se ha registrado correctamente",
-          error: "Error al registrar",
+          error: (error) => error.message,
         },
       );
       resetForm();
@@ -190,7 +190,6 @@ export default function RegistrarVacacion() {
               </Typography>
             </Box>
           </Stack>
-          <Chip label="SuperAdmin" variant="outlined" size="small" sx={{ fontSize: 12 }} />
         </Paper>
 
         <Stack sx={{ gap: 2 }}>

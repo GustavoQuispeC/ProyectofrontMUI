@@ -28,10 +28,7 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { permissions } from "@/shared/auth/auth.permissions";
-import {
-  ListarEmpleadoVacaciones,
-  PeriodoVacacional,
-} from "@/features/dashboard/vacaciones/vacaciones.type";
+import { ListarEmpleadoVacaciones, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useMounted } from "@/shared/hooks/useMounted";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
@@ -40,11 +37,12 @@ import { useVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/u
 import VacacionesDialog from "../VacacionesDialog";
 import { indigo } from "@mui/material/colors";
 import {
-    avatarStyle,
-    EstadoPeriodoColor,
-    formatDate,
-    getInitials
+  avatarStyle,
+  EstadoPeriodoColor,
+  formatDate,
+  getInitials,
 } from "@/features/dashboard/vacaciones/vacaciones.constants";
+
 const accent = indigo["500"];
 
 //! NIVEL 2 — FILA DE PERÍODO
@@ -345,19 +343,18 @@ export default function ListarVacacionesPendientes() {
           color="success"
           startIcon={<AssessmentIcon />}
         >
-          Ver Aprobadas
+          Aprobados
         </Button>
-
       </Box>
-        <Typography
-            variant="h5"
-            color={"primary"}
-            sx={{
-                mb: 2,
-
-            }}>
-            Vacaciones pendientes
-        </Typography>
+      <Typography
+        variant="h5"
+        color={"primary"}
+        sx={{
+          mb: 2,
+        }}
+      >
+        Vacaciones pendientes
+      </Typography>
       <TableContainer
         component={Paper}
         elevation={0}

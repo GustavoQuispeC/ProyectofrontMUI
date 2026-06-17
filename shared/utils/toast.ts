@@ -8,13 +8,12 @@ export const toastInfo = (msg: string) => toast(msg, { icon: "ℹ️" });
 
 export const toastWarning = (msg: string) => toast(msg, { icon: "⚠️" });
 
-// Para acciones async como guardar, eliminar, etc.
 export const toastPromise = <T>(
   promise: Promise<T>,
   messages: {
     loading: string;
     success: string;
-    error: string;
+    error: string | ((error: Error) => string);
   },
 ) =>
   toast.promise(promise, {
