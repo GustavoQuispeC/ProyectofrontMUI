@@ -7,7 +7,6 @@ import {
   Typography,
   Stack,
   Avatar,
-  Chip,
   TextField,
   Button,
   Autocomplete,
@@ -37,7 +36,6 @@ import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
-import { useQueryClient } from "@tanstack/react-query";
 import { useMounted } from "@/shared/hooks/useMounted";
 import { useEmpleadosAutocomplete } from "@/features/dashboard/empleado/hooks/useEmpleadosAutocomplete";
 import { useRouter } from "next/navigation";
@@ -99,7 +97,6 @@ export default function RegistrarVacacion() {
   const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
   const [saving, setSaving] = useState(false);
   const mounted = useMounted();
-  const queryClient = useQueryClient();
   const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
   const router = useRouter();
 
