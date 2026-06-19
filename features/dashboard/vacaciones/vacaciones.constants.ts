@@ -11,12 +11,6 @@ export const EstadoPeriodoLabel: Record<EstadoPeriodoVacacional, string> = {
   [EstadoPeriodoVacacional.Incompleto]: "Incompleto",
   [EstadoPeriodoVacacional.Completo]: "Completo",
 };
-// export const EstadoVacacionColor: Record<EstadoVacacion, ChipProps["color"]> = {
-//   [EstadoVacacion.Pendiente]: "warning",
-//   [EstadoVacacion.Aprobado]: "success",
-//   [EstadoVacacion.Rechazado]: "error",
-//   [EstadoVacacion.Cancelado]: "default",
-// };
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 const avatarPalette = [

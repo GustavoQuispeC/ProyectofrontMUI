@@ -37,10 +37,10 @@ import { useVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/u
 import VacacionesDialog from "../VacacionesDialog";
 import { indigo } from "@mui/material/colors";
 import {
-  avatarStyle,
-  EstadoPeriodoColor,
-  formatDate,
-  getInitials,
+    avatarStyle,
+    EstadoPeriodoColor, EstadoPeriodoLabel,
+    formatDate,
+    getInitials,
 } from "@/features/dashboard/vacaciones/vacaciones.constants";
 
 const accent = indigo["500"];
@@ -108,10 +108,10 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
       </TableCell>
       <TableCell sx={{ textAlign: "center", color: "text.secondary" }}>{periodo.cantidadVacaciones}</TableCell>
       <TableCell>
-        <Chip
+       <Chip
           size="small"
           color={EstadoPeriodoColor[periodo.estado]}
-          label={periodo.estado}
+          label={EstadoPeriodoLabel[periodo.estado]}
           sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
         />
       </TableCell>

@@ -29,7 +29,10 @@ import { useVacacionesAprobadas } from "@/features/dashboard/vacaciones/hooks/us
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { permissions } from "@/shared/auth/auth.permissions";
-import { ListarEmpleadoVacaciones, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
+import {
+    ListarEmpleadoVacaciones,
+    PeriodoVacacional
+} from "@/features/dashboard/vacaciones/vacaciones.type";
 
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useMounted } from "@/shared/hooks/useMounted";
@@ -115,6 +118,7 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
           label={EstadoPeriodoLabel[periodo.estado]}
           sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
         />
+
       </TableCell>
       <TableCell align="center">
         <Tooltip title="Ver solicitudes">
@@ -293,9 +297,8 @@ function Row({ row, onVerDetalle }: RowProps) {
 export default function ListarVacacionesAprobadas() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarVacacionesGenerales) : false;
-  const { vacacionesGenerales, loading } = useVacacionesAprobadas(canAccess);
+  const { vacacionesAprobadas, loading } = useVacacionesAprobadas(canAccess);
   const mounted = useMounted();
-
   const theme = useTheme();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("xl"));
   const rowsPerPage = isLargeScreen ? 20 : 10;
@@ -319,9 +322,9 @@ export default function ListarVacacionesAprobadas() {
   if (!mounted) return null;
   if (!canAccess) return <AccessDenied />;
 
-  const maxPage = Math.max(0, Math.ceil(vacacionesGenerales.length / rowsPerPage) - 1);
+  const maxPage = Math.max(0, Math.ceil(vacacionesAprobadas.length / rowsPerPage) - 1);
   const safePage = Math.min(page, maxPage);
-  const paginatedRows = vacacionesGenerales.slice(safePage * rowsPerPage, safePage * rowsPerPage + rowsPerPage);
+  const paginatedRows = vacacionesAprobadas.slice(safePage * rowsPerPage, safePage * rowsPerPage + rowsPerPage);
 
   return (
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
@@ -374,7 +377,7 @@ export default function ListarVacacionesAprobadas() {
               <Row key={row.empleadoId} row={row} onVerDetalle={handleVerDetalle} />
             ))}
 
-            {!loading && vacacionesGenerales.length === 0 && (
+            {!loading && vacacionesAprobadas.length === 0 && (
               <TableRow>
                 <TableCell colSpan={9}>
                   <Box sx={{ py: 6, textAlign: "center" }}>
@@ -386,10 +389,10 @@ export default function ListarVacacionesAprobadas() {
           </TableBody>
         </Table>
 
-        {vacacionesGenerales.length > 0 && (
+        {vacacionesAprobadas.length > 0 && (
           <TablePagination
             component="div"
-            count={vacacionesGenerales.length}
+            count={vacacionesAprobadas.length}
             page={safePage}
             onPageChange={(_, newPage) => setPage(newPage)}
             rowsPerPage={rowsPerPage}

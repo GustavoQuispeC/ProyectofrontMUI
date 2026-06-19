@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { aprobarVacaciones } from "@/features/dashboard/vacaciones/vacaciones.logic";
+import { cancelarVacaciones } from "@/features/dashboard/vacaciones/vacaciones.logic";
 
-export function useAprobarVacaciones(onSuccess?: () => void) {
+export function useCancelarVacaciones(onSuccess?: () => void) {
     const queryClient = useQueryClient();
     const mutation = useMutation({
-        mutationFn: aprobarVacaciones,
+        mutationFn: cancelarVacaciones,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["vacacionesAprobadas"] });
             queryClient.invalidateQueries({ queryKey: ["vacacionesPendientes"] });
@@ -13,7 +13,7 @@ export function useAprobarVacaciones(onSuccess?: () => void) {
     });
 
     return {
-        aprobarVacacion: mutation.mutate,
+        cancelarVacacion: mutation.mutate,
         loading: mutation.isPending,
         error: mutation.error?.message ?? null,
     };

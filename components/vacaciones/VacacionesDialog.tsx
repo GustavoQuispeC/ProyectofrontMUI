@@ -30,6 +30,9 @@ import { EstadoVacacion, PeriodoVacacional } from "@/features/dashboard/vacacion
 import { ChipProps } from "@mui/material";
 import { formatDate } from "@/features/dashboard/vacaciones/vacaciones.constants";
 import { useAprobarVacaciones } from "@/features/dashboard/vacaciones/hooks/useAprobarVacaciones";
+import {useCancelarVacaciones} from "@/features/dashboard/vacaciones/hooks/useCancelarVacaciones";
+import {useState} from "react";
+import ConfirmarCancelarVacacionDialog from "@/components/vacaciones/ConfirmarCancelarVacacionDialog";
 // ─── Labels / Colors / Icons ─────────────────────────────────────────────────
 const EstadoVacacionLabel: Record<EstadoVacacion, string> = {
   [EstadoVacacion.Pendiente]: "Pendiente",
@@ -63,7 +66,9 @@ interface VacacionesDialogProps {
 }
 
 export default function VacacionesDialog({ open, onClose, periodo, modo }: VacacionesDialogProps) {
-  const { aprobarVacaciones, loading: aprobando } = useAprobarVacaciones(onClose);
+  const { cancelarVacacion, loading: cancelando } = useCancelarVacaciones(onClose);
+const [vacacionIdAcancelar, setVacacionIdAcancelar] =useState<number | null>(null);
+  const { aprobarVacacion, loading: aprobando } = useAprobarVacaciones(onClose);
   if (!periodo) return null;
 
   return (
@@ -191,14 +196,14 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
                         sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
                       />
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    <TableCell >
                       {modo === "pendientes" && (
                         <>
                           <Tooltip title="Aprobar">
                             <IconButton
                               size="small"
                               color="success"
-                              onClick={() => aprobarVacaciones(v.vacacionId)}
+                              onClick={() => aprobarVacacion(v.vacacionId)}
                               disabled={aprobando}
                             >
                               <CheckIcon fontSize="small" />
@@ -216,15 +221,20 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
                           </Tooltip>
                         </>
                       )}
-                      {modo === "aprobadas" && (
-                        <>
-                          <Tooltip title="Cancelar">
-                            <IconButton size="small" color="error">
-                              <BlockIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </>
-                      )}
+                     {modo === "aprobadas" && (
+    <>
+        <Tooltip title="Cancelar">
+            <IconButton
+                size="small"
+                color="error"
+                onClick={() => setVacacionIdAcancelar(v.vacacionId)}
+                disabled={cancelando}
+            >
+                <BlockIcon fontSize="small" />
+            </IconButton>
+        </Tooltip>
+    </>
+)}
                     </TableCell>
                   </TableRow>
                 ))
@@ -239,6 +249,17 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
           Cerrar
         </Button>
       </DialogActions>
+      <ConfirmarCancelarVacacionDialog
+    open={vacacionIdAcancelar !== null}
+    onClose={() => setVacacionIdAcancelar(null)}
+    onConfirm={() => {
+        if (vacacionIdAcancelar !== null) {
+            cancelarVacacion(vacacionIdAcancelar);
+            setVacacionIdAcancelar(null);
+        }
+    }}
+    loading={cancelando}
+/>
     </Dialog>
   );
 }
