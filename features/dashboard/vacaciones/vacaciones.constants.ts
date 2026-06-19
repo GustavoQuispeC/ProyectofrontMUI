@@ -7,23 +7,27 @@ export const EstadoPeriodoColor: Record<EstadoPeriodoVacacional, ChipProps["colo
   [EstadoPeriodoVacacional.Completo]: "success",
 };
 
-export const EstadoVacacionColor: Record<EstadoVacacion, ChipProps["color"]> = {
-  [EstadoVacacion.Pendiente]: "warning",
-  [EstadoVacacion.Aprobado]: "success",
-  [EstadoVacacion.Rechazado]: "error",
-  [EstadoVacacion.Cancelado]: "default",
+export const EstadoPeriodoLabel: Record<EstadoPeriodoVacacional, string> = {
+  [EstadoPeriodoVacacional.Incompleto]: "Incompleto",
+  [EstadoPeriodoVacacional.Completo]: "Completo",
 };
+// export const EstadoVacacionColor: Record<EstadoVacacion, ChipProps["color"]> = {
+//   [EstadoVacacion.Pendiente]: "warning",
+//   [EstadoVacacion.Aprobado]: "success",
+//   [EstadoVacacion.Rechazado]: "error",
+//   [EstadoVacacion.Cancelado]: "default",
+// };
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 const avatarPalette = [
-    { bg: "#2458da", color: "#ffffff" },
-    { bg: "#15a167", color: "#ffffff" },
-    { bg: "#621cb1", color: "#ffffff" },
-    { bg: "#842910", color: "#ffffff" },
-    { bg: "#125393", color: "#ffffff" },
-    { bg: "#7e6014", color: "#ffffff" },
-    { bg: "#136413", color: "#ffffff" },
-    { bg: "#6a0c3b", color: "#ffffff" },
+  { bg: "#2458da", color: "#ffffff" },
+  { bg: "#15a167", color: "#ffffff" },
+  { bg: "#621cb1", color: "#ffffff" },
+  { bg: "#842910", color: "#ffffff" },
+  { bg: "#125393", color: "#ffffff" },
+  { bg: "#7e6014", color: "#ffffff" },
+  { bg: "#136413", color: "#ffffff" },
+  { bg: "#6a0c3b", color: "#ffffff" },
 ];
 export const avatarStyle = (id: number) => avatarPalette[id % avatarPalette.length];
 

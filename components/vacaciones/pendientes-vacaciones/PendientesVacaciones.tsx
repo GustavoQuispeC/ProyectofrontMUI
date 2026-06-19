@@ -76,7 +76,7 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
       <TableCell sx={{ fontWeight: 600 }}>#{periodo.vacacionSaldoId}</TableCell>
       <TableCell>{formatDate(periodo.periodoInicio)}</TableCell>
       <TableCell>{formatDate(periodo.periodoFin)}</TableCell>
-      <TableCell>{formatDate(periodo.fechaGeneracion)}</TableCell>
+      <TableCell sx={{ fontWeight: 700, color: "#6D28D9" }}>{formatDate(periodo.fechaGeneracion)}</TableCell>
       <TableCell sx={{ textAlign: "center" }}>{periodo.diasAsignados}</TableCell>
       <TableCell
         sx={{
@@ -242,11 +242,11 @@ function Row({ row, onVerDetalle }: RowProps) {
                     <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>ID</TableCell>
                     <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Per. Inicio</TableCell>
                     <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Per. Fin</TableCell>
-                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Generación</TableCell>
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>F. Apertura</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Asignados</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Usados</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Disponibles</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Total Dom.</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Domingos</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Consumo</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Solicitudes</TableCell>
                     <TableCell>Estado</TableCell>
