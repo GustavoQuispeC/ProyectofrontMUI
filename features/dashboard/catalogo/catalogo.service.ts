@@ -13,7 +13,6 @@ async function fetchCatalogo(endpoint: string) {
 export const listarTiposDocumento = () => fetchCatalogo("tipos-documento");
 export const listarGeneros = () => fetchCatalogo("generos");
 export const listarEstadosCiviles = () => fetchCatalogo("estados-civiles");
-export const listarTiposCuentaBancaria = () => fetchCatalogo("tipos-cuenta-bancaria");
 export const listarSistemasPensiones = () => fetchCatalogo("sistemas-pensiones");
 export const listarNivelesEducativos = () => fetchCatalogo("niveles-educativos");
 export const listarTiposParentesco = () => fetchCatalogo("tipos-parentesco");
