@@ -74,7 +74,7 @@ export interface RegistrarEmpleadoRequest {
     observaciones: string;
 }
 
-export interface n {
+export interface DetalleEmpleadoResponse {
   // DATOS PERSONALES
   id: number;
   nombreCompleto: string;

@@ -26,14 +26,18 @@ import BlockIcon from "@mui/icons-material/Block";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 
-import { EstadoVacacion, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
+import {
+  EstadoVacacion,
+  PeriodoVacacional,
+} from "@/features/dashboard/vacaciones/vacaciones.type";
 import { ChipProps } from "@mui/material";
 import { formatDate } from "@/features/dashboard/vacaciones/vacaciones.constants";
 import { useAprobarVacaciones } from "@/features/dashboard/vacaciones/hooks/useAprobarVacaciones";
-import {useCancelarVacaciones} from "@/features/dashboard/vacaciones/hooks/useCancelarVacaciones";
-import {useState} from "react";
+import { useCancelarVacaciones } from "@/features/dashboard/vacaciones/hooks/useCancelarVacaciones";
+import { useState } from "react";
 import ConfirmarCancelarVacacionDialog from "@/components/vacaciones/ConfirmarCancelarVacacionDialog";
-// ─── Labels / Colors / Icons ─────────────────────────────────────────────────
+import toast from "react-hot-toast";
+//! LABELS, COLORES E ICONOS DE ESTADO DE VACACIÓN
 const EstadoVacacionLabel: Record<EstadoVacacion, string> = {
   [EstadoVacacion.Pendiente]: "Pendiente",
   [EstadoVacacion.Aprobado]: "Aprobado",
@@ -50,14 +54,16 @@ const EstadoVacacionColor: Record<EstadoVacacion, ChipProps["color"]> = {
 
 const EstadoVacacionIcon: Record<EstadoVacacion, React.ReactElement> = {
   [EstadoVacacion.Pendiente]: <HourglassEmptyIcon sx={{ fontSize: 14 }} />,
-  [EstadoVacacion.Aprobado]: <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 14 }} />,
+  [EstadoVacacion.Aprobado]: (
+    <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 14 }} />
+  ),
   [EstadoVacacion.Rechazado]: <CancelOutlinedIcon sx={{ fontSize: 14 }} />,
   [EstadoVacacion.Cancelado]: <BlockIcon sx={{ fontSize: 14 }} />,
 };
 
 type ModoDialog = "pendientes" | "aprobadas";
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+//! PROPS
 interface VacacionesDialogProps {
   open: boolean;
   onClose: () => void;
@@ -65,9 +71,25 @@ interface VacacionesDialogProps {
   modo: ModoDialog;
 }
 
-export default function VacacionesDialog({ open, onClose, periodo, modo }: VacacionesDialogProps) {
-  const { cancelarVacacion, loading: cancelando } = useCancelarVacaciones(onClose);
-const [vacacionIdAcancelar, setVacacionIdAcancelar] =useState<number | null>(null);
+//! COMPONENTE PRINCIPAL
+export default function VacacionesDialog({
+  open,
+  onClose,
+  periodo,
+  modo,
+}: VacacionesDialogProps) {
+ const { cancelarVacacion, loading: cancelando } = useCancelarVacaciones(
+  (mensaje) => {
+    toast.success(mensaje ?? "Vacación cancelada exitosamente");
+    onClose();
+  },
+  (mensaje) => {
+    toast.error(mensaje);
+  },
+);
+  const [vacacionIdAcancelar, setVacacionIdAcancelar] = useState<number | null>(
+    null,
+  );
   const { aprobarVacacion, loading: aprobando } = useAprobarVacaciones(onClose);
   if (!periodo) return null;
 
@@ -87,9 +109,12 @@ const [vacacionIdAcancelar, setVacacionIdAcancelar] =useState<number | null>(nul
     >
       <DialogTitle id="vacaciones-dialog-title">
         <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>Solicitudes del período</Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
+            Solicitudes del período
+          </Typography>
           <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-            #{periodo.vacacionSaldoId}&nbsp;·&nbsp;{formatDate(periodo.periodoInicio)} –{" "}
+            #{periodo.vacacionSaldoId}&nbsp;·&nbsp;
+            {formatDate(periodo.periodoInicio)} –{" "}
             {formatDate(periodo.periodoFin)}
           </Typography>
         </Stack>
@@ -131,7 +156,10 @@ const [vacacionIdAcancelar, setVacacionIdAcancelar] =useState<number | null>(nul
                 </TableRow>
               ) : (
                 periodo.vacaciones.map((v) => (
-                  <TableRow key={v.vacacionId} sx={{ "&:last-child td": { borderBottom: 0 } }}>
+                  <TableRow
+                    key={v.vacacionId}
+                    sx={{ "&:last-child td": { borderBottom: 0 } }}
+                  >
                     <TableCell>
                       <Typography
                         sx={{
@@ -145,29 +173,41 @@ const [vacacionIdAcancelar, setVacacionIdAcancelar] =useState<number | null>(nul
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#6D28D9" }}>
+                      <Typography
+                        sx={{ fontSize: 13, fontWeight: 700, color: "#6D28D9" }}
+                      >
                         {formatDate(v.fechaSolicitud)}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography sx={{ fontSize: 13 }}>{formatDate(v.fechaInicio)}</Typography>
+                      <Typography sx={{ fontSize: 13 }}>
+                        {formatDate(v.fechaInicio)}
+                      </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography sx={{ fontSize: 13 }}>{formatDate(v.fechaFin)}</Typography>
+                      <Typography sx={{ fontSize: 13 }}>
+                        {formatDate(v.fechaFin)}
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#15803D" }}>
+                      <Typography
+                        sx={{ fontSize: 13, fontWeight: 600, color: "#15803D" }}
+                      >
                         {v.diasCalendario}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Typography sx={{ fontSize: 13, color: "#6D28D9" }}>{v.cantidadDomingos}</Typography>
+                      <Typography sx={{ fontSize: 13, color: "#6D28D9" }}>
+                        {v.cantidadDomingos}
+                      </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography
                         sx={{
                           fontSize: 13,
-                          color: v.aprobadoPor ? "text.primary" : "text.disabled",
+                          color: v.aprobadoPor
+                            ? "text.primary"
+                            : "text.disabled",
                           fontStyle: v.aprobadoPor ? "normal" : "italic",
                         }}
                       >
@@ -196,7 +236,7 @@ const [vacacionIdAcancelar, setVacacionIdAcancelar] =useState<number | null>(nul
                         sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
                       />
                     </TableCell>
-                    <TableCell >
+                    <TableCell>
                       {modo === "pendientes" && (
                         <>
                           <Tooltip title="Aprobar">
@@ -221,20 +261,22 @@ const [vacacionIdAcancelar, setVacacionIdAcancelar] =useState<number | null>(nul
                           </Tooltip>
                         </>
                       )}
-                     {modo === "aprobadas" && (
-    <>
-        <Tooltip title="Cancelar">
-            <IconButton
-                size="small"
-                color="error"
-                onClick={() => setVacacionIdAcancelar(v.vacacionId)}
-                disabled={cancelando}
-            >
-                <BlockIcon fontSize="small" />
-            </IconButton>
-        </Tooltip>
-    </>
-)}
+                      {modo === "aprobadas" && (
+                        <>
+                          <Tooltip title="Cancelar">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() =>
+                                setVacacionIdAcancelar(v.vacacionId)
+                              }
+                              disabled={cancelando}
+                            >
+                              <BlockIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -250,16 +292,16 @@ const [vacacionIdAcancelar, setVacacionIdAcancelar] =useState<number | null>(nul
         </Button>
       </DialogActions>
       <ConfirmarCancelarVacacionDialog
-    open={vacacionIdAcancelar !== null}
-    onClose={() => setVacacionIdAcancelar(null)}
-    onConfirm={() => {
-        if (vacacionIdAcancelar !== null) {
+        open={vacacionIdAcancelar !== null}
+        onClose={() => setVacacionIdAcancelar(null)}
+        onConfirm={() => {
+          if (vacacionIdAcancelar !== null) {
             cancelarVacacion(vacacionIdAcancelar);
             setVacacionIdAcancelar(null);
-        }
-    }}
-    loading={cancelando}
-/>
+          }
+        }}
+        loading={cancelando}
+      />
     </Dialog>
   );
 }
