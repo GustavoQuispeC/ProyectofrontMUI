@@ -8,9 +8,9 @@ export const RegistrarVacacionesSchema = z
 
     observacion: z.string().min(5, "La observación debe tener al menos 5 caracteres."),
   })
-  .refine((data) => data.fechaFin > data.fechaInicio, {
-    message: "La fecha de fin debe ser mayor a la fecha de inicio.",
-    path: ["fechaFin"],
-  });
+  // .refine((data) => data.fechaFin > data.fechaInicio, {
+  //   message: "La fecha de fin debe ser mayor a la fecha de inicio.",
+  //   path: ["fechaFin"],
+  // });
 
 export type RegistrarVacacionesForm = z.infer<typeof RegistrarVacacionesSchema>;
