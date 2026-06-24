@@ -419,7 +419,11 @@ export default function RegistrarEmpleado() {
                         control={control}
                         render={({field}) => (
                             <InputCard {...field} label="Nombres *" error={!!errors.nombre}
-                                       helperText={errors.nombre?.message}/>
+                                       helperText={errors.nombre?.message}
+                                       onChange={(e) =>
+                                           field.onChange(e.target.value.toUpperCase())
+                                       }
+                            />
                         )}
                     />
                 </Grid>
@@ -433,6 +437,9 @@ export default function RegistrarEmpleado() {
                                 label="Apellidos *"
                                 error={!!errors.apellidos}
                                 helperText={errors.apellidos?.message}
+                                onChange={(e) =>
+                                    field.onChange(e.target.value.toUpperCase())
+                                }
                             />
                         )}
                     />
@@ -526,9 +533,21 @@ export default function RegistrarEmpleado() {
                         render={({field}) => (
                             <InputCard
                                 {...field}
+                                value={field.value ?? ""}
                                 label="Número de Documento *"
                                 error={!!errors.numeroDocumento}
                                 helperText={errors.numeroDocumento?.message}
+                                onChange={(e) =>
+                                    field.onChange(e.target.value.replace(/\D/g, "").slice(0, 8)
+                                    )
+                                }
+                                slotProps={{
+                                    htmlInput: {
+                                        maxLength: 8,
+                                        inputMode: "numeric",
+                                        pattern: "[0-9]*",
+                                    },
+                                }}
                             />
                         )}
                     />
@@ -568,6 +587,9 @@ export default function RegistrarEmpleado() {
                                 type="email"
                                 error={!!errors.correo}
                                 helperText={errors.correo?.message}
+                                onChange={(e) =>
+                                    field.onChange(e.target.value.toLowerCase())
+                                }
                             />
                         )}
                     />
@@ -582,6 +604,10 @@ export default function RegistrarEmpleado() {
                                 label="Teléfono Móvil"
                                 error={!!errors.telefonoMovil}
                                 helperText={errors.telefonoMovil?.message}
+                                onChange={(e) =>
+                                    field.onChange(e.target.value.replace(/\D/g, "").slice(0, 9)
+                                    )
+                                }
                             />
                         )}
                     />
@@ -591,8 +617,11 @@ export default function RegistrarEmpleado() {
                         name="nacionalidad"
                         control={control}
                         render={({field}) =>
-                            <InputCard {...field} value={field.value ?? ""} label="Nacionalidad (Optional)"/>
-                    }/>
+                            <InputCard {...field} value={field.value ?? ""} label="Nacionalidad (Optional)"
+                                       onChange={(e) =>
+                                           field.onChange(e.target.value.toUpperCase())
+                                       }/>
+                        }/>
                 </Grid>
                 <Grid size={{xs: 12, sm: 6, md: 4}}>
                     <Controller
@@ -628,6 +657,9 @@ export default function RegistrarEmpleado() {
                                 label="Dirección *"
                                 error={!!errors.direccion}
                                 helperText={errors.direccion?.message}
+                                onChange={(e) =>
+                                    field.onChange(e.target.value.toUpperCase())
+                                }
                             />
                         )}
                     />
@@ -839,23 +871,31 @@ export default function RegistrarEmpleado() {
                         name="profesionOficio"
                         control={control}
                         render={({field}) =>
-                            <InputCard {...field} value={field.value ?? ""} label="Profesión / Oficio"/>
-                    }/>
+                            <InputCard {...field} value={field.value ?? ""} label="Profesión / Oficio" onChange={(e) =>
+                                field.onChange(e.target.value.toUpperCase())
+                            }/>
+                        }/>
                 </Grid>
                 <Grid size={{xs: 12, sm: 6, md: 4}}>
                     <Controller
                         name="ruc"
                         control={control}
                         render={({field}) =>
-                            <InputCard {...field} value={field.value ?? ""} label="RUC"/>
-                    }/>
+                            <InputCard {...field} value={field.value ?? ""} label="RUC" onChange={(e) =>
+                                    field.onChange(e.target.value.replace(/\D/g, "").slice(0, 11)
+                                    )
+                                }/>
+                        }/>
                 </Grid>
                 <Grid size={{xs: 12}}>
                     <Controller
                         name="observaciones"
                         control={control}
                         render={({field}) => (
-                            <InputCard {...field} value={field.value ?? ""} label="Observaciones" multiline rows={2}/>
+                            <InputCard {...field} value={field.value ?? ""} label="Observaciones" multiline rows={2}
+                                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                            />
+
                         )}
                     />
                 </Grid>
@@ -868,7 +908,9 @@ export default function RegistrarEmpleado() {
                         name="contactoEmergenciaNombre"
                         control={control}
                         render={({field}) =>
-                            <InputCard {...field} value={field.value ?? ""} label="Nombres y Apellidos"/>}
+                            <InputCard {...field} value={field.value ?? ""} label="Nombres y Apellidos" onChange={(e) =>
+                                field.onChange(e.target.value.toUpperCase())
+                            }/>}
                     />
                 </Grid>
                 <Grid size={{xs: 12, sm: 6, md: 4}}>
@@ -901,7 +943,10 @@ export default function RegistrarEmpleado() {
                         name="contactoEmergenciaTelefono"
                         control={control}
                         render={({field}) =>
-                            <InputCard {...field} value={field.value ?? ""} label="Teléfono de Contacto"/>}
+                            <InputCard {...field} value={field.value ?? ""} label="Teléfono de Contacto" onChange={(e) =>
+                                    field.onChange(e.target.value.replace(/\D/g, "").slice(0, 9)
+                                    )
+                                }/>}
                     />
                 </Grid>
             </Section>
