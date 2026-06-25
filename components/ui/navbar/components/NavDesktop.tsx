@@ -24,11 +24,11 @@ export function NavDesktop({
 }: NavDesktopProps) {
   const productTrigger = (
     <>
-      <span className="opacity-70">
+      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-300">
         <WorkOutlineOutlinedIcon fontSize="small" />
       </span>
 
-      Ver por categorias
+      Categorías
 
       <KeyboardArrowDownIcon
         fontSize="small"
@@ -40,7 +40,7 @@ export function NavDesktop({
   );
 
   return (
-    <div className="hidden md:flex items-center gap-1 flex-1">
+    <div className="hidden md:flex items-center gap-2 flex-1 rounded-full border border-white/60 bg-white/40 px-2 py-1 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
       {/* Inicio */}
       <NavLink
         icon={<HomeOutlinedIcon fontSize="small" />}
@@ -56,8 +56,8 @@ export function NavDesktop({
         onToggle={onToggleDropdown}
         trigger={productTrigger}
       >
-        <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-gray-800">
-         Categorias
+        <div className="px-3 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+         Categorías
         </div>
 
         {PRODUCT_ITEMS.map(({ icon: Icon, label, href }) => (
@@ -71,21 +71,21 @@ export function NavDesktop({
       </Dropdown>
 
       {/* Catalogo Productos */}
-<NavLink
-  icon={<BusinessOutlinedIcon fontSize="small" />}
-  label="Catálogo de Productos"
-  href="/productFilter"
-  active={activeNav === "productFilter"}
-  onClick={() => onNavClick("productFilter")}
-/>
+      <NavLink
+        icon={<BusinessOutlinedIcon fontSize="small" />}
+        label="Catálogo"
+        href="/productFilter"
+        active={activeNav === "productFilter"}
+        onClick={() => onNavClick("productFilter")}
+      />
       {/* Contact */}
-     <NavLink
-  icon={<EmailIcon fontSize="small" />}
-  label="Contáctanos"
-  href="/#contacto"
-  active={activeNav === "contacto"}
-  onClick={() => onNavClick("contacto")}
-/>
+      <NavLink
+        icon={<EmailIcon fontSize="small" />}
+        label="Contáctanos"
+        href="/#contacto"
+        active={activeNav === "contacto"}
+        onClick={() => onNavClick("contacto")}
+      />
     </div>
   );
 }

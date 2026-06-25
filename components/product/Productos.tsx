@@ -4,7 +4,6 @@ import { useState } from "react";
 import ShoppingCart from "@mui/icons-material/ShoppingCart";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import { DRAWER_OPEN_EVENT } from "../cartdrawer/Cartdrawer";
 import AddToCartModal from "@/components/cartdrawer/AddToCartModal";
 import { upsertCartItem } from "@/components/cartdrawer/cartService";
 
@@ -18,8 +17,6 @@ interface Producto {
 }
 
 /* ================== LOCAL STORAGE CONFIG ================== */
-
-/* ========================================================= */
 
 export default function Productos() {
   const [isOpen, setIsOpen] = useState(false);
@@ -118,11 +115,11 @@ export default function Productos() {
           </div>
 
           {/* Grid de productos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {productosData.map((producto) => (
               <div
                 key={producto.id}
-                className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full relative transition-all duration-500 hover:-translate-y-2"
+                className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full relative transition-all duration-500 hover:-translate-y-2 min-w-0"
               >
                 {/* Badge con Tailwind puro */}
                 {producto.badge && (
@@ -134,7 +131,7 @@ export default function Productos() {
                 )}
 
                 {/* Imagen */}
-                <div className="relative aspect-square bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 flex justify-center items-center p-6 overflow-hidden">
+                <div className="relative aspect-square bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 flex justify-center items-center p-3 sm:p-5 lg:p-6 overflow-hidden">
                   <img
                     src={producto.imagen}
                     alt={producto.nombre}
@@ -144,29 +141,29 @@ export default function Productos() {
                 </div>
 
                 {/* Contenido */}
-                <div className="p-5 flex flex-col grow bg-white dark:bg-gray-800">
+                <div className="p-3 sm:p-4 lg:p-5 flex flex-col grow bg-white dark:bg-gray-800">
                   <div className="grow">
-                    <h3 className="font-bold text-base text-blue-900 dark:text-white mb-2 line-clamp-2 min-h-12">
+                    <h3 className="font-bold text-sm sm:text-base text-blue-900 dark:text-white mb-2 line-clamp-2 min-h-10 sm:min-h-12">
                       {producto.nombre}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[2.5rem]">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[2.25rem] sm:min-h-[2.5rem]">
                       {producto.descripcion}
                     </p>
                   </div>
 
                   {/* Precio y botón */}
-                  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-2xl font-extrabold text-orange-500">S/ {producto.precio.toFixed(2)}</span>
+                      <span className="text-lg sm:text-2xl font-extrabold text-orange-500">S/ {producto.precio.toFixed(2)}</span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">/unidad</span>
                     </div>
 
                     <button
                       onClick={() => handleAgregar(producto)}
-                      className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+                      className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-2 sm:py-2.5 text-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
                     >
-                      <ShoppingCart sx={{ fontSize: 18 }} />
-                      Agregar al carrito
+                      <ShoppingCart sx={{ fontSize: 16 }} />
+                      <span className="truncate">Agregar</span>
                     </button>
                   </div>
                 </div>

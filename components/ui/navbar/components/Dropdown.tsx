@@ -27,16 +27,16 @@ export function Dropdown({
     <div className="relative">
       <button
         onClick={() => onToggle(id)}
-        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 whitespace-nowrap ${
+        className={`inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
           isOpen
-            ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+            ? "border-blue-500/20 bg-blue-50 text-blue-700 shadow-lg shadow-blue-500/15 dark:bg-blue-950/70 dark:text-blue-300"
+            : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white"
         }`}
       >
         {trigger}
       </button>
       <div
-        className={`absolute top-full mt-1.5 ${width} bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-1.5 z-50 transition-all duration-150 origin-top ${
+        className={`absolute top-full mt-2 ${width} rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl z-50 transition-all duration-200 origin-top dark:border-white/10 dark:bg-zinc-950/95 ${
           align === "right" ? "right-0" : "left-0"
         } ${
           isOpen
@@ -73,13 +73,13 @@ export function DropdownItem({
 }: DropdownItemProps) {
   const className = `
     flex items-center gap-2.5
-    rounded-lg px-3 py-2
+    rounded-xl px-3 py-2.5
     text-sm
-    transition-colors duration-100
+    transition-all duration-150
     ${
       danger
-        ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-950"
-        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+        ? "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
     }
   `;
 
@@ -87,7 +87,7 @@ export function DropdownItem({
   if (href) {
     return (
       <Link href={href} className={className}>
-        <span className="shrink-0 opacity-60">{icon}</span>
+        <span className="shrink-0 text-slate-400 dark:text-slate-500">{icon}</span>
 
         <span className="flex-1">{label}</span>
 
@@ -107,7 +107,7 @@ export function DropdownItem({
       onClick={onClick}
       className={`${className} w-full text-left`}
     >
-      <span className="shrink-0 opacity-60">{icon}</span>
+      <span className="shrink-0 text-slate-400 dark:text-slate-500">{icon}</span>
 
       <span className="flex-1">{label}</span>
 

@@ -19,17 +19,19 @@ export function NavLink({
   active,
   onClick,
 }: NavLinkProps) {
-  const className = `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 whitespace-nowrap ${
+  const className = `inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
     active
-      ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-      : "text-gray-500 hover:bg-gray-100 hover:text-orange-500 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+      ? "border-blue-500/20 bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/20"
+      : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white"
   }`;
 
   // ─── Si tiene href → navegación ─────────────────────────────
   if (href) {
     return (
       <Link href={href} className={className}>
-        <span className="opacity-70">{icon}</span>
+        <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${active ? "bg-white/15" : "bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-300"}`}>
+          {icon}
+        </span>
 
         {label}
 
@@ -45,7 +47,9 @@ export function NavLink({
   // ─── Si NO tiene href → acción ─────────────────────────────
   return (
     <button onClick={onClick} className={className}>
-      <span className="opacity-70">{icon}</span>
+      <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${active ? "bg-white/15" : "bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-300"}`}>
+        {icon}
+      </span>
 
       {label}
 

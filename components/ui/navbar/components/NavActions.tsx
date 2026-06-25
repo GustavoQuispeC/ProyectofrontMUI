@@ -9,7 +9,7 @@ import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dropdown, DropdownItem } from "./Dropdown";
 import type { DropdownId } from "../types";
@@ -37,7 +37,7 @@ export function NavActions({
   const { mode, toggleTheme } = useThemeMode();
   const router = useRouter();
 
-  const updateSearchParams = (search: string) => {
+  const updateSearchParams = useCallback((search: string) => {
     const params = new URLSearchParams(window.location.search);
     if (search) {
       params.set("search", search);
@@ -46,7 +46,7 @@ export function NavActions({
     }
     const query = params.toString();
     router.replace(`/productFilter${query ? `?${query}` : ""}`);
-  };
+  }, [router]);
 
   useEffect(() => {
     const trimmed = searchTerm.trim();
@@ -59,7 +59,7 @@ export function NavActions({
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, router]);
+  }, [searchTerm, updateSearchParams]);
 
   const handleSearch = () => {
     const trimmed = searchTerm.trim();
@@ -172,10 +172,10 @@ export function NavActions({
       ) : (
         <button
           onClick={onLogin}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-150"
+          className="inline-flex h-11 items-center gap-2 rounded-full border border-blue-500/20 bg-gradient-to-r from-blue-600 to-cyan-600 px-4 text-sm font-medium text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-blue-500/30"
         >
           <LoginOutlinedIcon style={{ fontSize: 16 }} />
-          Mi cuenta
+          Acceso
         </button>
       )}
     </div>
