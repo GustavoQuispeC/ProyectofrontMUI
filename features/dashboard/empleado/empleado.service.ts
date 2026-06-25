@@ -1,5 +1,10 @@
 import { apiEmpleado } from "@/lib/api-empleado";
-import { EmpleadosListar, RegistarEmpleado, DetalleEmpleado, EmpleadoAutocomplete } from "./empleado.types";
+import {
+  EmpleadosListar,
+  RegistrarEmpleadoRequest,
+  EmpleadoAutocomplete,
+  RegistrarEmpleadoResponse, DetalleEmpleadoResponse
+} from "./empleado.types";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -11,7 +16,7 @@ export async function listarEmpleadosApi(): Promise<EmpleadosListar[]> {
 }
 
 //! Listar empleado por ID
-export async function detalleEmpleadoApi(id: string): Promise<DetalleEmpleado> {
+export async function obtenerDetalleEmpleadoApi(id: number,): Promise<DetalleEmpleadoResponse> {
   return apiEmpleado(`${apiUrl}/Empleados/${id}`, {
     method: "GET",
   });
@@ -25,8 +30,9 @@ export async function eliminarEmpleadoApi(id: string): Promise<void> {
 }
 
 //! Función para registrar empleados, token y rol requrido
-export async function registrarEmpleadoApi(payload: RegistarEmpleado): Promise<RegistarEmpleado> {
-  return apiEmpleado(`${apiUrl}/Empleados`, {
+export async function registrarEmpleadoApi(payload: RegistrarEmpleadoRequest): Promise<RegistrarEmpleadoResponse> {
+  console.log(payload);
+  return apiEmpleado(`${apiUrl}/empleados`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -38,3 +44,4 @@ export async function listarEmpleadosActivosApi(): Promise<EmpleadoAutocomplete[
     method: "GET",
   });
 }
+

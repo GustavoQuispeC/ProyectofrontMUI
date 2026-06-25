@@ -35,7 +35,7 @@ import { permissions } from "@/shared/auth/auth.permissions";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 interface Props {
-  id: string;
+  id: number;
 }
 
 //! Función auxiliar para obtener el nombre de un ítem de catálogo a partir de su ID
@@ -43,7 +43,7 @@ function obtenerNombreCatalogo(items: { id: number; nombre: string }[], id?: num
   return items.find((x) => x.id === id)?.nombre ?? "—";
 }
 
-// ── Subcomponentes ────────────────────────────────────────────────────────────
+//! subcomponentes
 
 const SectionCard = ({
   title,
@@ -122,7 +122,7 @@ const Field = ({ label, value }: { label: string; value?: string | number | null
   </Grid>
 );
 
-// ── Skeleton de carga ─────────────────────────────────────────────────────────
+//! Skeleton de carga
 const LoadingSkeleton = () => (
   <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1100, mx: "auto" }}>
     <Card variant="outlined" sx={{ borderRadius: 4, boxShadow: "none", mb: 2 }}>
@@ -154,28 +154,42 @@ const LoadingSkeleton = () => (
   </Box>
 );
 
-// ── Componente principal ──────────────────────────────────────────────────────
+//! Componente principal
 export default function DetalleEmpleado({ id }: Props) {
-  //!Validando permisos
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.detalleEmpleado) : false;
-
+    if (!canAccess) {
+    return <AccessDenied />;
+  }
   const { empleado, loading, error } = useEmpleado(id, canAccess);
   const { catalogos, loading: loadingCatalogos } = useCatalogos();
-
   const router = useRouter();
 
   if (loading || loadingCatalogos) {
     return <LoadingSkeleton />;
   }
 
-  if (error) {
+if (error) {
     return (
-      <Stack sx={{ alignItems: "center", justifyContent: "center", height: 256, gap: 1.5 }}>
-        <Typography variant="body2" sx={{ color: "error.main" }}>
-          {error}
+      <Stack
+        sx={{
+          alignItems: "center",
+          justifyContent: "center",
+          height: 256,
+          gap: 2,
+        }}
+      >
+        <Typography color="error">
+          {error instanceof Error ? error.message : "Error al cargar el empleado."}
         </Typography>
-        <Button onClick={() => router.push("/dashboard/empleados/listar")}>Volver</Button>
+
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
+          onClick={() => router.push("/dashboard/empleados/listar")}
+        >
+          Volver
+        </Button>
       </Stack>
     );
   }
@@ -199,9 +213,6 @@ export default function DetalleEmpleado({ id }: Props) {
     );
   }
 
-  if (!canAccess) {
-    return <AccessDenied />;
-  }
 
   return (
     <Box
@@ -310,14 +321,12 @@ export default function DetalleEmpleado({ id }: Props) {
               >
                 Volver
               </Button>
-              <Button
-                size="small"
-                variant="contained"
-                startIcon={<Download fontSize="small" />}
-                sx={{ fontSize: "0.75rem" }}
-              >
-                Exportar
-              </Button>
+                <Button
+                    variant="contained"
+                    startIcon={<Download/>}
+                >
+                    Exportar
+                </Button>
             </Stack>
           </Stack>
         </CardContent>
@@ -366,8 +375,10 @@ export default function DetalleEmpleado({ id }: Props) {
 
         <Grid size={{ xs: 12 }}>
           <SectionCard title="Información laboral" icon={Work}>
-            <Field label="Cargo" value={empleado.cargoActual} />
-            <Field label="Salario" value={empleado.salarioActual ? `S/ ${empleado.salarioActual}` : null} />
+              <Typography variant="caption">
+                  {empleado.cargoActual}
+              </Typography>
+            <Field label="Salario" value={empleado.salarioBase ? `S/ ${empleado.salarioBase}` : null} />
             <Field
               label="Tipo de contrato"
               value={obtenerNombreCatalogo(catalogos.tiposContrato, empleado.tipoContrato)}
@@ -382,13 +393,12 @@ export default function DetalleEmpleado({ id }: Props) {
 
         <Grid size={{ xs: 12, lg: 6 }}>
           <SectionCard title="Datos bancarios" icon={AccountBalance}>
-            <Field label="Banco" value={empleado.bancoNombre} />
-            <Field label="Número de cuenta" value={empleado.numeroCuentaBancaria} />
-            <Field label="CCI" value={empleado.cci} />
-            <Field
-              label="Tipo de cuenta"
-              value={obtenerNombreCatalogo(catalogos.tiposCuentaBancaria, empleado.tipoCuenta)}
-            />
+            <Field label="Banco Sueldo" value={empleado.bancoSueldo} />
+            <Field label="Número de cuenta Sueldo" value={empleado.cuentaSueldo} />
+            <Field label="CCI sueldo" value={empleado.cciSueldo} />
+            <Field label="Banco CTS" value={empleado.bancoCTS} />
+            <Field label="Número de cuenta CTS" value={empleado.cuentaCTS} />
+            <Field label="CCI CTS" value={empleado.cciCTS} />
           </SectionCard>
         </Grid>
 
@@ -399,7 +409,7 @@ export default function DetalleEmpleado({ id }: Props) {
               value={obtenerNombreCatalogo(catalogos.sistemasPensiones, empleado.sistemaPensiones)}
             />
             <Field label="CUSPP" value={empleado.cuspp} />
-            <Field label="N° EsSalud" value={empleado.numeroEssalud} />
+
           </SectionCard>
         </Grid>
       </Grid>

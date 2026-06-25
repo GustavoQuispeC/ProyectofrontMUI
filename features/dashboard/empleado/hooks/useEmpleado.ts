@@ -1,27 +1,19 @@
-import { DetalleEmpleado } from "../empleado.types";
-import { detalleEmpleadoApi } from "../empleado.service";
-import { useQuery } from "@tanstack/react-query";
+import {useQuery} from "@tanstack/react-query";
+import {DetalleEmpleadoResponse} from "@/features/dashboard/empleado/empleado.types";
+import {obtenerDetalleEmpleadoApi} from "@/features/dashboard/empleado/empleado.service";
 
-export function useEmpleado(id: string, canAccess: boolean) {
-  const {
-    data: empleado,
-    isLoading: loading,
-    error,
-    refetch,
-  } = useQuery<DetalleEmpleado>({
-    queryKey: ["empleado", id],
+export function useEmpleado(id: number, canAccess: boolean) {
+    const query = useQuery<DetalleEmpleadoResponse>({
+        queryKey: ["empleado", id],
+        queryFn: () => obtenerDetalleEmpleadoApi(id),
+        enabled: id > 0 && canAccess,
+        staleTime: 5 * 60 * 1000,
+    });
 
-    queryFn: () => detalleEmpleadoApi(id),
-
-    enabled: !!id && canAccess,
-
-    staleTime: 1000 * 60 * 5,
-  });
-
-  return {
-    empleado,
-    loading,
-    error: error ? "Error al cargar empleado" : null,
-    refetch,
-  };
+    return {
+        empleado: query.data,
+        loading: query.isLoading,
+        error: query.error,
+        refetch: query.refetch,
+    };
 }

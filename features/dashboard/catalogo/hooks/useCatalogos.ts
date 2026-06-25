@@ -5,7 +5,6 @@ import {
   listarNivelesEducativos,
   listarSistemasPensiones,
   listarTiposContrato,
-  listarTiposCuentaBancaria,
   listarTiposDocumento,
   listarTiposJornada,
   listarTiposParentesco,
@@ -20,7 +19,6 @@ interface Catalogos {
   tiposDocumentos: CatalogoItem[];
   generos: CatalogoItem[];
   estadosCiviles: CatalogoItem[];
-  tiposCuentaBancaria: CatalogoItem[];
   sistemasPensiones: CatalogoItem[];
   nivelesEducativos: CatalogoItem[];
   tiposParentesco: CatalogoItem[];
@@ -32,7 +30,6 @@ const initialCatalogos: Catalogos = {
   tiposDocumentos: [],
   generos: [],
   estadosCiviles: [],
-  tiposCuentaBancaria: [],
   sistemasPensiones: [],
   nivelesEducativos: [],
   tiposParentesco: [],
@@ -55,7 +52,6 @@ export function useCatalogos() {
           tiposDocumentos,
           generos,
           estadosCiviles,
-          tiposCuentaBancaria,
           sistemasPensiones,
           nivelesEducativos,
           tiposParentesco,
@@ -65,7 +61,6 @@ export function useCatalogos() {
           listarTiposDocumento(),
           listarGeneros(),
           listarEstadosCiviles(),
-          listarTiposCuentaBancaria(),
           listarSistemasPensiones(),
           listarNivelesEducativos(),
           listarTiposParentesco(),
@@ -77,7 +72,6 @@ export function useCatalogos() {
           tiposDocumentos: tiposDocumentos ?? [],
           generos: generos ?? [],
           estadosCiviles: estadosCiviles ?? [],
-          tiposCuentaBancaria: tiposCuentaBancaria ?? [],
           sistemasPensiones: sistemasPensiones ?? [],
           nivelesEducativos: nivelesEducativos ?? [],
           tiposParentesco: tiposParentesco ?? [],

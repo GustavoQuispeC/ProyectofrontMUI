@@ -29,7 +29,7 @@ export async function aprobarVacacionesApi(id: number): Promise<void> {
 }
 
 //! Cancelar vacaciones
-export async function cancelarVacacionesApi(id: number): Promise<void> {
+export async function cancelarVacacionesApi(id: number): Promise<{ mensaje?: string }> {
   return apiVacaciones(`${apiUrl}/Vacacion/${id}/cancelar`, {
     method: "PUT",
   });
