@@ -1,11 +1,12 @@
 "use client";
-
 import { useState } from "react";
 import ShoppingCart from "@mui/icons-material/ShoppingCart";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import AddToCartModal from "@/components/cartdrawer/AddToCartModal";
 import { upsertCartItem } from "@/components/cartdrawer/cartService";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import Link from "next/link";
 
 interface Producto {
   id: number;
@@ -20,7 +21,8 @@ interface Producto {
 
 export default function Productos() {
   const [isOpen, setIsOpen] = useState(false);
-  const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null);
+  const [productoSeleccionado, setProductoSeleccionado] =
+    useState<Producto | null>(null);
 
   const productosData: Producto[] = [
     {
@@ -62,7 +64,8 @@ export default function Productos() {
       nombre: "Tubo cuadrado 2.0*2.0mm*6mt",
       precio: 45.0,
       descripcion: "Perfil metálico resistente para estructuras.",
-      imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHE10nnA-l3uYYGnHWvdOEXiEnOh-hPZFwEQ&s",
+      imagen:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHE10nnA-l3uYYGnHWvdOEXiEnOh-hPZFwEQ&s",
     },
     {
       id: 6,
@@ -85,7 +88,8 @@ export default function Productos() {
       nombre: "Fierro de 1/2",
       precio: 28.0,
       descripcion: "Barra de acero para refuerzo estructural.",
-      imagen: "https://media.falabella.com/sodimacPE/211230_01/w=800,h=800,fit=pad",
+      imagen:
+        "https://media.falabella.com/sodimacPE/211230_01/w=800,h=800,fit=pad",
     },
   ];
 
@@ -110,7 +114,8 @@ export default function Productos() {
               Catálogo de Productos
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
-              Encuentra los mejores materiales de construcción con precios competitivos
+              Encuentra los mejores materiales de construcción con precios
+              competitivos
             </p>
           </div>
 
@@ -146,7 +151,7 @@ export default function Productos() {
                     <h3 className="font-bold text-sm sm:text-base text-blue-900 dark:text-white mb-2 line-clamp-2 min-h-10 sm:min-h-12">
                       {producto.nombre}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[2.25rem] sm:min-h-[2.5rem]">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2 min-h-9 sm:min-h-10">
                       {producto.descripcion}
                     </p>
                   </div>
@@ -154,8 +159,12 @@ export default function Productos() {
                   {/* Precio y botón */}
                   <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100 dark:border-gray-700">
                     <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-lg sm:text-2xl font-extrabold text-orange-500">S/ {producto.precio.toFixed(2)}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">/unidad</span>
+                      <span className="text-lg sm:text-2xl font-extrabold text-orange-500">
+                        S/ {producto.precio.toFixed(2)}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        /unidad
+                      </span>
                     </div>
 
                     <button
@@ -173,20 +182,28 @@ export default function Productos() {
           </div>
 
           {/* CTA */}
-          <div className="mt-16 flex justify-center">
-            <a
-              href="/tienda"
-              className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-white dark:bg-gray-800 hover:bg-linear-to-r hover:from-orange-500 hover:to-orange-600 border-2 border-orange-500 text-orange-600 hover:text-white dark:text-orange-400 dark:hover:text-white font-bold text-lg shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105"
+          <div className="mt-8 flex justify-center">
+            <Link
+              href="/productFilter"
+              className="    group inline-flex items-center gap-2 rounded-xl border border-orange-600   bg-white   px-5 py-2.5   text-sm font-bold text-orange-600   shadow-sm transition-all duration-300 hover:scale-[1.02]   hover:bg-orange-600 hover:text-white hover:shadow-lg   dark:bg-transparent   dark:text-orange-400   dark:border-orange-400   dark:hover:bg-orange-500   dark:hover:text-white   dark:hover:border-orange-500   focus:outline-none   focus-visible:ring-2   focus-visible:ring-orange-400 "
             >
-              Ver todos los productos
-              <ArrowForwardIcon className="transition-transform duration-300 group-hover:translate-x-1" />
-            </a>
+              <StorefrontOutlinedIcon sx={{ fontSize: 18 }} />
+              Explorar catálogo completo
+              <ArrowForwardIcon
+                sx={{ fontSize: 16 }}
+                className="transition-transform duration-300 group-hover:translate-x-0.5"
+              />
+            </Link>
           </div>
         </div>
       </section>
 
       {isOpen && productoSeleccionado && (
-        <AddToCartModal isOpen={isOpen} onClose={() => setIsOpen(false)} producto={productoSeleccionado} />
+        <AddToCartModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          producto={productoSeleccionado}
+        />
       )}
     </>
   );

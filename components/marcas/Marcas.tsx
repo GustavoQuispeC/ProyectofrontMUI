@@ -29,7 +29,7 @@ const TRUST_STATS = [
   {
     icon: WorkspacePremiumOutlinedIcon,
     label: "Marcas líderes",
-    value: `${BRANDS.length}+`,
+    value: "25+",
   },
   {
     icon: VerifiedOutlinedIcon,
@@ -76,7 +76,7 @@ function BrandCard({ brand, onSelect }: BrandCardProps) {
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1 scale-x-0 bg-linear-to-r from-orange-500 to-orange-600 transition-transform duration-300 group-hover:scale-x-100" />
 
-      <div className="relative flex min-h-[120px] flex-1 items-center justify-center px-4 py-8 sm:min-h-[132px] sm:px-5 sm:py-9">
+      <div className="relative flex min-h-30 flex-1 items-center justify-center px-4 py-8 sm:min-h-33 sm:px-5 sm:py-9">
         <div className="absolute inset-0 bg-linear-to-br from-orange-500/0 to-orange-600/0 transition-colors duration-300 group-hover:from-orange-500/5 group-hover:to-orange-600/10" />
 
         {imageError ? (
@@ -84,7 +84,7 @@ function BrandCard({ brand, onSelect }: BrandCardProps) {
             {getBrandInitials(brand)}
           </div>
         ) : (
-          <div className="relative z-10 h-14 w-full opacity-75 grayscale transition-all duration-300 group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0 sm:h-16 lg:h-[72px]">
+          <div className="relative z-10 h-14 w-full opacity-75 grayscale transition-all duration-300 group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0 sm:h-16 lg:h-18">
             <Image
               src={getBrandLogoUrl(brand)}
               alt={`Logo de ${brand}`}
@@ -130,7 +130,7 @@ export default function Marcas() {
             Marcas de confianza
           </div>
 
-          <h2 className="text-2xl font-bold tracking-tight text-text-primary sm:text-3xl lg:text-4xl">
+          <h2 className="text-2xl font-bold tracking-tight text-blue-900 sm:text-3xl lg:text-4xl">
             Aliados estratégicos del sector
           </h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-text-secondary sm:text-base">

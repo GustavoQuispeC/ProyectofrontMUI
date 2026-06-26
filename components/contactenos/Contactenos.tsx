@@ -72,7 +72,7 @@ export default function Contactenos() {
           <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
             {/* MAPA mejorado */}
             <div className="overflow-hidden rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl">
-              <div className="px-6 py-5 bg-linear-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-750 border-b-2 border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="px-6 py-7 bg-linear-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-750 border-b-2 border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <FmdGoodOutlinedIcon className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
@@ -134,7 +134,7 @@ export default function Contactenos() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   <a
                     href={`mailto:${email}`}
                     className="
@@ -143,9 +143,9 @@ export default function Contactenos() {
                       rounded-xl 
                       border-2 border-gray-200 dark:border-gray-600
                       bg-white dark:bg-gray-700
-                      px-4 py-3 
+                      px-4 py-2 
                       text-sm font-medium text-gray-800 dark:text-white
-                      hover:border-orange-500 dark:hover:border-orange-400
+                      hover:border-orange-200 dark:hover:border-orange-400
                       hover:bg-orange-50 dark:hover:bg-orange-900/20
                       transition-all duration-300
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400
@@ -171,9 +171,9 @@ export default function Contactenos() {
                       rounded-xl 
                       border-2 border-gray-200 dark:border-gray-600
                       bg-white dark:bg-gray-700
-                      px-4 py-3 
+                      px-4 py-2 
                       text-sm font-medium text-gray-800 dark:text-white
-                      hover:border-orange-500 dark:hover:border-orange-400
+                      hover:border-orange-200 dark:hover:border-orange-400
                       hover:bg-orange-50 dark:hover:bg-orange-900/20
                       transition-all duration-300
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400
@@ -195,11 +195,11 @@ export default function Contactenos() {
 
               {/* Lista de tiendas */}
               <div className="p-3">
-                <p className="px-3 py-2 text-xs uppercase tracking-wide font-bold text-gray-600 dark:text-gray-400">
+                <p className="px-3 py-1 text-xs uppercase tracking-wide font-bold text-gray-600 dark:text-gray-400">
                   Selecciona una tienda
                 </p>
 
-                <div className="space-y-2 mt-2">
+                <div className="space-y-1 mt-2">
                   {tiendas.map((tienda) => {
                     const activa = tienda.id === tiendaActiva.id;
 
@@ -208,10 +208,10 @@ export default function Contactenos() {
                         key={tienda.id}
                         onClick={() => setTiendaActiva(tienda)}
                         className={[
-                          "w-full text-left rounded-xl px-4 py-4 transition-all duration-300",
+                          "w-full text-left rounded-xl px-4 py-2 transition-all duration-300",
                           "focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400",
                           activa
-                            ? "bg-linear-to-r from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 border-2 border-orange-400 dark:border-orange-500 shadow-md"
+                            ? "bg-linear-to-r from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 border-2 border-orange-200 dark:border-orange-500 shadow-md"
                             : "hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-600",
                         ].join(" ")}
                       >
@@ -258,9 +258,9 @@ export default function Contactenos() {
               </div>
 
               {/* Footer mejorado */}
-              <div className="px-6 py-5 bg-blue-50 dark:bg-blue-900/20 border-t-2 border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-2 bg-blue-50 dark:bg-blue-900/20 border-t-2 border-gray-200 dark:border-gray-700">
                 <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white shrink-0">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-900 text-white shrink-0">
                     <Mail sx={{ fontSize: 18 }} />
                   </div>
                   <div>
