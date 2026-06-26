@@ -26,11 +26,8 @@ import BlockIcon from "@mui/icons-material/Block";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 
-import {
-  EstadoVacacion,
-  PeriodoVacacional,
-} from "@/features/dashboard/vacaciones/vacaciones.type";
-import { ChipProps } from "@mui/material";
+import { EstadoVacacion, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
+import type { ChipProps } from "@mui/material";
 import { formatDate } from "@/features/dashboard/vacaciones/vacaciones.constants";
 import { useAprobarVacaciones } from "@/features/dashboard/vacaciones/hooks/useAprobarVacaciones";
 import { useCancelarVacaciones } from "@/features/dashboard/vacaciones/hooks/useCancelarVacaciones";
@@ -54,11 +51,47 @@ const EstadoVacacionColor: Record<EstadoVacacion, ChipProps["color"]> = {
 
 const EstadoVacacionIcon: Record<EstadoVacacion, React.ReactElement> = {
   [EstadoVacacion.Pendiente]: <HourglassEmptyIcon sx={{ fontSize: 14 }} />,
-  [EstadoVacacion.Aprobado]: (
-    <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 14 }} />
-  ),
+  [EstadoVacacion.Aprobado]: <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 14 }} />,
   [EstadoVacacion.Rechazado]: <CancelOutlinedIcon sx={{ fontSize: 14 }} />,
   [EstadoVacacion.Cancelado]: <BlockIcon sx={{ fontSize: 14 }} />,
+};
+
+const EstadoVacacionPorNumero: Record<number, EstadoVacacion> = {
+  0: EstadoVacacion.Pendiente,
+  1: EstadoVacacion.Aprobado,
+  2: EstadoVacacion.Rechazado,
+  3: EstadoVacacion.Cancelado,
+};
+
+const normalizarEstadoVacacion = (estado: unknown): EstadoVacacion | null => {
+  if (typeof estado === "number") return EstadoVacacionPorNumero[estado] ?? null;
+  if (typeof estado !== "string") return null;
+
+  const estadoNormalizado = estado.trim().toLowerCase();
+  return (
+    Object.values(EstadoVacacion).find((item) => item.toLowerCase() === estadoNormalizado) ??
+    EstadoVacacionPorNumero[Number(estado)] ??
+    null
+  );
+};
+
+const chipEstadoVacacion = (estado: unknown) => {
+  const estadoValido = normalizarEstadoVacacion(estado);
+
+  if (!estadoValido) {
+    const label = typeof estado === "string" && estado.trim() ? estado : "Sin estado";
+    return <Chip size="small" color="default" label={label} sx={{ fontSize: 11, height: 20, fontWeight: 600 }} />;
+  }
+
+  return (
+    <Chip
+      size="small"
+      color={EstadoVacacionColor[estadoValido]}
+      icon={EstadoVacacionIcon[estadoValido]}
+      label={EstadoVacacionLabel[estadoValido]}
+      sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
+    />
+  );
 };
 
 type ModoDialog = "pendientes" | "aprobadas";
@@ -78,18 +111,16 @@ export default function VacacionesDialog({
   periodo,
   modo,
 }: VacacionesDialogProps) {
- const { cancelarVacacion, loading: cancelando } = useCancelarVacaciones(
-  (mensaje) => {
-    toast.success(mensaje ?? "Vacación cancelada exitosamente");
-    onClose();
-  },
-  (mensaje) => {
-    toast.error(mensaje);
-  },
-);
-  const [vacacionIdAcancelar, setVacacionIdAcancelar] = useState<number | null>(
-    null,
+  const { cancelarVacacion, loading: cancelando } = useCancelarVacaciones(
+    (mensaje) => {
+      toast.success(mensaje ?? "Vacación cancelada exitosamente");
+      onClose();
+    },
+    (mensaje) => {
+      toast.error(mensaje);
+    },
   );
+  const [vacacionIdAcancelar, setVacacionIdAcancelar] = useState<number | null>(null);
   const { aprobarVacacion, loading: aprobando } = useAprobarVacaciones(onClose);
   if (!periodo) return null;
 
@@ -227,15 +258,7 @@ export default function VacacionesDialog({
                         {v.observacion ?? "—"}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        color={EstadoVacacionColor[v.estado]}
-                        icon={EstadoVacacionIcon[v.estado]}
-                        label={EstadoVacacionLabel[v.estado]}
-                        sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
-                      />
-                    </TableCell>
+                    <TableCell>{chipEstadoVacacion(v.estado)}</TableCell>
                     <TableCell>
                       {modo === "pendientes" && (
                         <>

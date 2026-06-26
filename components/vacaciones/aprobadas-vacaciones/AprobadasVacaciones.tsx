@@ -24,7 +24,6 @@ import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
-
 import { useVacacionesAprobadas } from "@/features/dashboard/vacaciones/hooks/useVacacionesAprobadas";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
@@ -328,7 +327,7 @@ export default function ListarVacacionesAprobadas() {
 
   return (
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap", mb: 1 }}>
         <Button
           component={Link}
           href="/dashboard/vacaciones/registrar"

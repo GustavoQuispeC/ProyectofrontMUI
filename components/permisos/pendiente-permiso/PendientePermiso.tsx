@@ -1,10 +1,8 @@
 import { usePermisosPendientes } from "@/features/dashboard/permiso/hooks/usePermisosPendientes";
-import { Condicion } from "@/features/dashboard/permiso/permiso.type";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -32,15 +30,7 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import { useAprobarPermiso } from "@/features/dashboard/permiso/hooks/useAprobarPermiso";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-
-const chipCondicion = (condicion: Condicion) => {
-  const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
-    Pendiente: { color: "warning", label: "Pendiente" },
-    Aprobado: { color: "success", label: "Aprobado" },
-    Rechazado: { color: "error", label: "Rechazado" },
-  };
-  return <Chip size="small" color={config[condicion].color} label={config[condicion].label} />;
-};
+import { chipCondicion } from "@/features/dashboard/permiso/permiso.ui";
 
 export default function ListarPermisosPendientes() {
   const user = getAuthUser();
@@ -164,7 +154,7 @@ export default function ListarPermisosPendientes() {
                     </TableCell>
                     <TableCell>
                       <Tooltip title={permiso.motivoRechazo || ""} arrow>
-                        <span>{chipCondicion(permiso.condicion as Condicion)}</span>
+                        <span>{chipCondicion(permiso.condicion)}</span>
                       </Tooltip>
                     </TableCell>
                     <TableCell align="center">

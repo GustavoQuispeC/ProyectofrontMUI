@@ -33,7 +33,7 @@ import {
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { PermisoMensualForm, PermisoMensualSchema } from "@/features/dashboard/permiso/permiso.schema";
 import { useState } from "react";
-import { Condicion, ListarPermisoMensual } from "@/features/dashboard/permiso/permiso.type";
+import { ListarPermisoMensual } from "@/features/dashboard/permiso/permiso.type";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
@@ -48,6 +48,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useRechazarPermiso } from "@/features/dashboard/permiso/hooks/useRechazarPermiso";
+import { chipCondicion } from "@/features/dashboard/permiso/permiso.ui";
 
 const meses = [
   { value: 1, label: "Enero" },
@@ -63,16 +64,6 @@ const meses = [
   { value: 11, label: "Noviembre" },
   { value: 12, label: "Diciembre" },
 ];
-
-//! Muestra el estado del permiso
-const chipCondicion = (condicion: Condicion) => {
-  const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
-    Pendiente: { color: "warning", label: "Pendiente" },
-    Aprobado: { color: "success", label: "Aprobado" },
-    Rechazado: { color: "error", label: "Rechazado" },
-  };
-  return <Chip size="small" color={config[condicion].color} label={config[condicion].label} />;
-};
 
 //! Iniciales para el avatar
 const getInitials = (name: string) =>
@@ -266,7 +257,7 @@ function Row({ row, onRechazar }: RowProps) {
                           {permiso.lugar}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">{chipCondicion(permiso.condicion as Condicion)}</TableCell>
+                      <TableCell align="center">{chipCondicion(permiso.condicion)}</TableCell>
                       <TableCell align="center">
                         <Tooltip title="Rechazar">
                           <span>

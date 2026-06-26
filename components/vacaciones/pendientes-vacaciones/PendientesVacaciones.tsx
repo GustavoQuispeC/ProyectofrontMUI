@@ -2,264 +2,399 @@
 
 import * as React from "react";
 import {
+  Avatar,
+  Box,
   Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Collapse,
   IconButton,
+  Paper,
   Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
-import BlockIcon from "@mui/icons-material/Block";
-import CheckIcon from "@mui/icons-material/Check";
-import ClearIcon from "@mui/icons-material/Clear";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import Link from "next/link";
 
-import { EstadoVacacion, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
-import { ChipProps } from "@mui/material";
-import { formatDate } from "@/features/dashboard/vacaciones/vacaciones.constants";
-import { useAprobarVacaciones } from "@/features/dashboard/vacaciones/hooks/useAprobarVacaciones";
-import { useCancelarVacaciones } from "@/features/dashboard/vacaciones/hooks/useCancelarVacaciones";
-import { useState } from "react";
-import ConfirmarCancelarVacacionDialog from "@/components/vacaciones/ConfirmarCancelarVacacionDialog";
-// ─── Labels / Colors / Icons ─────────────────────────────────────────────────
-const EstadoVacacionLabel: Record<EstadoVacacion, string> = {
-  [EstadoVacacion.Pendiente]: "Pendiente",
-  [EstadoVacacion.Aprobado]: "Aprobado",
-  [EstadoVacacion.Rechazado]: "Rechazado",
-  [EstadoVacacion.Cancelado]: "Cancelado",
-};
+import VacacionesDialog from "@/components/vacaciones/VacacionesDialog";
+import { useVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/useVacacionesPendientes";
+import {
+  ListarEmpleadoVacaciones,
+  PeriodoVacacional,
+} from "@/features/dashboard/vacaciones/vacaciones.type";
+import {
+  avatarStyle,
+  EstadoPeriodoColor,
+  EstadoPeriodoLabel,
+  formatDate,
+  getInitials,
+} from "@/features/dashboard/vacaciones/vacaciones.constants";
+import { hasPermission } from "@/shared/auth/auth.helper";
+import { permissions } from "@/shared/auth/auth.permissions";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import AccessDenied from "@/shared/components/access-denied/AccessDenied";
+import { useMounted } from "@/shared/hooks/useMounted";
 
-const EstadoVacacionColor: Record<EstadoVacacion, ChipProps["color"]> = {
-  [EstadoVacacion.Pendiente]: "warning",
-  [EstadoVacacion.Aprobado]: "success",
-  [EstadoVacacion.Rechazado]: "error",
-  [EstadoVacacion.Cancelado]: "default",
-};
-
-const EstadoVacacionIcon: Record<EstadoVacacion, React.ReactElement> = {
-  [EstadoVacacion.Pendiente]: <HourglassEmptyIcon sx={{ fontSize: 14 }} />,
-  [EstadoVacacion.Aprobado]: <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 14 }} />,
-  [EstadoVacacion.Rechazado]: <CancelOutlinedIcon sx={{ fontSize: 14 }} />,
-  [EstadoVacacion.Cancelado]: <BlockIcon sx={{ fontSize: 14 }} />,
-};
-
-type ModoDialog = "pendientes" | "aprobadas";
-
-// ─── Props ────────────────────────────────────────────────────────────────────
-interface VacacionesDialogProps {
-  open: boolean;
-  onClose: () => void;
-  periodo: PeriodoVacacional | null;
-  modo: ModoDialog;
+interface PeriodoRowProps {
+  periodo: PeriodoVacacional;
+  isLast: boolean;
+  onVerDetalle: (periodo: PeriodoVacacional) => void;
 }
 
-export default function VacacionesDialog({ open, onClose, periodo, modo }: VacacionesDialogProps) {
-  const { cancelarVacacion, loading: cancelando } = useCancelarVacaciones(onClose);
-  const [vacacionIdAcancelar, setVacacionIdAcancelar] = useState<number | null>(null);
-  const { aprobarVacacion, loading: aprobando } = useAprobarVacaciones(onClose);
-  if (!periodo) return null;
+function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      aria-labelledby="vacaciones-dialog-title"
-      fullWidth
-      maxWidth={false}
+    <TableRow
       sx={{
-        "& .MuiDialog-paper": {
-          width: "75%",
-          maxWidth: "75%",
+        bgcolor: isDarkMode ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.05)",
+        "&:hover": {
+          bgcolor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+        },
+        "& td": {
+          borderBottom: isLast ? "none" : "1px solid rgba(0,0,0,0.12)",
         },
       }}
     >
-      <DialogTitle id="vacaciones-dialog-title">
-        <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>Solicitudes del período</Typography>
-          <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-            #{periodo.vacacionSaldoId}&nbsp;·&nbsp;{formatDate(periodo.periodoInicio)} –{" "}
-            {formatDate(periodo.periodoFin)}
-          </Typography>
-        </Stack>
-      </DialogTitle>
+      <TableCell />
+      <TableCell />
+      <TableCell sx={{ fontWeight: 600 }}>#{periodo.vacacionSaldoId}</TableCell>
+      <TableCell>{formatDate(periodo.periodoInicio)}</TableCell>
+      <TableCell>{formatDate(periodo.periodoFin)}</TableCell>
+      <TableCell sx={{ fontWeight: 700, color: "#6D28D9" }}>{formatDate(periodo.fechaGeneracion)}</TableCell>
+      <TableCell align="center">{periodo.diasAsignados}</TableCell>
+      <TableCell align="center" sx={{ color: periodo.diasUsados > 0 ? "#92400E" : "text.secondary" }}>
+        {periodo.diasUsados}
+      </TableCell>
+      <TableCell align="center" sx={{ color: "success.dark", fontWeight: 600 }}>
+        {periodo.diasDisponibles}
+      </TableCell>
+      <TableCell align="center">{periodo.cantidadDomingosAcumulados}</TableCell>
+      <TableCell align="center">
+        <Chip
+          size="small"
+          color={periodo.porcentajeConsumido >= 80 ? "error" : periodo.porcentajeConsumido >= 50 ? "warning" : "success"}
+          label={`${periodo.porcentajeConsumido}%`}
+          sx={{ fontSize: 11, height: 20, fontWeight: 700, minWidth: 46 }}
+        />
+      </TableCell>
+      <TableCell align="center">{periodo.cantidadVacaciones}</TableCell>
+      <TableCell>
+        <Chip
+          size="small"
+          color={EstadoPeriodoColor[periodo.estado]}
+          label={EstadoPeriodoLabel[periodo.estado]}
+          sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
+        />
+      </TableCell>
+      <TableCell align="center">
+        <Tooltip title="Ver solicitudes">
+          <IconButton size="small" color="info" onClick={() => onVerDetalle(periodo)}>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </TableCell>
+    </TableRow>
+  );
+}
 
-      <DialogContent dividers sx={{ p: 0 }}>
-        <TableContainer>
-          <Table size="small" sx={{ tableLayout: "auto", minWidth: 600 }}>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell sx={{ fontWeight: "700" }}>F. Solicitud</TableCell>
-                <TableCell>F. Inicio</TableCell>
-                <TableCell>F. Fin</TableCell>
-                <TableCell align="center">Días</TableCell>
-                <TableCell align="center">Domingos</TableCell>
-                <TableCell>Aprobado por</TableCell>
-                <TableCell>Observación</TableCell>
-                <TableCell>Estado</TableCell>
-                <TableCell>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
+interface RowProps {
+  row: ListarEmpleadoVacaciones;
+  onVerDetalle: (periodo: PeriodoVacacional) => void;
+}
 
-            <TableBody>
-              {periodo.vacaciones.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={10}
-                    sx={{
-                      py: 4,
-                      textAlign: "center",
-                      color: "text.disabled",
-                      fontSize: 12,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Sin solicitudes registradas en este período.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                periodo.vacaciones.map((v) => (
-                  <TableRow key={v.vacacionId} sx={{ "&:last-child td": { borderBottom: 0 } }}>
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: "text.secondary",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        #{v.vacacionId}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#6D28D9" }}>
-                        {formatDate(v.fechaSolicitud)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography sx={{ fontSize: 13 }}>{formatDate(v.fechaInicio)}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography sx={{ fontSize: 13 }}>{formatDate(v.fechaFin)}</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#15803D" }}>
-                        {v.diasCalendario}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ fontSize: 13, color: "#6D28D9" }}>{v.cantidadDomingos}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        sx={{
-                          fontSize: 13,
-                          color: v.aprobadoPor ? "text.primary" : "text.disabled",
-                          fontStyle: v.aprobadoPor ? "normal" : "italic",
-                        }}
-                      >
-                        {v.aprobadoPor ?? "—"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ maxWidth: 200 }}>
-                      <Typography
-                        sx={{
-                          fontSize: 12,
-                          color: v.observacion ? "#92400E" : "text.disabled",
-                          fontStyle: v.observacion ? "normal" : "italic",
-                          whiteSpace: "normal",
-                          wordBreak: "break-word",
-                        }}
-                      >
-                        {v.observacion ?? "—"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        color={EstadoVacacionColor[v.estado]}
-                        icon={EstadoVacacionIcon[v.estado]}
-                        label={EstadoVacacionLabel[v.estado]}
-                        sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {modo === "pendientes" && (
-                        <>
-                          <Tooltip title="Aprobar">
-                            <IconButton
-                              size="small"
-                              color="success"
-                              onClick={() => aprobarVacacion(v.vacacionId)}
-                              disabled={aprobando}
-                            >
-                              <CheckIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Cancelar">
-                            <IconButton size="small" color="error">
-                              <BlockIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Rechazar">
-                            <IconButton size="small" color="error">
-                              <ClearIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </>
-                      )}
-                      {modo === "aprobadas" && (
-                        <>
-                          <Tooltip title="Cancelar">
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => setVacacionIdAcancelar(v.vacacionId)}
-                              disabled={cancelando}
-                            >
-                              <BlockIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </DialogContent>
+function Row({ row, onVerDetalle }: RowProps) {
+  const [open, setOpen] = React.useState(false);
+  const palette = avatarStyle(row.empleadoId);
 
-      <DialogActions sx={{ px: 2, py: 1.5 }}>
-        <Button variant="outlined" size="small" onClick={onClose}>
-          Cerrar
-        </Button>
-      </DialogActions>
-      <ConfirmarCancelarVacacionDialog
-        open={vacacionIdAcancelar !== null}
-        onClose={() => setVacacionIdAcancelar(null)}
-        onConfirm={() => {
-          if (vacacionIdAcancelar !== null) {
-            cancelarVacacion(vacacionIdAcancelar);
-            setVacacionIdAcancelar(null);
-          }
+  return (
+    <>
+      <TableRow
+        hover
+        onClick={() => setOpen((prev) => !prev)}
+        sx={{
+          cursor: "pointer",
+          bgcolor: open ? "rgba(94, 125, 227, 0.2)" : "rgba(0, 0, 0, 0.05)",
+          "&:hover": { bgcolor: open ? "rgba(232, 237, 255, 0.2)" : "rgba(0, 0, 0, 0.08)" },
+          transition: "background-color 0.12s",
+          "& > td": {
+            py: "10px",
+            borderBottom: open ? "1px solid" : undefined,
+            borderColor: "divider",
+          },
         }}
-        loading={cancelando}
-      />
-    </Dialog>
+      >
+        <TableCell sx={{ pl: 1.5 }}>
+          <IconButton size="small" disableRipple sx={{ color: "text.secondary" }}>
+            {open ? <KeyboardArrowUp fontSize="small" /> : <KeyboardArrowDown fontSize="small" />}
+          </IconButton>
+        </TableCell>
+        <TableCell>
+          <Typography
+            sx={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: "text.secondary",
+              fontVariantNumeric: "tabular-nums",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {row.codigoEmpleado}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.25 }}>
+            <Avatar
+              sx={{
+                width: 28,
+                height: 28,
+                fontSize: 10,
+                fontWeight: 700,
+                bgcolor: palette.bg,
+                color: palette.color,
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              {getInitials(row.nombreCompleto)}
+            </Avatar>
+            <Typography sx={{ fontSize: 14, fontWeight: 500 }}>{row.nombreCompleto}</Typography>
+          </Stack>
+        </TableCell>
+        <TableCell align="center">
+          <Typography sx={{ fontSize: 13, color: "text.secondary" }}>{formatDate(row.fechaIngreso)}</Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography sx={{ fontSize: 13 }}>{row.cantidadPeriodos}</Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography sx={{ fontSize: 13 }}>{row.cantidadVacaciones}</Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography sx={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }}>{row.diasTotalesAsignados}</Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography
+            sx={{
+              fontSize: 13,
+              fontVariantNumeric: "tabular-nums",
+              color: row.diasTotalesUsados > 0 ? "warning.dark" : "text.secondary",
+            }}
+          >
+            {row.diasTotalesUsados}
+          </Typography>
+        </TableCell>
+        <TableCell align="center">
+          <Typography sx={{ fontSize: 13, fontVariantNumeric: "tabular-nums", color: "success.dark", fontWeight: 600 }}>
+            {row.diasTotalesDisponibles}
+          </Typography>
+        </TableCell>
+      </TableRow>
+
+      <TableRow>
+        <TableCell colSpan={10} sx={{ p: 0, borderBottom: open ? "2px solid" : "none", borderColor: "primary.light" }}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+              <Table size="small" sx={{ tableLayout: "auto", width: "100%" }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell />
+                    <TableCell />
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>ID</TableCell>
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Per. Inicio</TableCell>
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Per. Fin</TableCell>
+                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>F. Apertura</TableCell>
+                    <TableCell align="center" sx={{ borderRight: "1px solid #D8DBE2" }}>
+                      Asignados
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: "1px solid #D8DBE2" }}>
+                      Usados
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: "1px solid #D8DBE2" }}>
+                      Disponibles
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: "1px solid #D8DBE2" }}>
+                      Domingos
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: "1px solid #D8DBE2" }}>
+                      Consumo
+                    </TableCell>
+                    <TableCell align="center" sx={{ borderRight: "1px solid #D8DBE2" }}>
+                      Solicitudes
+                    </TableCell>
+                    <TableCell>Estado</TableCell>
+                    <TableCell align="center">Acciones</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.periodosVacacionales.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={14}
+                        sx={{
+                          py: 2.5,
+                          textAlign: "center",
+                          color: "text.disabled",
+                          fontSize: 12,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        Sin períodos registrados
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    row.periodosVacacionales.map((periodo, idx) => (
+                      <PeriodoRow
+                        key={periodo.vacacionSaldoId}
+                        periodo={periodo}
+                        isLast={idx === row.periodosVacacionales.length - 1}
+                        onVerDetalle={onVerDetalle}
+                      />
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
+  );
+}
+
+export default function PendientesVacaciones() {
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.listarVacacionesPendientes) : false;
+  const { vacacionesPendientes, loading } = useVacacionesPendientes(canAccess);
+  const mounted = useMounted();
+  const theme = useTheme();
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up("xl"));
+  const rowsPerPage = isLargeScreen ? 20 : 10;
+  const [page, setPage] = React.useState(0);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [selectedPeriodo, setSelectedPeriodo] = React.useState<PeriodoVacacional | null>(null);
+
+  const handleVerDetalle = (periodo: PeriodoVacacional) => {
+    setSelectedPeriodo(periodo);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setSelectedPeriodo(null);
+  };
+
+  if (!mounted) return null;
+  if (!canAccess) return <AccessDenied />;
+
+  const maxPage = Math.max(0, Math.ceil(vacacionesPendientes.length / rowsPerPage) - 1);
+  const safePage = Math.min(page, maxPage);
+  const paginatedRows = vacacionesPendientes.slice(safePage * rowsPerPage, safePage * rowsPerPage + rowsPerPage);
+
+  return (
+    <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap", mb: 1 }}>
+        <Button component={Link} href="/dashboard/vacaciones/registrar" variant="contained" startIcon={<GroupAddIcon />}>
+          Gestionar Vacaciones
+        </Button>
+        <Button
+          component={Link}
+          href="/dashboard/vacaciones/aprobadas"
+          variant="contained"
+          color="success"
+          startIcon={<VisibilityIcon />}
+        >
+          Ver aprobados
+        </Button>
+      </Box>
+      <Typography variant="h5" color="primary" sx={{ mb: 2 }}>
+        Vacaciones pendientes
+      </Typography>
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        sx={{
+          borderRadius: "6px",
+          border: "1px solid",
+          borderColor: "divider",
+          overflowX: "auto",
+        }}
+      >
+        <Table sx={{ tableLayout: "auto", minWidth: 900 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell width={44} />
+              <TableCell>Código</TableCell>
+              <TableCell>Empleado</TableCell>
+              <TableCell align="center">Ingreso</TableCell>
+              <TableCell align="center">Períodos</TableCell>
+              <TableCell align="center">Solicitudes</TableCell>
+              <TableCell align="center">Asignados</TableCell>
+              <TableCell align="center">Usados</TableCell>
+              <TableCell align="center">Disponibles</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={9}>
+                  <Box sx={{ py: 6, textAlign: "center" }}>
+                    <Typography sx={{ fontSize: 14, color: "text.secondary" }}>Cargando...</Typography>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : paginatedRows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9}>
+                  <Box sx={{ py: 6, textAlign: "center" }}>
+                    <Typography sx={{ fontSize: 14, color: "text.disabled" }}>
+                      No se encontraron vacaciones pendientes.
+                    </Typography>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedRows.map((row) => <Row key={row.empleadoId} row={row} onVerDetalle={handleVerDetalle} />)
+            )}
+          </TableBody>
+        </Table>
+
+        {vacacionesPendientes.length > 0 && (
+          <TablePagination
+            component="div"
+            count={vacacionesPendientes.length}
+            page={safePage}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            rowsPerPageOptions={[rowsPerPage]}
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count !== -1 ? count : `mas de ${to}`}`}
+            labelRowsPerPage="Filas por pagina:"
+            sx={{
+              borderTop: "1px solid",
+              borderColor: "divider",
+              "& .MuiTablePagination-toolbar": { minHeight: 44 },
+              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
+                fontSize: 13,
+              },
+            }}
+          />
+        )}
+      </TableContainer>
+
+      <VacacionesDialog open={dialogOpen} onClose={handleCloseDialog} periodo={selectedPeriodo} modo="pendientes" />
+    </Box>
   );
 }

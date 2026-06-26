@@ -59,6 +59,7 @@ import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { usePermisos } from "@/features/dashboard/permiso/hooks/usePermiso";
 import { useMounted } from "@/shared/hooks/useMounted";
 import { useRouter } from "next/navigation";
+import { chipCondicion } from "@/features/dashboard/permiso/permiso.ui";
 
 const defaultValues: RegistrarPermisoForm = {
   empleadoId: 0,
@@ -94,15 +95,6 @@ const calcularDuracion = (inicio: string, fin: string): string => {
   const totalMin = h2 * 60 + m2 - (h1 * 60 + m1);
   if (totalMin <= 0) return "Inválido";
   return `${Math.floor(totalMin / 60)}h ${totalMin % 60}m`;
-};
-
-const chipCondicion = (condicion: Condicion) => {
-  const config: Record<Condicion, { color: "warning" | "success" | "error"; label: string }> = {
-    Pendiente: { color: "warning", label: "Pendiente" },
-    Aprobado: { color: "success", label: "Aprobado" },
-    Rechazado: { color: "error", label: "Rechazado" },
-  };
-  return <Chip size="small" color={config[condicion].color} label={config[condicion].label} />;
 };
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -592,7 +584,7 @@ export default function RegistrarPermiso() {
                       </TableCell>
                       <TableCell>
                         <Tooltip title={permiso.motivoRechazo || ""} arrow>
-                          <span>{chipCondicion(permiso.condicion as Condicion)}</span>
+                          <span>{chipCondicion(permiso.condicion)}</span>
                         </Tooltip>
                       </TableCell>
                     </TableRow>
