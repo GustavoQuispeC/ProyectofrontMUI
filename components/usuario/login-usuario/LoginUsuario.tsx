@@ -63,7 +63,7 @@ export default function LoginUsuario({
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center px-4 py-12 overflow-hidden bg-gradient-to-br from-blue-900 via-blue-950 to-black dark:from-black dark:via-neutral-950 dark:to-black">
+    <main className="relative flex min-h-screen items-center justify-center px-4 py-12 overflow-hidden bg-linear-to-br from-blue-900 via-blue-950 to-black dark:from-black dark:via-neutral-950 dark:to-black">
       {/* Glow decorations */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-orange-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
@@ -151,7 +151,7 @@ export default function LoginUsuario({
               <button
                 type="submit"
                 disabled={!canSubmit}
-                className="flex items-center justify-center gap-2 h-12 w-full rounded-xl bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-bold shadow-lg shadow-orange-600/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                className="flex items-center justify-center gap-2 h-12 w-full rounded-xl bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-bold shadow-lg shadow-orange-600/30 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
               >
                 {isLoading ? (
                   <>

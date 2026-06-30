@@ -1,4 +1,8 @@
-export type Condicion = "Pendiente" | "Aprobado" | "Rechazado";
+export enum Condicion {
+  Pendiente = "Pendiente",
+  Aprobado = "Aprobado",
+  Rechazado = "Rechazado",
+}
 
 export interface RegistrarPermiso {
   empleadoId: number;

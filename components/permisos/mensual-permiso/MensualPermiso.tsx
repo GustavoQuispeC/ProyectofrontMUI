@@ -48,7 +48,13 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useRechazarPermiso } from "@/features/dashboard/permiso/hooks/useRechazarPermiso";
-import { chipCondicion } from "@/features/dashboard/permiso/permiso.ui";
+import {
+  avatarStyle,
+  getInitials,
+  formatHoras,
+  CondicionPermisoColor,
+  CondicionPermisoLabel,
+} from "@/features/dashboard/permiso/permisos.constants";
 
 const meses = [
   { value: 1, label: "Enero" },
@@ -65,47 +71,12 @@ const meses = [
   { value: 12, label: "Diciembre" },
 ];
 
-//! Iniciales para el avatar
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-
-//! Color de avatar por empleadoId
-const avatarColor = (id: number) => {
-  const colors = [
-    "#5C6BC0",
-    "#26A69A",
-    "#EF5350",
-    "#AB47BC",
-    "#FF7043",
-    "#29B6F6",
-    "#66BB6A",
-    "#8D6E63",
-    "#D4E157",
-    "#546E7A",
-  ];
-  return colors[id % colors.length];
-};
-
 //! Props para las filas
 interface RowProps {
   row: ListarPermisoMensual;
 
   onRechazar: (id: number, nombreEmpleado: string) => void;
 }
-
-//! Función para formatear horas a formato "Xh Ym"
-const formatHoras = (horas: number): string => {
-  const h = Math.floor(horas);
-  const m = Math.round((horas - h) * 60);
-  if (h === 0) return `${m}min`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}min`;
-};
 
 //! Fila de la tabla con detalle
 function Row({ row, onRechazar }: RowProps) {
@@ -148,7 +119,7 @@ function Row({ row, onRechazar }: RowProps) {
                 fontSize: 13,
                 fontWeight: 700,
                 mr: 1,
-                bgcolor: avatarColor(row.empleadoId),
+                bgcolor: avatarStyle(row.empleadoId).bg,
               }}
             >
               {getInitials(row.nombreCompleto)}
@@ -257,7 +228,13 @@ function Row({ row, onRechazar }: RowProps) {
                           {permiso.lugar}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">{chipCondicion(permiso.condicion)}</TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          label={CondicionPermisoLabel[permiso.condicion]}
+                          color={CondicionPermisoColor[permiso.condicion]}
+                          size="small"
+                        />
+                      </TableCell>
                       <TableCell align="center">
                         <Tooltip title="Rechazar">
                           <span>

@@ -25,3 +25,11 @@ export async function registrarUsuarioApi(empleadoId: number, payload: Registrar
     body: JSON.stringify(payload),
   });
 }
+
+//! Función para actualizar usuario
+export async function actualizarUsuarioApi(usuarioId: number, payload: RegistrarUsuario): Promise<void> {
+  return apiUsuario(`${apiUrl}/usuarios/${usuarioId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}

@@ -4,6 +4,7 @@ import { permissions } from "@/shared/auth/auth.permissions";
 import {
   listarUsuariosApi as listarUsuariosService,
   registrarUsuarioApi as registrarUsuarioService,
+  actualizarUsuarioApi as actualizarUsuarioService,
 } from "./usuario.service";
 import { RegistrarUsuario } from "./usuario.types";
 
@@ -33,4 +34,18 @@ export async function listarUsuarios() {
     throw new Error("No tienes permisos para listar usuarios");
   }
   return listarUsuariosService();
+}
+
+//! Actualizar usuario con validación
+export async function actualizarUsuario(usuarioId: number, payload: RegistrarUsuario): Promise<void> {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  if (!hasPermission(user.rol, permissions.actualizarUsuarios)) {
+    throw new Error("No tienes permisos para actualizar usuarios");
+  }
+  return actualizarUsuarioService(usuarioId, payload);
 }
