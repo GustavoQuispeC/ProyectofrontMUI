@@ -10,15 +10,17 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import { esES } from "@mui/x-data-grid/locales";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Button from "@mui/material/Button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
+import { ListarUsuarios } from "@/features/dashboard/usuario";
 
-const getColumns = (): GridColDef[] => [
+const getColumns = (onEdit: (row: ListarUsuarios) => void): GridColDef[] => [
   {
     field: "numeroDocumento",
     headerName: "N° DOCUMENTO",
@@ -79,7 +81,7 @@ const getColumns = (): GridColDef[] => [
           </IconButton>
         </Tooltip> */}
         <Tooltip title="Editar">
-          <IconButton size="small" color="inherit" onClick={() => console.log("Editar", params.row)}>
+          <IconButton size="small" color="inherit" onClick={() => onEdit(params.row)}>
             <ModeEditOutlineOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -97,6 +99,7 @@ const paginationModel = { page: 0, pageSize: 10 };
 const gridInitialState = { pagination: { paginationModel } };
 
 export default function ListarUsuariosDataTable() {
+  const router = useRouter();
   const user = getAuthUser();
 
   const canAccess = user ? hasPermission(user.rol, permissions.listarUsuarios) : false;
@@ -114,7 +117,21 @@ export default function ListarUsuariosDataTable() {
 
   const localeText = useMemo(() => esES.components.MuiDataGrid.defaultProps.localeText, []);
 
-  const columns = useMemo(() => getColumns(), []);
+  const handleEdit = useCallback(
+    (row: ListarUsuarios) => {
+      const userId = row.userId;
+
+      if (!userId) {
+        console.warn("⚠️ No se encontró userId en la fila:", row);
+        return;
+      }
+
+      router.push(`/dashboard/usuarios/actualizar?usuarioId=${userId}`);
+    },
+    [router],
+  );
+
+  const columns = useMemo(() => getColumns(handleEdit), [handleEdit]);
 
   if (!mounted) return null;
 

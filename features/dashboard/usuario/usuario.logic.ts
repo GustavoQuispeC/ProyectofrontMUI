@@ -6,7 +6,7 @@ import {
   registrarUsuarioApi as registrarUsuarioService,
   actualizarUsuarioApi as actualizarUsuarioService,
 } from "./usuario.service";
-import { RegistrarUsuario } from "./usuario.types";
+import { ActualizarUsuarioPayload, RegistrarUsuario } from "./usuario.types";
 
 //! Registrar usuario con validación
 export async function registrarUsuario(empleadoId: number, payload: RegistrarUsuario): Promise<void> {
@@ -37,7 +37,7 @@ export async function listarUsuarios() {
 }
 
 //! Actualizar usuario con validación
-export async function actualizarUsuario(usuarioId: number, payload: RegistrarUsuario): Promise<void> {
+export async function actualizarUsuario(usuarioId: string, payload: ActualizarUsuarioPayload): Promise<void> {
   const user = getAuthUser();
 
   if (!user) {

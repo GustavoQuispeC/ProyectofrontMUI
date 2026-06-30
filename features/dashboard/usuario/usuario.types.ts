@@ -3,11 +3,18 @@ export interface RegistrarUsuario {
   password: string;
 }
 
+export interface ActualizarUsuarioPayload {
+  roleId: string;
+  isActive: boolean;
+}
+
 export interface ListarUsuarios {
+  id?: number;
+  usuarioId?: number;
+  userId?: string;
   numeroDocumento: string;
   email: string;
   isActive: boolean;
   roles: string[];
   nombreEmpleado: null | string;
-  //fotoUrl:        null | string;
 }
