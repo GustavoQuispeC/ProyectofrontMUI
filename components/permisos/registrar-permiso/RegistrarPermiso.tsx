@@ -107,7 +107,7 @@ export default function RegistrarPermiso() {
 
   const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
   const [saving, setSaving] = useState(false);
-  const [condicion, setCondicion] = useState<Condicion>("Pendiente");
+  const [condicion, setCondicion] = useState<Condicion>(Condicion.Pendiente);
   const [motivoRechazo, setMotivoRechazo] = useState("");
   const fechaActual = new Date();
   const [anioFiltro, setAnioFiltro] = useState(fechaActual.getFullYear().toString());
@@ -152,7 +152,7 @@ export default function RegistrarPermiso() {
   const resetForm = () => {
     reset(defaultValues);
     setSelectedEmployee(null);
-    setCondicion("Pendiente");
+    setCondicion(Condicion.Pendiente);
     setMotivoRechazo("");
   };
   //! enviar form
@@ -411,12 +411,12 @@ export default function RegistrarPermiso() {
               <FormControl component="fieldset">
                 <FormLabel component="legend">Condición del permiso</FormLabel>
                 <RadioGroup row value={condicion} onChange={(e) => setCondicion(e.target.value as Condicion)}>
-                  <FormControlLabel value="Pendiente" control={<Radio color="warning" />} label="Pendiente" />
-                  <FormControlLabel value="Aprobado" control={<Radio color="success" />} label="Aprobado" />
+                  <FormControlLabel value={Condicion.Pendiente} control={<Radio color="warning" />} label="Pendiente" />
+                  <FormControlLabel value={Condicion.Aprobado} control={<Radio color="success" />} label="Aprobado" />
                 </RadioGroup>
               </FormControl>
             </Grid>
-            {condicion === "Rechazado" && (
+            {condicion === Condicion.Rechazado && (
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth

@@ -4,7 +4,7 @@ import DetalleEmpleado from "@/components/empleados/detalle-empleado/DetalleEmpl
 import Box from "@mui/material/Box";
 import { use } from "react";
 
-export default function DetalleEmpleadoPage({ params }: { params: Promise<{ id: string }> }) {
+export default function DetalleEmpleadoPage({ params }: { params: Promise<{ id: number }> }) {
   const { id } = use(params);
 
   if (!id) {
