@@ -16,7 +16,6 @@ import type { DropdownId } from "../types";
 import { CartButton } from "@/components/cartdrawer/Cartdrawer";
 import { useThemeMode } from "../../theme/ThemeRegistry";
 
-
 interface NavActionsProps {
   isLoggedIn: boolean;
   openDropdown: DropdownId;
@@ -25,28 +24,25 @@ interface NavActionsProps {
   onLogout: () => void;
 }
 
-export function NavActions({
-  isLoggedIn,
-  openDropdown,
-  onToggleDropdown,
-  onLogin,
-  onLogout,
-}: NavActionsProps) {
+export function NavActions({ isLoggedIn, openDropdown, onToggleDropdown, onLogin, onLogout }: NavActionsProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { mode, toggleTheme } = useThemeMode();
   const router = useRouter();
 
-  const updateSearchParams = useCallback((search: string) => {
-    const params = new URLSearchParams(window.location.search);
-    if (search) {
-      params.set("search", search);
-    } else {
-      params.delete("search");
-    }
-    const query = params.toString();
-    router.replace(`/productFilter${query ? `?${query}` : ""}`);
-  }, [router]);
+  const updateSearchParams = useCallback(
+    (search: string) => {
+      const params = new URLSearchParams(window.location.search);
+      if (search) {
+        params.set("search", search);
+      } else {
+        params.delete("search");
+      }
+      const query = params.toString();
+      router.replace(`/productFilter${query ? `?${query}` : ""}`);
+    },
+    [router],
+  );
 
   useEffect(() => {
     const trimmed = searchTerm.trim();
@@ -127,22 +123,18 @@ export function NavActions({
             <div className="flex items-center gap-2">
               <div className="relative">
                 <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-[11px] font-semibold text-blue-700 dark:text-blue-300">
-                  JD
+                  GQ
                 </div>
                 <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border-2 border-white dark:border-gray-950" />
               </div>
               <div className="hidden lg:block text-left">
-                <div className="text-[13px] font-medium text-gray-800 dark:text-gray-200 leading-tight">
-                  John Doe
-                </div>
-                <div className="text-[11px] text-gray-400">Admin</div>
+                <div className="text-[13px] font-medium text-gray-800 dark:text-gray-200 leading-tight">Gustavo</div>
+                <div className="text-[11px] text-gray-400">Administrador</div>
               </div>
               <span className="hidden lg:block">
                 <KeyboardArrowDownIcon
                   fontSize="small"
-                  className={`transition-transform duration-200 ${
-                    openDropdown === "user" ? "rotate-180" : ""
-                  }`}
+                  className={`transition-transform duration-200 ${openDropdown === "user" ? "rotate-180" : ""}`}
                 />
               </span>
             </div>
@@ -151,28 +143,23 @@ export function NavActions({
           {/* Header del user */}
           <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-gray-100 dark:border-gray-800 mb-1">
             <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-sm font-semibold text-blue-700 dark:text-blue-300 shrink-0">
-              JD
+              G
             </div>
             <div>
-              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">John Doe</div>
-              <div className="text-[11px] text-gray-400">john@example.com</div>
+              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Gustavo</div>
+              <div className="text-[11px] text-gray-400">gusstavocta@gmail.com</div>
             </div>
           </div>
-          <DropdownItem icon={<PersonOutlineOutlinedIcon fontSize="small" />} label="My profile" />
-          <DropdownItem icon={<SettingsOutlinedIcon fontSize="small" />} label="Account settings" />
-          <DropdownItem icon={<EmailIcon fontSize="small" />} label="Messages" badge="3" />
+          <DropdownItem icon={<PersonOutlineOutlinedIcon fontSize="small" />} label="Mis pedidos" />
+          <DropdownItem icon={<SettingsOutlinedIcon fontSize="small" />} label="Deudas" />
+          <DropdownItem icon={<EmailIcon fontSize="small" />} label="Mensajes" badge="3" />
           <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
-          <DropdownItem
-            icon={<LogoutOutlinedIcon fontSize="small" />}
-            label="Salir"
-            danger
-            onClick={onLogout}
-          />
+          <DropdownItem icon={<LogoutOutlinedIcon fontSize="small" />} label="Salir" danger onClick={onLogout} />
         </Dropdown>
       ) : (
         <button
           onClick={onLogin}
-          className="inline-flex h-11 items-center gap-2 rounded-full border border-blue-500/20 bg-gradient-to-r from-blue-600 to-cyan-600 px-4 text-sm font-medium text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-blue-500/30"
+          className="inline-flex h-11 items-center gap-2 rounded-full border border-blue-500/20 bg-linear-to-r from-blue-600 to-cyan-600 px-4 text-sm font-medium text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-blue-500/30"
         >
           <LoginOutlinedIcon style={{ fontSize: 16 }} />
           Acceso

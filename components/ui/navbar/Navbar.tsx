@@ -70,9 +70,7 @@ export default function Navbar() {
     <div ref={navRef} className="sticky top-0 z-40">
       <nav
         className={`relative overflow-visible border-b border-white/60 bg-white/88 backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-zinc-950/80 ${
-          scrolled
-            ? "shadow-[0_18px_45px_-26px_rgba(15,23,42,0.55)]"
-            : "shadow-none"
+          scrolled ? "shadow-[0_18px_45px_-26px_rgba(15,23,42,0.55)]" : "shadow-none"
         }`}
       >
         <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-blue-500/35 to-transparent" />
@@ -81,12 +79,12 @@ export default function Navbar() {
           <div className="flex items-center h-16 gap-2">
             <Link href="/" className="flex items-center gap-3 shrink-0 group mr-2">
               <Image
-                src="/Logo1Famet.png"
+                src="/LogoFamet2.png"
                 alt="Grupo Famet"
                 width={96}
-                height={16}
+                height={12}
                 priority
-                className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
               />
             </Link>
 
