@@ -4,7 +4,7 @@ export interface RegistrarUsuario {
 }
 
 export interface ActualizarUsuarioPayload {
-  roleId: string;
+  roleIds: string[];
   isActive: boolean;
 }
 

@@ -48,7 +48,7 @@ export default function LoginUsuario({
         localStorage.setItem(storageKey, JSON.stringify(payload));
       }
 
-      toastSuccess("Bienvenido al sistema");
+      toastSuccess("Bienvenido a Grupo Famet SAC");
 
       setTimeout(() => {
         window.location.assign("/dashboard");
