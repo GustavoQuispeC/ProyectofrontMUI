@@ -47,7 +47,9 @@ export default function SideMenu() {
       sx={{
         display: { xs: "none", md: "block" },
         [`& .${drawerClasses.paper}`]: {
-          backgroundColor: "background.paper",
+          backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#0F172A" : "#FFFFFF"),
+          borderRight: "1px solid",
+          borderColor: (theme) => (theme.palette.mode === "dark" ? "#1E293B" : "#E2E8F0"),
         },
       }}
     >
@@ -99,10 +101,12 @@ export default function SideMenu() {
               fontWeight: 500,
               cursor: "pointer",
               border: "1px solid",
-              borderColor: "divider",
-
-              bgcolor: "primary.100",
-              color: "primary.800",
+              borderColor: (theme) => (theme.palette.mode === "dark" ? "#3B82F6" : "#F97316"),
+              bgcolor: (theme) => (theme.palette.mode === "dark" ? "#1E40AF" : "#FFEDD5"),
+              color: (theme) => (theme.palette.mode === "dark" ? "#FFFFFF" : "#C2410C"),
+              "&:hover": {
+                bgcolor: (theme) => (theme.palette.mode === "dark" ? "#2563EB" : "#FDBA74"),
+              },
             }}
           >
             {usuario?.nombreCompleto

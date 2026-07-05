@@ -289,7 +289,7 @@ function FormularioActualizar({ usuario, roles, usuarioId, onSaved }: Formulario
               color="inherit"
               startIcon={<KeyboardBackspaceIcon />}
               onClick={() => router.push("/dashboard/usuarios/listar")}
-              sx={{ minWidth: 120, height: 44 }}
+              sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
             >
               Volver
             </Button>
@@ -300,7 +300,7 @@ function FormularioActualizar({ usuario, roles, usuarioId, onSaved }: Formulario
               startIcon={<RestartAltIcon />}
               onClick={resetForm}
               disabled={saving}
-              sx={{ minWidth: 120, height: 44 }}
+              sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
             >
               Limpiar
             </Button>
@@ -310,7 +310,7 @@ function FormularioActualizar({ usuario, roles, usuarioId, onSaved }: Formulario
               startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
               onClick={handleSubmit(onSubmit)}
               disabled={saving}
-              sx={{ minWidth: 140, height: 44, boxShadow: "none", borderRadius: 2 }}
+              sx={{ minWidth: 140, height: 44, boxShadow: "none", borderRadius: 2, width: { xs: "100%", sm: "auto" } }}
             >
               {saving ? "Guardando..." : "Actualizar"}
             </Button>

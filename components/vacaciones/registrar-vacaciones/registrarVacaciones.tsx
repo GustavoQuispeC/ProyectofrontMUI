@@ -14,11 +14,14 @@ import {
   CircularProgress,
   FormControl,
   FormHelperText,
+  Card,
+  CardContent,
+  useTheme,
 } from "@mui/material";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import SaveIcon from "@mui/icons-material/Save";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -61,6 +64,9 @@ interface SectionProps {
 }
 
 function Section({ title, children }: SectionProps) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
   return (
     <Paper
       elevation={0}
@@ -75,7 +81,7 @@ function Section({ title, children }: SectionProps) {
         sx={{
           px: 2.5,
           py: 1.25,
-          bgcolor: "#F8F9FB",
+          bgcolor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F8F9FB",
           borderBottom: "1px solid",
           borderColor: "divider",
         }}
@@ -99,6 +105,8 @@ export default function RegistrarVacacion() {
   const mounted = useMounted();
   const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
   const router = useRouter();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const {
     control,
@@ -154,40 +162,67 @@ export default function RegistrarVacacion() {
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
       <Box
         sx={{
-          width: "50%",
+          width: { xs: "100%", md: "50%" },
           bgcolor: "background.default",
           minHeight: "100vh",
           mx: "auto",
           py: { xs: 2, md: 5 },
-          px: 2,
+          px: { xs: 1, sm: 2 },
         }}
       >
         {/* ── HEADER ── */}
-        <Paper
-          elevation={0}
+        <Card
+          variant="outlined"
           sx={{
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: "8px",
-            p: 2,
             mb: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            borderRadius: 3,
+            boxShadow: "none",
           }}
         >
-          <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5 }}>
-            <Avatar sx={{ bgcolor: "#2458da", width: 40, height: 40 }}>
-              <BeachAccessIcon sx={{ fontSize: 20 }} />
-            </Avatar>
-            <Box>
-              <Typography sx={{ fontSize: 18, fontWeight: 700, lineHeight: 1.2 }}>Registro de Vacaciones</Typography>
-              <Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-                Solicitud de días de descanso del empleado
-              </Typography>
-            </Box>
-          </Stack>
-        </Paper>
+          <CardContent
+            sx={{
+              p: { xs: 2, md: 3 },
+              borderBottom: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+            }}
+          >
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
+              <Avatar
+                sx={{
+                  bgcolor: "primary.main",
+                  width: { xs: 48, md: 52 },
+                  height: { xs: 48, md: 52 },
+                }}
+              >
+                <BeachAccessIcon />
+              </Avatar>
+
+              <Box>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    color: "text.primary",
+                    fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                  }}
+                >
+                  Registro de Vacaciones
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Solicitud de días de descanso del empleado
+                </Typography>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
 
         <Stack sx={{ gap: 2 }}>
           {/* ── SECCIÓN 1: EMPLEADO ── */}
@@ -295,12 +330,20 @@ export default function RegistrarVacacion() {
               {/* Días calculados */}
               <Box
                 sx={{
-                  minWidth: 110,
+                  minWidth: { xs: 80, sm: 110 },
+                  width: { xs: "100%", sm: "auto" },
                   border: "1px solid",
-                  borderColor: diasCalculados !== null ? "#BBF7D0" : "divider",
-                  bgcolor: diasCalculados !== null ? "#F0FDF4" : "#F8F9FB",
+                  borderColor: diasCalculados !== null ? (isDarkMode ? "#22C55E" : "#BBF7D0") : "divider",
+                  bgcolor:
+                    diasCalculados !== null
+                      ? isDarkMode
+                        ? "rgba(34, 197, 94, 0.1)"
+                        : "#F0FDF4"
+                      : isDarkMode
+                        ? "rgba(255,255,255,0.05)"
+                        : "#F8F9FB",
                   borderRadius: "6px",
-                  px: 1.5,
+                  px: { xs: 1, sm: 1.5 },
                   py: 0.75,
                   display: "flex",
                   flexDirection: "column",
@@ -313,7 +356,7 @@ export default function RegistrarVacacion() {
                   sx={{
                     fontSize: diasCalculados !== null ? 22 : 14,
                     fontWeight: 700,
-                    color: diasCalculados !== null ? "#15803D" : "text.disabled",
+                    color: diasCalculados !== null ? (isDarkMode ? "#4ADE80" : "#15803D") : "text.disabled",
                     lineHeight: 1,
                   }}
                 >
@@ -322,7 +365,7 @@ export default function RegistrarVacacion() {
                 <Typography
                   sx={{
                     fontSize: 10,
-                    color: diasCalculados !== null ? "#4ADE80" : "text.disabled",
+                    color: diasCalculados !== null ? (isDarkMode ? "#86EFAC" : "#4ADE80") : "text.disabled",
                     mt: 0.25,
                   }}
                 >
@@ -357,22 +400,22 @@ export default function RegistrarVacacion() {
 
           <Stack
             sx={{
-              flexDirection: "row",
-              justifyContent: "flex-end",
-              gap: 1.5,
+              flexDirection: { xs: "column", sm: "row" },
+              justifyContent: { xs: "stretch", sm: "flex-end" },
+              gap: { xs: 1, sm: 1.5 },
               flexWrap: "wrap",
             }}
           >
             <Button
               variant="outlined"
-              startIcon={<ArrowBackIcon />}
+              color="inherit"
+              startIcon={<KeyboardBackspaceIcon />}
               onClick={() => router.push("/dashboard/vacaciones/pendientes")}
-              // ✅ FIX 2: usar "saving" consistentemente
               disabled={saving}
               sx={{
-                borderColor: "divider",
-                color: "text.secondary",
-                "&:hover": { borderColor: "text.secondary" },
+                minWidth: 120,
+                height: 44,
+                width: { xs: "100%", sm: "auto" },
               }}
             >
               Volver
@@ -380,21 +423,31 @@ export default function RegistrarVacacion() {
 
             <Button
               variant="outlined"
-              startIcon={<RefreshIcon />}
+              color="warning"
+              startIcon={<RestartAltIcon />}
               onClick={resetForm}
               disabled={saving}
-              color="warning"
+              sx={{
+                minWidth: 120,
+                height: 44,
+                width: { xs: "100%", sm: "auto" },
+              }}
             >
               Limpiar
             </Button>
 
             <Button
               variant="contained"
-              startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+              startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
               onClick={handleSubmit(onSubmit)}
               disabled={saving}
-              disableElevation
-              sx={{ minWidth: 120 }}
+              sx={{
+                minWidth: 140,
+                height: 44,
+                boxShadow: "none",
+                borderRadius: 2,
+                width: { xs: "100%", sm: "auto" },
+              }}
             >
               {saving ? "Guardando..." : "Guardar"}
             </Button>

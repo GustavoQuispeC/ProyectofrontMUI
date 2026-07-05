@@ -20,11 +20,12 @@ export default function Header() {
         width: "100%",
         alignItems: "center",
         justifyContent: "space-between",
-        px: 3, // ← agrega padding horizontal aquí
+        px: 3,
         pt: 1.5,
         pb: 1,
-        borderBottom: "0.5px solid",
-        borderColor: "divider",
+        borderBottom: "1px solid",
+        borderColor: (theme) => (theme.palette.mode === "dark" ? "#1E293B" : "#E2E8F0"),
+        backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#0F172A" : "#FFFFFF"),
       }}
     >
       <NavbarBreadcrumbs />
@@ -79,13 +80,14 @@ export default function Header() {
             sx={{
               width: 34,
               height: 34,
-              border: "0.5px solid",
-              borderColor: "divider",
+              border: "1px solid",
+              borderColor: (theme) => (theme.palette.mode === "dark" ? "#3B82F6" : "#F97316"),
               borderRadius: "8px",
-              color: "text.secondary",
+              color: (theme) => (theme.palette.mode === "dark" ? "#3B82F6" : "#F97316"),
               "&:hover": {
-                backgroundColor: "action.hover",
-                borderColor: "text.secondary",
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark" ? "rgba(59, 130, 246, 0.1)" : "rgba(249, 115, 22, 0.1)",
+                borderColor: (theme) => (theme.palette.mode === "dark" ? "#2563EB" : "#EA580C"),
               },
             }}
           >

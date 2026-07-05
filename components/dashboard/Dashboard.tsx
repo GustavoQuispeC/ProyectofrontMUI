@@ -13,7 +13,7 @@ interface DashboardProps {
 
 export default function Dashboard({ children }: DashboardProps) {
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideMenu />
       <AppNavbar />
       {/* Main content */}
@@ -27,17 +27,20 @@ export default function Dashboard({ children }: DashboardProps) {
           overflow: "auto",
         })}
       >
-        {/* ✅ Header sin mx, ocupa todo el ancho */}
+        {/* Header con bordes mejorados */}
         <Header />
 
-        {/* ✅ Solo el contenido tiene mx */}
+        {/* Contenido con mejor espaciado */}
         <Stack
-          spacing={2}
+          spacing={3}
           sx={{
             alignItems: "stretch",
-            mx: 3,
-            pb: 5,
-            mt: { xs: 8, md: 0 },
+            px: { xs: 2, md: 4 },
+            py: { xs: 3, md: 4 },
+            maxWidth: "1400px",
+            mx: "auto",
+            width: "100%",
+            mt: { xs: "64px", md: 0 },
           }}
         >
           {children}

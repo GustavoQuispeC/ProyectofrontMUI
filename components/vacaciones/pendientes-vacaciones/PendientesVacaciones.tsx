@@ -21,19 +21,18 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Grid,
 } from "@mui/material";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import Link from "next/link";
 
 import VacacionesDialog from "@/components/vacaciones/VacacionesDialog";
 import { useVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/useVacacionesPendientes";
-import {
-  ListarEmpleadoVacaciones,
-  PeriodoVacacional,
-} from "@/features/dashboard/vacaciones/vacaciones.type";
+import { ListarEmpleadoVacaciones, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
 import {
   avatarStyle,
   EstadoPeriodoColor,
@@ -86,7 +85,9 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
       <TableCell align="center">
         <Chip
           size="small"
-          color={periodo.porcentajeConsumido >= 80 ? "error" : periodo.porcentajeConsumido >= 50 ? "warning" : "success"}
+          color={
+            periodo.porcentajeConsumido >= 80 ? "error" : periodo.porcentajeConsumido >= 50 ? "warning" : "success"
+          }
           label={`${periodo.porcentajeConsumido}%`}
           sx={{ fontSize: 11, height: 20, fontWeight: 700, minWidth: 46 }}
         />
@@ -306,23 +307,42 @@ export default function PendientesVacaciones() {
 
   return (
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap", mb: 1 }}>
-        <Button component={Link} href="/dashboard/vacaciones/registrar" variant="contained" startIcon={<GroupAddIcon />}>
-          Gestionar Vacaciones
-        </Button>
-        <Button
-          component={Link}
-          href="/dashboard/vacaciones/aprobadas"
-          variant="contained"
-          color="success"
-          startIcon={<VisibilityIcon />}
-        >
-          Ver aprobados
-        </Button>
-      </Box>
-      <Typography variant="h5" color="primary" sx={{ mb: 2 }}>
-        Vacaciones pendientes
-      </Typography>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        {/* Título */}
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
+            <BeachAccessIcon color="primary" />
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              Vacaciones pendientes
+            </Typography>
+          </Stack>
+        </Grid>
+
+        {/* Botones */}
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Stack sx={{ flexDirection: { xs: "column", sm: "row" }, gap: 1, justifyContent: "flex-end" }}>
+            <Button
+              component={Link}
+              href="/dashboard/vacaciones/registrar"
+              variant="contained"
+              startIcon={<GroupAddIcon />}
+              sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+            >
+              Gestionar Vacaciones
+            </Button>
+            <Button
+              component={Link}
+              href="/dashboard/vacaciones/aprobadas"
+              variant="contained"
+              color="success"
+              startIcon={<VisibilityIcon />}
+              sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+            >
+              Ver aprobados
+            </Button>
+          </Stack>
+        </Grid>
+      </Grid>
       <TableContainer
         component={Paper}
         elevation={0}

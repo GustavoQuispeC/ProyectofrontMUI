@@ -40,10 +40,10 @@ export default function AppNavbar() {
       sx={{
         display: { xs: "auto", md: "none" },
         boxShadow: 0,
-        bgcolor: "background.paper",
+        bgcolor: (theme) => (theme.palette.mode === "dark" ? "#0F172A" : "#FFFFFF"),
         backgroundImage: "none",
-        borderBottom: "0.5px solid", // más sutil que 1px
-        borderColor: "divider",
+        borderBottom: "1px solid",
+        borderColor: (theme) => (theme.palette.mode === "dark" ? "#1E293B" : "#E2E8F0"),
         top: "var(--template-frame-height, 0px)",
       }}
     >
@@ -104,7 +104,7 @@ export function CustomIcon() {
       sx={{
         width: 26,
         height: 26,
-        borderRadius: "8px", // cuadrado redondeado — más moderno que círculo
+        borderRadius: "8px",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -112,11 +112,11 @@ export function CustomIcon() {
         flexShrink: 0,
         background: (theme) =>
           theme.palette.mode === "dark"
-            ? "linear-gradient(135deg, hsl(210,80%,40%) 0%, hsl(210,100%,25%) 100%)"
-            : "linear-gradient(135deg, hsl(210,98%,55%) 0%, hsl(210,100%,35%) 100%)",
+            ? "linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%)"
+            : "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
         color: "white",
         border: "1px solid",
-        borderColor: "hsl(210, 100%, 45%)",
+        borderColor: (theme) => (theme.palette.mode === "dark" ? "#2563EB" : "#F97316"),
       }}
     >
       <DashboardRoundedIcon sx={{ fontSize: "0.95rem", color: "white" }} />

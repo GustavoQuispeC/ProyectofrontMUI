@@ -41,10 +41,11 @@ import { useMounted } from "@/shared/hooks/useMounted";
 import { usePermisosMensuales } from "@/features/dashboard/permiso/hooks/usePermisosMensuales";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
-import { AccessTime, CleaningServices, EventNote } from "@mui/icons-material";
+import { AccessTime, EventNote } from "@mui/icons-material";
 import Search from "@mui/icons-material/Search";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
-import ArrowBack from "@mui/icons-material/ArrowBack";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useRouter } from "next/navigation";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useRechazarPermiso } from "@/features/dashboard/permiso/hooks/useRechazarPermiso";
@@ -342,9 +343,9 @@ export default function ListarPermisosMensual() {
 
   return (
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2, alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
         {/* Título */}
-        <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
             <EventNote color="primary" />
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -354,7 +355,7 @@ export default function ListarPermisosMensual() {
         </Grid>
 
         {/* Filtros */}
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Box component="form" onSubmit={handleSubmit(onSubmit)}>
             <Stack sx={{ flexDirection: { xs: "column", sm: "row" }, gap: 1, alignItems: "flex-start" }}>
               <Controller
@@ -365,7 +366,7 @@ export default function ListarPermisosMensual() {
                     {...field}
                     label="Año"
                     size="small"
-                    sx={{ width: 90 }}
+                    sx={{ width: { xs: "100%", sm: 90 } }}
                     error={!!errors.anio}
                     helperText={errors.anio?.message}
                     slotProps={{ htmlInput: { inputMode: "numeric", pattern: "[0-9]*", maxLength: 4 } }}
@@ -378,7 +379,7 @@ export default function ListarPermisosMensual() {
                 name="mes"
                 control={control}
                 render={({ field }) => (
-                  <FormControl size="small" error={!!errors.mes} sx={{ minWidth: 130 }}>
+                  <FormControl size="small" error={!!errors.mes} sx={{ minWidth: { xs: "100%", sm: 130 } }}>
                     <InputLabel>Mes</InputLabel>
                     <Select {...field} label="Mes">
                       {meses.map((m) => (
@@ -391,25 +392,37 @@ export default function ListarPermisosMensual() {
                 )}
               />
 
-              <Stack sx={{ flexDirection: "row", gap: 1, flexShrink: 0 }}>
-                <Button type="submit" variant="contained" startIcon={<Search />} size="medium">
+              <Stack
+                sx={{
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 1,
+                  flexShrink: 0,
+                  width: { xs: "100%", sm: "auto" },
+                }}
+              >
+                <Button
+                  type="submit"
+                  variant="contained"
+                  startIcon={<Search />}
+                  sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+                >
                   Buscar
                 </Button>
                 <Button
-                  size="small"
-                  variant="contained"
-                  color="warning"
-                  startIcon={<ArrowBack fontSize="small" />}
+                  variant="outlined"
+                  color="inherit"
+                  startIcon={<KeyboardBackspaceIcon />}
                   onClick={() => router.push("/dashboard/permisos/pendiente")}
+                  sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
                 >
                   Volver
                 </Button>
                 <Button
                   variant="outlined"
-                  color="error"
-                  startIcon={<CleaningServices />}
+                  color="warning"
+                  startIcon={<RestartAltIcon />}
                   onClick={handleClear}
-                  size="medium"
+                  sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
                 >
                   Limpiar
                 </Button>
@@ -417,7 +430,7 @@ export default function ListarPermisosMensual() {
             </Stack>
           </Box>
         </Grid>
-      </Box>
+      </Grid>
 
       {/* Tabla — FUERA del Box de flex para que ocupe todo el ancho */}
       <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
@@ -488,7 +501,7 @@ export default function ListarPermisosMensual() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={rechazando}>
+          <Button onClick={handleCloseDialog} disabled={rechazando} sx={{ minWidth: 120, height: 44 }}>
             Cancelar
           </Button>
           <Button
@@ -496,6 +509,7 @@ export default function ListarPermisosMensual() {
             color="error"
             onClick={handleRechazar}
             disabled={rechazando || !motivoRechazo.trim()}
+            sx={{ minWidth: 140, height: 44, boxShadow: "none", borderRadius: 2 }}
           >
             {rechazando ? "Rechazando..." : "Rechazar"}
           </Button>

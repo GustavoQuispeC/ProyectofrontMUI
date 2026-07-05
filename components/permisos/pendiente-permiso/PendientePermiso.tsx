@@ -30,7 +30,11 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import { useAprobarPermiso } from "@/features/dashboard/permiso/hooks/useAprobarPermiso";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import { chipCondicion } from "@/features/dashboard/permiso/permiso.ui";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import { useTheme } from "@mui/material";
 
 export default function ListarPermisosPendientes() {
   const user = getAuthUser();
@@ -45,6 +49,8 @@ export default function ListarPermisosPendientes() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<{ id: number; nombreEmpleado: string } | null>(null);
   const [motivoRechazo, setMotivoRechazo] = useState("");
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   const handleOpenDialog = (id: number, nombreEmpleado: string) => {
     setSelectedRow({ id, nombreEmpleado });
@@ -73,25 +79,50 @@ export default function ListarPermisosPendientes() {
 
   return (
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
-        <Button component={Link} href="/dashboard/permisos/registrar" variant="contained" startIcon={<GroupAddIcon />}>
-          Gestionar Permisos
-        </Button>
-        <Button
-          component={Link}
-          href="/dashboard/permisos/mensual"
-          variant="contained"
-          sx={{ ml: 1 }}
-          color="success"
-          startIcon={<AssessmentIcon />}
-        >
-          Ver todos
-        </Button>
-      </Box>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        {/* Título */}
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
+            <BeachAccessIcon color="primary" />
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              Permisos pendientes
+            </Typography>
+          </Stack>
+        </Grid>
+
+        {/* Botones */}
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Stack sx={{ flexDirection: { xs: "column", sm: "row" }, gap: 1, justifyContent: "flex-end" }}>
+            <Button
+              component={Link}
+              href="/dashboard/permisos/registrar"
+              variant="contained"
+              startIcon={<GroupAddIcon />}
+              sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+            >
+              Gestionar Permisos
+            </Button>
+            <Button
+              component={Link}
+              href="/dashboard/permisos/mensual"
+              variant="contained"
+              color="success"
+              startIcon={<AssessmentIcon />}
+              sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+            >
+              Ver todos
+            </Button>
+          </Stack>
+        </Grid>
+      </Grid>
       <TableContainer component={Paper} variant="outlined" sx={{ width: "100%" }}>
         <Table size="small" sx={{ minWidth: 900 }}>
           <TableHead>
-            <TableRow sx={{ bgcolor: "grey.50" }}>
+            <TableRow
+              sx={{
+                bgcolor: isDarkMode ? "rgba(255,255,255,0.08)" : "grey.50",
+              }}
+            >
               {["N°", "Empleado", "Fecha", "Horario", "Duración", "Motivo", "Lugar", "Estado", "Acciones"].map(
                 (col) => (
                   <TableCell key={col} align={col === "Acciones" ? "center" : "left"}>
@@ -122,8 +153,22 @@ export default function ListarPermisosPendientes() {
               </TableRow>
             ) : (
               permisosPendientes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((permiso, idx) => {
+                const isLast =
+                  idx === permisosPendientes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).length - 1;
                 return (
-                  <TableRow key={permiso.id} hover>
+                  <TableRow
+                    key={permiso.id}
+                    hover
+                    sx={{
+                      bgcolor: isDarkMode ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.05)",
+                      "&:hover": {
+                        bgcolor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+                      },
+                      "& td": {
+                        borderBottom: isLast ? "none" : "1px solid rgba(0,0,0,0.12)",
+                      },
+                    }}
+                  >
                     <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
                     <TableCell>
                       <Typography variant="body2" noWrap sx={{ maxWidth: 250 }}>
@@ -230,10 +275,16 @@ export default function ListarPermisosPendientes() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={rechazando}>
+          <Button onClick={handleCloseDialog} disabled={rechazando} sx={{ minWidth: 120, height: 44 }}>
             Cancelar
           </Button>
-          <Button variant="contained" color="error" onClick={handleRechazar} disabled={rechazando}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleRechazar}
+            disabled={rechazando}
+            sx={{ minWidth: 140, height: 44, boxShadow: "none", borderRadius: 2 }}
+          >
             {rechazando ? "Rechazando..." : "Rechazar"}
           </Button>
         </DialogActions>

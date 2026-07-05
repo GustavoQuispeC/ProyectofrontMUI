@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  ArrowBack,
+  KeyboardBackspace,
   Download,
   Person,
   Mail,
@@ -158,18 +158,19 @@ const LoadingSkeleton = () => (
 export default function DetalleEmpleado({ id }: Props) {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.detalleEmpleado) : false;
-    if (!canAccess) {
-    return <AccessDenied />;
-  }
   const { empleado, loading, error } = useEmpleado(id, canAccess);
   const { catalogos, loading: loadingCatalogos } = useCatalogos();
   const router = useRouter();
+
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
 
   if (loading || loadingCatalogos) {
     return <LoadingSkeleton />;
   }
 
-if (error) {
+  if (error) {
     return (
       <Stack
         sx={{
@@ -179,14 +180,13 @@ if (error) {
           gap: 2,
         }}
       >
-        <Typography color="error">
-          {error instanceof Error ? error.message : "Error al cargar el empleado."}
-        </Typography>
+        <Typography color="error">{error instanceof Error ? error.message : "Error al cargar el empleado."}</Typography>
 
         <Button
           variant="outlined"
-          startIcon={<ArrowBack />}
+          startIcon={<KeyboardBackspace />}
           onClick={() => router.push("/dashboard/empleados/listar")}
+          sx={{ minWidth: 120, height: 44 }}
         >
           Volver
         </Button>
@@ -202,17 +202,16 @@ if (error) {
           No se encontró el empleado
         </Typography>
         <Button
-          size="small"
           variant="outlined"
-          startIcon={<ArrowBack fontSize="small" />}
+          startIcon={<KeyboardBackspace />}
           onClick={() => router.push("/dashboard/empleados/listar")}
+          sx={{ minWidth: 120, height: 44 }}
         >
           Volver
         </Button>
       </Stack>
     );
   }
-
 
   return (
     <Box
@@ -241,7 +240,7 @@ if (error) {
               <Box sx={{ position: "relative", flexShrink: 0 }}>
                 <Box
                   component="img"
-                  src={empleado.fotoUrl ?? "/avatar.png"}
+                  src={empleado.fotoUrl || "/Avatar.png"}
                   alt={empleado.nombreCompleto}
                   sx={{
                     width: 96,
@@ -311,22 +310,30 @@ if (error) {
             </Stack>
 
             {/* Botones de acción */}
-            <Stack sx={{ flexDirection: "row", gap: 1, alignSelf: { sm: "flex-start" } }}>
+            <Stack
+              sx={{
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 1,
+                alignSelf: { sm: "flex-start" },
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
               <Button
-                size="small"
                 variant="outlined"
-                startIcon={<ArrowBack fontSize="small" />}
+                color="inherit"
+                startIcon={<KeyboardBackspace />}
                 onClick={() => router.push("/dashboard/empleados/listar")}
-                sx={{ fontSize: "0.75rem" }}
+                sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
               >
                 Volver
               </Button>
-                <Button
-                    variant="contained"
-                    startIcon={<Download/>}
-                >
-                    Exportar
-                </Button>
+              <Button
+                variant="contained"
+                startIcon={<Download />}
+                sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+              >
+                Exportar
+              </Button>
             </Stack>
           </Stack>
         </CardContent>
@@ -375,9 +382,7 @@ if (error) {
 
         <Grid size={{ xs: 12 }}>
           <SectionCard title="Información laboral" icon={Work}>
-              <Typography variant="caption">
-                  {empleado.cargoActual}
-              </Typography>
+            <Typography variant="caption">{empleado.cargoActual}</Typography>
             <Field label="Salario" value={empleado.salarioBase ? `S/ ${empleado.salarioBase}` : null} />
             <Field
               label="Tipo de contrato"
@@ -409,7 +414,6 @@ if (error) {
               value={obtenerNombreCatalogo(catalogos.sistemasPensiones, empleado.sistemaPensiones)}
             />
             <Field label="CUSPP" value={empleado.cuspp} />
-
           </SectionCard>
         </Grid>
       </Grid>

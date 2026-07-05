@@ -30,12 +30,17 @@ import {
   Tooltip,
   Avatar,
   FormHelperText,
+  CircularProgress,
+  Stack,
+  Card,
+  CardContent,
+  useTheme,
 } from "@mui/material";
 import {
   BeachAccess as PermisosIcon,
-  ArrowBack as ArrowBackIcon,
-  Refresh as RefreshIcon,
-  Save as SaveIcon,
+  KeyboardBackspace as KeyboardBackspaceIcon,
+  RestartAlt as RestartAltIcon,
+  SaveRounded as SaveRoundedIcon,
   Person as PersonIcon,
   Work as WorkIcon,
 } from "@mui/icons-material";
@@ -117,6 +122,8 @@ export default function RegistrarPermiso() {
   const mounted = useMounted(); //? controla el estado de montaje
   const queryClient = useQueryClient();
   const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
 
   //!React Hook Form
   const {
@@ -202,22 +209,58 @@ export default function RegistrarPermiso() {
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" }}>
       {/* ── Header ── */}
-      <Paper variant="outlined" sx={{ p: 2.5, mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
-        <Avatar sx={{ bgcolor: "primary.main", width: 48, height: 48 }}>
-          <PermisosIcon />
-        </Avatar>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            Registro de Permisos
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Gestión y control de permisos de empleados
-          </Typography>
-        </Box>
-        <Box sx={{ ml: "auto" }}>
-          <Chip label={user?.rol ?? "Sin rol"} color="primary" variant="outlined" size="small" />
-        </Box>
-      </Paper>
+      <Card
+        variant="outlined"
+        sx={{
+          mb: 2,
+          borderRadius: 3,
+          boxShadow: "none",
+        }}
+      >
+        <CardContent
+          sx={{
+            p: { xs: 2, md: 3 },
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+          }}
+        >
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Avatar
+              sx={{
+                bgcolor: "primary.main",
+                width: { xs: 48, md: 52 },
+                height: { xs: 48, md: 52 },
+              }}
+            >
+              <PermisosIcon />
+            </Avatar>
+
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 700,
+                  color: "text.primary",
+                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                }}
+              >
+                Registro de Permisos
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                Gestión y control de permisos de empleados
+              </Typography>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
 
       {/* ── Información del Empleado ── */}
       <Paper variant="outlined" sx={{ p: 2.5, mb: 2 }}>
@@ -475,33 +518,47 @@ export default function RegistrarPermiso() {
               }}
             >
               <Button
-                fullWidth={false}
                 variant="outlined"
-                startIcon={<ArrowBackIcon />}
                 color="inherit"
-                sx={{ flex: { xs: 1, sm: "unset" } }}
+                startIcon={<KeyboardBackspaceIcon />}
                 onClick={() => router.push("/dashboard/permisos/pendiente")}
+                sx={{
+                  minWidth: 120,
+                  height: 44,
+                  width: { xs: "100%", sm: "auto" },
+                }}
               >
                 Volver
               </Button>
               <Button
                 variant="outlined"
-                startIcon={<RefreshIcon />}
                 color="warning"
+                startIcon={<RestartAltIcon />}
                 onClick={resetForm}
-                sx={{ flex: { xs: 1, sm: "unset" } }}
+                disabled={saving}
+                sx={{
+                  minWidth: 120,
+                  height: 44,
+                  width: { xs: "100%", sm: "auto" },
+                }}
               >
                 Limpiar
               </Button>
               <Button
                 variant="contained"
-                startIcon={<SaveIcon />}
+                startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
                 color="primary"
                 disabled={saving}
                 onClick={handleSubmit(onSubmit)}
-                sx={{ flex: { xs: 1, sm: "unset" } }}
+                sx={{
+                  minWidth: 140,
+                  height: 44,
+                  boxShadow: "none",
+                  borderRadius: 2,
+                  width: { xs: "100%", sm: "auto" },
+                }}
               >
-                Guardar
+                {saving ? "Guardando..." : "Guardar"}
               </Button>
             </Box>
           </Grid>
@@ -526,7 +583,11 @@ export default function RegistrarPermiso() {
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: "grey.50" }}>
+              <TableRow
+                sx={{
+                  bgcolor: isDarkMode ? "rgba(255,255,255,0.08)" : "grey.50",
+                }}
+              >
                 {["N°", "Empleado", "Fecha", "Horario", "Duración", "Motivo", "Lugar", "Estado"].map((col) => (
                   <TableCell key={col} align={col === "Acciones" ? "center" : "left"}>
                     <Typography variant="caption" sx={{ fontWeight: 700 }}>
@@ -555,8 +616,22 @@ export default function RegistrarPermiso() {
                 </TableRow>
               ) : (
                 permisos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((permiso, idx) => {
+                  const isLast =
+                    idx === permisos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).length - 1;
                   return (
-                    <TableRow key={permiso.id} hover>
+                    <TableRow
+                      key={permiso.id}
+                      hover
+                      sx={{
+                        bgcolor: isDarkMode ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.05)",
+                        "&:hover": {
+                          bgcolor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+                        },
+                        "& td": {
+                          borderBottom: isLast ? "none" : "1px solid rgba(0,0,0,0.12)",
+                        },
+                      }}
+                    >
                       <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
                       <TableCell>
                         <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
