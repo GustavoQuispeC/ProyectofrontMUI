@@ -16,11 +16,9 @@ export interface ListarEmpleadoVacaciones {
   nombreCompleto: string;
   fechaIngreso: string;
   diasTotalesDisponibles: number;
-  diasTotalesUsados: number;
-  diasTotalesAsignados: number;
   cantidadPeriodos: number;
   cantidadVacaciones: number;
-  porcentajeConsumido: number;
+  porcentajeAcumulado: number;
   periodosVacacionales: PeriodoVacacional[];
 }
 
@@ -28,12 +26,11 @@ export interface PeriodoVacacional {
   vacacionSaldoId: number;
   periodoInicio: string;
   periodoFin: string;
-  fechaGeneracion: string;
-  diasAsignados: number;
+  diasAcumulados: number;
   diasUsados: number;
   diasDisponibles: number;
   cantidadDomingosAcumulados: number;
-  porcentajeConsumido: number;
+  porcentajeAcumulado: number;
   cantidadVacaciones: number;
   estado: EstadoPeriodoVacacional;
   vacaciones: Vacacion[];

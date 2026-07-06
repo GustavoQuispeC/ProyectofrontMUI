@@ -28,10 +28,7 @@ import { useVacacionesAprobadas } from "@/features/dashboard/vacaciones/hooks/us
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { permissions } from "@/shared/auth/auth.permissions";
-import {
-    ListarEmpleadoVacaciones,
-    PeriodoVacacional
-} from "@/features/dashboard/vacaciones/vacaciones.type";
+import { ListarEmpleadoVacaciones, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
 
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useMounted } from "@/shared/hooks/useMounted";
@@ -79,8 +76,16 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
       <TableCell sx={{ fontWeight: 600 }}>#{periodo.vacacionSaldoId}</TableCell>
       <TableCell>{formatDate(periodo.periodoInicio)}</TableCell>
       <TableCell>{formatDate(periodo.periodoFin)}</TableCell>
-      <TableCell sx={{ fontWeight: 700, color: "#6D28D9" }}>{formatDate(periodo.fechaGeneracion)}</TableCell>
-      <TableCell sx={{ textAlign: "center" }}>{periodo.diasAsignados}</TableCell>
+      <TableCell
+        sx={{
+          textAlign: "center",
+          color: isDarkMode ? theme.palette.success.light : "#0562ed",
+          fontWeight: 600,
+        }}
+      >
+        {periodo.diasAcumulados}
+      </TableCell>
+
       <TableCell
         sx={{
           textAlign: "center",
@@ -103,9 +108,9 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
         <Chip
           size="small"
           color={
-            periodo.porcentajeConsumido >= 80 ? "error" : periodo.porcentajeConsumido >= 50 ? "warning" : "success"
+            periodo.porcentajeAcumulado >= 80 ? "error" : periodo.porcentajeAcumulado >= 50 ? "warning" : "success"
           }
-          label={`${periodo.porcentajeConsumido}%`}
+          label={`${periodo.porcentajeAcumulado}%`}
           sx={{ fontSize: 11, height: 20, fontWeight: 700, minWidth: 46 }}
         />
       </TableCell>
@@ -117,7 +122,6 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
           label={EstadoPeriodoLabel[periodo.estado]}
           sx={{ fontSize: 11, height: 20, fontWeight: 600 }}
         />
-
       </TableCell>
       <TableCell align="center">
         <Tooltip title="Ver solicitudes">
@@ -206,23 +210,6 @@ function Row({ row, onVerDetalle }: RowProps) {
           <Typography sx={{ fontSize: 13 }}>{row.cantidadPeriodos}</Typography>
         </TableCell>
         <TableCell align="center">
-          <Typography sx={{ fontSize: 13 }}>{row.cantidadVacaciones}</Typography>
-        </TableCell>
-        <TableCell align="center">
-          <Typography sx={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }}>{row.diasTotalesAsignados}</Typography>
-        </TableCell>
-        <TableCell align="center">
-          <Typography
-            sx={{
-              fontSize: 13,
-              fontVariantNumeric: "tabular-nums",
-              color: row.diasTotalesUsados > 0 ? "warning.dark" : "text.secondary",
-            }}
-          >
-            {row.diasTotalesUsados}
-          </Typography>
-        </TableCell>
-        <TableCell align="center">
           <Typography sx={{ fontSize: 13, fontVariantNumeric: "tabular-nums", color: "success.dark", fontWeight: 600 }}>
             {row.diasTotalesDisponibles}
           </Typography>
@@ -242,12 +229,11 @@ function Row({ row, onVerDetalle }: RowProps) {
                     <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>ID</TableCell>
                     <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Per. Inicio</TableCell>
                     <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>Per. Fin</TableCell>
-                    <TableCell sx={{ borderRight: "1px solid #D8DBE2" }}>F. Apertura</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Asignados</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Acumulados</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Usados</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Disponibles</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Domingos</TableCell>
-                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Consumo</TableCell>
+                    <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Progreso</TableCell>
                     <TableCell sx={{ textAlign: "center", borderRight: "1px solid #D8DBE2" }}>Solicitudes</TableCell>
                     <TableCell>Estado</TableCell>
                     <TableCell align="center">Acciones</TableCell>
@@ -364,9 +350,6 @@ export default function ListarVacacionesAprobadas() {
               <TableCell>Empleado</TableCell>
               <TableCell align="center">Ingreso</TableCell>
               <TableCell align="center">Períodos</TableCell>
-              <TableCell align="center">Solicitudes</TableCell>
-              <TableCell align="center">Asignados</TableCell>
-              <TableCell align="center">Usados</TableCell>
               <TableCell align="center">Disponibles</TableCell>
             </TableRow>
           </TableHead>
