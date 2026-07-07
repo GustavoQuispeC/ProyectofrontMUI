@@ -3,10 +3,13 @@ import { jwtDecode } from "jwt-decode";
 
 const AUTH_KEY = "auth_usuario";
 const ROL_KEY = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+const GUID_KEY = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
 
 //! Función para verificar si el código se está ejecutando en el cliente (navegador)
 type JwtPayload = {
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string | string[];
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"?: string;
+  sub?: string;
   exp?: number;
 };
 
@@ -23,6 +26,16 @@ const extractRolFromToken = (token: string): string => {
   }
 };
 
+//! Función para extraer el GUID del token JWT
+const extractGuidFromToken = (token: string): string | null => {
+  try {
+    const decoded = jwtDecode<JwtPayload>(token);
+    return decoded[GUID_KEY] ?? decoded.sub ?? null;
+  } catch {
+    return null;
+  }
+};
+
 //! Función para guardar los datos de autenticación
 export const saveAuthData = (data: ILoginResponse): void => {
   if (!isClient()) return;
@@ -32,6 +45,7 @@ export const saveAuthData = (data: ILoginResponse): void => {
       ...data,
       fotoUrl: data.fotoUrl ?? null,
       rol: extractRolFromToken(data.token),
+      guid: extractGuidFromToken(data.token),
     };
 
     localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
@@ -53,6 +67,7 @@ export const getAuthUser = (): IUserData | null => {
     return {
       ...parsed,
       rol: extractRolFromToken(parsed.token),
+      guid: extractGuidFromToken(parsed.token),
     };
   } catch (error) {
     console.error("❌ Error al leer sesión:", error);

@@ -14,3 +14,12 @@ export const UsuarioSchema = z.object({
 });
 
 export type UsuarioForm = z.infer<typeof UsuarioSchema>;
+
+export const ActualizarUsuarioSchema = z.object({
+  empleadoId: z.string().min(1, "Seleccione un empleado"),
+  nombreCompleto: z.string().min(1, "Seleccione un empleado"),
+  isActive: z.boolean(),
+  rolId: z.string().min(1, "Seleccione un rol"),
+});
+
+export type ActualizarUsuarioForm = z.infer<typeof ActualizarUsuarioSchema>;

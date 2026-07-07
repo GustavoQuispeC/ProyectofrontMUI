@@ -10,15 +10,28 @@ export async function registrarVacacionesApi(data: RegistrarVacaciones): Promise
 
 //! Listar vacaciones aprobadas
 export async function listarVacacionesAprobadasApi(): Promise<ListarEmpleadoVacaciones[]> {
-  return apiVacaciones<ListarEmpleadoVacaciones[]>(`${apiUrl}/Vacacion/aprobadas`,
-      { method: "GET" });
+  return apiVacaciones<ListarEmpleadoVacaciones[]>(`${apiUrl}/Vacacion/aprobadas`, { method: "GET" });
 }
 
 //! Listar Vacaciones pendientes
 export async function listarVacacionesPendientesApi(): Promise<ListarEmpleadoVacaciones[]> {
   return apiVacaciones<ListarEmpleadoVacaciones[]>(`${apiUrl}/Vacacion/pendientes`, {
     method: "GET",
-});
+  });
+}
+
+//! Listar Vacaciones resumen
+export async function listarVacacionesResumenApi(): Promise<ListarEmpleadoVacaciones[]> {
+  return apiVacaciones<ListarEmpleadoVacaciones[]>(`${apiUrl}/Vacacion/resumen`, {
+    method: "GET",
+  });
+}
+
+//! Listar Vacaciones por GUID de usuario
+export async function listarVacacionesByIdApi(guid: string): Promise<ListarEmpleadoVacaciones> {
+  return apiVacaciones<ListarEmpleadoVacaciones>(`${apiUrl}/Vacacion/resumen/${guid}`, {
+    method: "GET",
+  });
 }
 
 //! Aprobar vacaciones

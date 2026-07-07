@@ -23,7 +23,8 @@ import {
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import { useVacacionesAprobadas } from "@/features/dashboard/vacaciones/hooks/useVacacionesAprobadas";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
@@ -316,11 +317,23 @@ export default function ListarVacacionesAprobadas() {
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap", mb: 1 }}>
         <Button
           component={Link}
+          href="/dashboard/vacaciones/resumen"
+          variant="outlined"
+          color="inherit"
+          startIcon={<ArrowBackIcon />}
+          sx={{ height: 44, minWidth: 130, width: { xs: "100%", sm: "auto" } }}
+        >
+          Volver
+        </Button>
+        <Button
+          component={Link}
           href="/dashboard/vacaciones/registrar"
           variant="contained"
-          startIcon={<GroupAddIcon />}
+          color="primary"
+          startIcon={<EventRepeatIcon />}
+          sx={{ height: 44, minWidth: 130, width: { xs: "100%", sm: "auto" } }}
         >
-          Gestionar Vacaciones
+          Programar
         </Button>
       </Box>
       <Typography

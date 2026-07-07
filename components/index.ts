@@ -14,3 +14,5 @@ export { default as ListarPermisosPendientes } from "./permisos/pendiente-permis
 export { default as AprobadasVacaciones } from "@/components/vacaciones/aprobadas-vacaciones/AprobadasVacaciones";
 export { default as RegistrarVacaciones } from "./vacaciones/registrar-vacaciones/registrarVacaciones";
 export { default as PendientesVacaciones } from "./vacaciones/pendientes-vacaciones/PendientesVacaciones";
+export { default as ResumenVacaciones } from "./vacaciones/resumen-vacaciones/ResumenVacaciones";
+export { default as ResumenIdVacaciones } from "./vacaciones/resumen-id-vacaciones/ResumenIdVacaciones";

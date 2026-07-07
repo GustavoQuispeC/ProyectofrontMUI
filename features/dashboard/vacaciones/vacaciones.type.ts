@@ -15,12 +15,14 @@ export interface ListarEmpleadoVacaciones {
   codigoEmpleado: string;
   nombreCompleto: string;
   fechaIngreso: string;
+
   diasTotalesDisponibles: number;
   cantidadPeriodos: number;
-  cantidadVacaciones: number;
-  porcentajeAcumulado: number;
+
   periodosVacacionales: PeriodoVacacional[];
 }
+
+export type VacacionesIdResumen = ListarEmpleadoVacaciones;
 
 export interface PeriodoVacacional {
   vacacionSaldoId: number;

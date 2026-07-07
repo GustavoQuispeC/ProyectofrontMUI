@@ -15,23 +15,23 @@ export interface RegistrarPermiso {
   motivoRechazo?: string; // ← opcional
 }
 
-export interface ListarPermisos {
-  id: number;
-  empleadoId: number;
-  nombreEmpleado: string;
-  fecha: string;
-  horaInicio: string;
-  horaFin: string;
-  duracionMin: number;
-  motivo: string;
-  lugar: string;
-  condicion: string;
-  motivoRechazo: null;
-  aprobadoPor: null | string;
-  aprobadoPorNombre: null | string;
-  fechaAprobacion: Date | null;
-  createdAt: Date;
-}
+// export interface ListarPermisos {
+//   id: number;
+//   empleadoId: number;
+//   nombreEmpleado: string;
+//   fecha: string;
+//   horaInicio: string;
+//   horaFin: string;
+//   duracionMin: number;
+//   motivo: string;
+//   lugar: string;
+//   condicion: string;
+//   motivoRechazo: null;
+//   aprobadoPor: null | string;
+//   aprobadoPorNombre: null | string;
+//   fechaAprobacion: Date | null;
+//   createdAt: Date;
+// }
 
 export interface PendientesPermisos {
   id: number;

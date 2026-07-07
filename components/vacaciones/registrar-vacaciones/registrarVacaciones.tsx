@@ -410,7 +410,7 @@ export default function RegistrarVacacion() {
               variant="outlined"
               color="inherit"
               startIcon={<KeyboardBackspaceIcon />}
-              onClick={() => router.push("/dashboard/vacaciones/pendientes")}
+              onClick={() => router.push("/dashboard/vacaciones/resumen")}
               disabled={saving}
               sx={{
                 minWidth: 120,

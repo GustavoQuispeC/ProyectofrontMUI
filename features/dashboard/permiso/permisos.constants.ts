@@ -42,6 +42,7 @@ export const formatDate = (date: string) =>
     year: "numeric",
   });
 
+//! Horas
 export const formatHoras = (horas: number): string => {
   const h = Math.floor(horas);
   const m = Math.round((horas - h) * 60);
