@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -15,7 +15,6 @@ export default function Navbar() {
   const [activeNav, setActiveNav] = useState("Inicio");
   const [isLoggedIn, setIsLoggedIn] = useState(false); // ← conectar con auth real
   const [scrolled, setScrolled] = useState(false);
-  const navRef = useRef<HTMLDivElement>(null);
 
   // Shadow on scroll
   useEffect(() => {
@@ -24,17 +23,6 @@ export default function Navbar() {
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Cerrar dropdowns al click fuera
-  useEffect(() => {
-    function handleOutsideClick(e: MouseEvent) {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setOpenDropdown(null);
-      }
-    }
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
   // Cerrar mobile menu en resize a desktop
@@ -67,7 +55,7 @@ export default function Navbar() {
   }
 
   return (
-    <div ref={navRef} className="sticky top-0 z-40">
+    <div className="sticky top-0 z-40">
       <nav
         className={`relative overflow-visible border-b border-white/60 bg-white/88 backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-zinc-950/80 ${
           scrolled ? "shadow-[0_18px_45px_-26px_rgba(15,23,42,0.55)]" : "shadow-none"

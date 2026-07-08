@@ -1,4 +1,6 @@
 // components/Dropdown.tsx
+import Link from "next/link";
+import { useEffect, useRef } from "react";
 import type { DropdownId } from "../types";
 
 // ─── Dropdown ────────────────────────────────────────────────────────────────
@@ -13,18 +15,23 @@ interface DropdownProps {
   width?: string;
 }
 
-export function Dropdown({
-  id,
-  openId,
-  onToggle,
-  trigger,
-  children,
-  align = "left",
-  width = "w-52",
-}: DropdownProps) {
+export function Dropdown({ id, openId, onToggle, trigger, children, align = "left", width = "w-52" }: DropdownProps) {
   const isOpen = openId === id;
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleOutside(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        onToggle(id);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [isOpen, id, onToggle]);
+
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <button
         onClick={() => onToggle(id)}
         className={`inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
@@ -38,11 +45,7 @@ export function Dropdown({
       <div
         className={`absolute top-full mt-2 ${width} rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl z-50 transition-all duration-200 origin-top dark:border-white/10 dark:bg-zinc-950/95 ${
           align === "right" ? "right-0" : "left-0"
-        } ${
-          isOpen
-            ? "opacity-100 scale-100 translate-y-0"
-            : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
-        }`}
+        } ${isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-1 pointer-events-none"}`}
       >
         {children}
       </div>
@@ -51,8 +54,6 @@ export function Dropdown({
 }
 
 // ─── DropdownItem ─────────────────────────────────────────────────────────────
-
-import Link from "next/link";
 
 interface DropdownItemProps {
   icon: React.ReactNode;
@@ -63,59 +64,34 @@ interface DropdownItemProps {
   onClick?: () => void;
 }
 
-export function DropdownItem({
-  icon,
-  label,
-  href,
-  badge,
-  danger,
-  onClick,
-}: DropdownItemProps) {
-  const className = `
-    flex items-center gap-2.5
-    rounded-xl px-3 py-2.5
-    text-sm
-    transition-all duration-150
-    ${
-      danger
-        ? "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
-    }
-  `;
+export function DropdownItem({ icon, label, href, badge, danger, onClick }: DropdownItemProps) {
+  const className = `flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all duration-150 ${
+    danger
+      ? "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
+  }`;
 
-  // ─── Si tiene href → navegación ─────────────────────────────
-  if (href) {
-    return (
-      <Link href={href} className={className}>
-        <span className="shrink-0 text-slate-400 dark:text-slate-500">{icon}</span>
-
-        <span className="flex-1">{label}</span>
-
-        {badge && (
-          <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold leading-tight text-white">
-            {badge}
-          </span>
-        )}
-      </Link>
-    );
-  }
-
-  // ─── Si NO tiene href → acción ─────────────────────────────
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`${className} w-full text-left`}
-    >
+  const content = (
+    <>
       <span className="shrink-0 text-slate-400 dark:text-slate-500">{icon}</span>
-
       <span className="flex-1">{label}</span>
-
       {badge && (
         <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold leading-tight text-white">
           {badge}
         </span>
       )}
+    </>
+  );
+
+  if (href)
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  return (
+    <button type="button" onClick={onClick} className={`${className} w-full text-left`}>
+      {content}
     </button>
   );
 }

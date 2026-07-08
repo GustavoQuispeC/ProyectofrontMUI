@@ -131,12 +131,10 @@ export function NavActions({ isLoggedIn, openDropdown, onToggleDropdown, onLogin
                 <div className="text-[13px] font-medium text-gray-800 dark:text-gray-200 leading-tight">Gustavo</div>
                 <div className="text-[11px] text-gray-400">Administrador</div>
               </div>
-              <span className="hidden lg:block">
-                <KeyboardArrowDownIcon
-                  fontSize="small"
-                  className={`transition-transform duration-200 ${openDropdown === "user" ? "rotate-180" : ""}`}
-                />
-              </span>
+              <KeyboardArrowDownIcon
+                fontSize="small"
+                className={`hidden lg:block transition-transform duration-200 ${openDropdown === "user" ? "rotate-180" : ""}`}
+              />
             </div>
           }
         >
