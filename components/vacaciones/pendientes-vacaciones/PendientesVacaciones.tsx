@@ -23,7 +23,6 @@ import {
   useTheme,
   Grid,
 } from "@mui/material";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";

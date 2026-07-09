@@ -10,7 +10,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid";
 import { Controller, useForm } from "react-hook-form";
 import {
   Avatar,
@@ -142,8 +141,8 @@ function Row({ row, onRechazar }: RowProps) {
         </TableCell>
 
         <TableCell align="center">
-          <Stack direction="row" sx={{ spacing: 0.5, justifyContent: "center", alignItems: "center" }}>
-            <AccessTime sx={{ fontSize: 15, color: "text.secondary" }} />
+          <Stack direction="row" sx={{ justifyContent: "center", alignItems: "center", gap: 0.5 }}>
+            <AccessTime sx={{ fontSize: 15, color: "primary.main" }} />
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
               {formatHoras(row.totalHorasPermisos)}
             </Typography>
@@ -170,6 +169,7 @@ function Row({ row, onRechazar }: RowProps) {
                 <TableHead>
                   <TableRow
                     sx={{
+                      bgcolor: "background.default",
                       "& th": {
                         fontWeight: 700,
                         fontSize: 12,
@@ -210,6 +210,7 @@ function Row({ row, onRechazar }: RowProps) {
                         <Chip
                           label={formatHoras(permiso.totalHoras)}
                           size="small"
+                          color="primary"
                           variant="outlined"
                           sx={{ fontSize: 11 }}
                         />
@@ -343,102 +344,110 @@ export default function ListarPermisosMensual() {
 
   return (
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        {/* Título */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
-            <EventNote color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              Reporte mensual de permisos
-            </Typography>
-          </Stack>
-        </Grid>
+      <Stack
+        sx={{
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { xs: "flex-start", md: "center" },
+          justifyContent: "space-between",
+          gap: 2,
+          mb: 2,
+        }}
+      >
+        <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
+          <EventNote color="primary" />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Reporte mensual de permisos
+          </Typography>
+        </Stack>
 
-        {/* Filtros */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-            <Stack sx={{ flexDirection: { xs: "column", sm: "row" }, gap: 1, alignItems: "flex-start" }}>
-              <Controller
-                name="anio"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Año"
-                    size="small"
-                    sx={{ width: { xs: "100%", sm: 90 } }}
-                    error={!!errors.anio}
-                    helperText={errors.anio?.message}
-                    slotProps={{ htmlInput: { inputMode: "numeric", pattern: "[0-9]*", maxLength: 4 } }}
-                    onChange={(e) => field.onChange(Number(e.target.value.replace(/\D/g, "").slice(0, 4)))}
-                  />
-                )}
-              />
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ width: { xs: "100%", md: "auto" } }}>
+          <Stack
+            sx={{ flexDirection: { xs: "column", sm: "row" }, gap: 1, alignItems: { xs: "stretch", sm: "center" } }}
+          >
+            <Controller
+              name="anio"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Año"
+                  size="small"
+                  sx={{ width: { xs: "100%", sm: 90 } }}
+                  error={!!errors.anio}
+                  helperText={errors.anio?.message}
+                  slotProps={{ htmlInput: { inputMode: "numeric", pattern: "[0-9]*", maxLength: 4 } }}
+                  onChange={(e) => field.onChange(Number(e.target.value.replace(/\D/g, "").slice(0, 4)))}
+                />
+              )}
+            />
 
-              <Controller
-                name="mes"
-                control={control}
-                render={({ field }) => (
-                  <FormControl size="small" error={!!errors.mes} sx={{ minWidth: { xs: "100%", sm: 130 } }}>
-                    <InputLabel>Mes</InputLabel>
-                    <Select {...field} label="Mes">
-                      {meses.map((m) => (
-                        <MenuItem key={m.value} value={m.value}>
-                          {m.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              />
+            <Controller
+              name="mes"
+              control={control}
+              render={({ field }) => (
+                <FormControl
+                  size="small"
+                  error={!!errors.mes}
+                  sx={{ minWidth: { xs: "100%", sm: 140 }, width: { xs: "100%", sm: "auto" } }}
+                >
+                  <InputLabel>Mes</InputLabel>
+                  <Select {...field} label="Mes">
+                    {meses.map((m) => (
+                      <MenuItem key={m.value} value={m.value}>
+                        {m.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
 
-              <Stack
-                sx={{
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: 1,
-                  flexShrink: 0,
-                  width: { xs: "100%", sm: "auto" },
-                }}
+            <Stack
+              sx={{
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 1,
+                flexShrink: 0,
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
+              <Button
+                type="submit"
+                variant="contained"
+                startIcon={<Search />}
+                sx={{ minWidth: 120, width: { xs: "100%", sm: "auto" } }}
               >
-                <Button
-                  type="submit"
-                  variant="contained"
-                  startIcon={<Search />}
-                  sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
-                >
-                  Buscar
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  startIcon={<KeyboardBackspaceIcon />}
-                  onClick={() => router.push("/dashboard/permisos/pendiente")}
-                  sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
-                >
-                  Volver
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  startIcon={<RestartAltIcon />}
-                  onClick={handleClear}
-                  sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
-                >
-                  Limpiar
-                </Button>
-              </Stack>
+                Buscar
+              </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                startIcon={<KeyboardBackspaceIcon />}
+                onClick={() => router.push("/dashboard/permisos/pendiente")}
+                sx={{ minWidth: 120, width: { xs: "100%", sm: "auto" } }}
+              >
+                Volver
+              </Button>
+              <Button
+                variant="outlined"
+                color="warning"
+                startIcon={<RestartAltIcon />}
+                onClick={handleClear}
+                sx={{ minWidth: 120, width: { xs: "100%", sm: "auto" } }}
+              >
+                Limpiar
+              </Button>
             </Stack>
-          </Box>
-        </Grid>
-      </Grid>
+          </Stack>
+        </Box>
+      </Stack>
 
       {/* Tabla — FUERA del Box de flex para que ocupe todo el ancho */}
-      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, bgcolor: "background.paper" }}>
         <Table>
           <TableHead>
             <TableRow
               sx={{
-                bgcolor: "action.hover",
+                bgcolor: "background.default",
                 "& th": {
                   fontWeight: 700,
                   fontSize: 12,
@@ -468,7 +477,7 @@ export default function ListarPermisosMensual() {
             ) : rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                  <Stack sx={{ spacing: 1, alignItems: "center" }}>
+                  <Stack sx={{ spacing: 1, alignItems: "center", gap: 1 }}>
                     <AccessTime sx={{ fontSize: 40, color: "text.disabled" }} />
                     <Typography variant="body2" color="text.secondary">
                       {filtros.anio === 0
@@ -501,7 +510,7 @@ export default function ListarPermisosMensual() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={rechazando} sx={{ minWidth: 120, height: 44 }}>
+          <Button onClick={handleCloseDialog} disabled={rechazando} sx={{ minWidth: 120 }}>
             Cancelar
           </Button>
           <Button
@@ -509,7 +518,7 @@ export default function ListarPermisosMensual() {
             color="error"
             onClick={handleRechazar}
             disabled={rechazando || !motivoRechazo.trim()}
-            sx={{ minWidth: 140, height: 44, boxShadow: "none", borderRadius: 2 }}
+            sx={{ minWidth: 140 }}
           >
             {rechazando ? "Rechazando..." : "Rechazar"}
           </Button>
