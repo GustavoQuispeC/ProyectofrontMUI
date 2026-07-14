@@ -33,4 +33,7 @@ export const permissions = {
   cancelarVacaciones: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   listarVacacionesResumen: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   listarVacacionesById: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR], // TODO: Agregar rol de empleado
+
+  //!Faltas
+  registrarFalta:[ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR]
 };
