@@ -5,7 +5,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 //!  Listar usuarios
 export async function listarUsuariosApi(): Promise<ListarUsuarios[]> {
-  return apiUsuario(`${apiUrl}/Usuarios`, {
+  return apiUsuario(`${apiUrl}/usuarios`, {
     method: "GET",
   });
 }
@@ -19,7 +19,7 @@ export async function getUsuarioByIdApi(userId: string): Promise<ListarUsuarios>
 
 //! Función para iniciar sesión de usuario
 export function loginUsuarioApi(email: string, password: string) {
-  return apiUsuario(`${apiUrl}/Auth/login/usuario`, {
+  return apiUsuario(`${apiUrl}/Auth/login/usuarios`, {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
