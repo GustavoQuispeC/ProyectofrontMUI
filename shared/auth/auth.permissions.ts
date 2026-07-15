@@ -1,18 +1,18 @@
 import { ROLES } from "./uth.constants";
 
 export const permissions = {
-  //Usuario
+  //! Usuario
   registrarUsuarios: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   listarUsuarios: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   actualizarUsuarios: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
 
-  //Empleado
+  //! Empleado
   registrarEmpleado: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
-  listarEmpleados: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.SUPERVISOR],
-  detalleEmpleado: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.SUPERVISOR],
+  listarEmpleados: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.SUPERVISOR, ROLES.ADMINISTRADOR],
+  detalleEmpleado: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.SUPERVISOR, ROLES.ADMINISTRADOR],
   eliminarEmpleado: [ROLES.SUPER_ADMIN, ROLES.GERENTE],
 
-  //Permisos
+  //! Permisos
   registrarPermiso: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR, ROLES.SUPERVISOR, ROLES.JEFE_ALMACEN],
   listarPermisosPendientes: [
     ROLES.SUPER_ADMIN,
@@ -25,7 +25,7 @@ export const permissions = {
   rechazarPermiso: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   listarPermisosMensual: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
 
-  //Vacaciones
+  //! Vacaciones
   listarVacacionesGenerales: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   listarVacacionesPendientes: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   registrarVacaciones: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],

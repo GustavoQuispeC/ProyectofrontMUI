@@ -1,18 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Chip,
-  Divider,
-  Grid,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Card, CardContent, Chip, Divider, Grid, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import {
   KeyboardBackspace,
   Download,
@@ -25,10 +13,14 @@ import {
   Phone,
   Badge,
   CheckCircle,
+  School,
+  CalendarMonth,
 } from "@mui/icons-material";
+import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useEmpleado } from "@/features/dashboard/empleado/hooks/useEmpleado";
 import { useCatalogos } from "@/features/dashboard/catalogo/hooks/useCatalogos";
+import { exportarEmpleadoPdf } from "@/features/dashboard/empleado/helpers/exportarEmpleadoPdf";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
@@ -43,6 +35,17 @@ function obtenerNombreCatalogo(items: { id: number; nombre: string }[], id?: num
   return items.find((x) => x.id === id)?.nombre ?? "—";
 }
 
+function formatearFecha(value: string | null | undefined) {
+  if (!value) return null;
+  const date = dayjs(value);
+  return date.isValid() ? date.format("DD/MM/YYYY") : value;
+}
+
+function formatearSalario(value: number | null | undefined) {
+  if (value === null || value === undefined) return null;
+  return `S/ ${Number(value).toFixed(2)}`;
+}
+
 //! subcomponentes
 
 const SectionCard = ({
@@ -54,48 +57,55 @@ const SectionCard = ({
   icon: React.ElementType;
   children: React.ReactNode;
 }) => (
-  <Card variant="outlined" sx={{ borderRadius: 3, boxShadow: "none" }}>
-    <CardHeader
-      avatar={
-        <Box
-          sx={{
-            p: 0.75,
-            bgcolor: "primary.50",
-            borderRadius: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon sx={{ fontSize: 18, color: "primary.main" }} />
-        </Box>
-      }
-      title={
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 700,
-            color: "text.secondary",
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
-        >
-          {title}
-        </Typography>
-      }
-      sx={{ pb: 0 }}
-    />
-    <Divider sx={{ mt: 1.5 }} />
-    <CardContent sx={{ pt: 2 }}>
-      <Grid container spacing={2}>
-        {children}
-      </Grid>
-    </CardContent>
-  </Card>
+  <Paper
+    elevation={0}
+    sx={{
+      border: "1px solid",
+      borderColor: "divider",
+      borderRadius: 3,
+      p: { xs: 2, sm: 2.5 },
+      height: "100%",
+    }}
+  >
+    <Stack direction="row" sx={{ mb: 2, gap: 1.5, alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 34,
+          height: 34,
+          borderRadius: 2,
+          bgcolor: "primary.main",
+          color: "white",
+          "& svg": { fontSize: 20 },
+        }}
+      >
+        <Icon />
+      </Box>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "text.primary" }}>
+        {title}
+      </Typography>
+    </Stack>
+    <Divider sx={{ mb: 2 }} />
+    <Grid container spacing={2}>
+      {children}
+    </Grid>
+  </Paper>
 );
 
-const Field = ({ label, value }: { label: string; value?: string | number | null }) => (
-  <Grid size={{ xs: 12, sm: 6 }}>
+const Field = ({
+  label,
+  value,
+  size,
+  valueColor,
+}: {
+  label: string;
+  value?: string | number | null;
+  size?: { xs?: number; sm?: number; md?: number };
+  valueColor?: string;
+}) => (
+  <Grid size={size ?? { xs: 12, sm: 6, md: 4 }}>
     <Stack sx={{ gap: 0.25 }}>
       <Typography
         variant="caption"
@@ -111,9 +121,10 @@ const Field = ({ label, value }: { label: string; value?: string | number | null
       <Typography
         variant="body2"
         sx={{
-          color: value ? "text.primary" : "text.disabled",
+          color: value ? (valueColor ?? "text.primary") : "text.disabled",
           fontWeight: 500,
           fontStyle: value ? "normal" : "italic",
+          wordBreak: "break-word",
         }}
       >
         {value ?? "—"}
@@ -213,6 +224,112 @@ export default function DetalleEmpleado({ id }: Props) {
     );
   }
 
+  const handleExportarPdf = async () => {
+    await exportarEmpleadoPdf({
+      nombreCompleto: empleado.nombreCompleto,
+      codigoEmpleado: empleado.codigoEmpleado,
+      estado: empleado.isActive ? "Activo" : "Inactivo",
+      secciones: [
+        {
+          titulo: "Datos personales",
+          campos: [
+            { etiqueta: "Nombres", valor: empleado.nombre },
+            { etiqueta: "Apellidos", valor: empleado.apellidos },
+            {
+              etiqueta: "Tipo de documento",
+              valor: obtenerNombreCatalogo(catalogos.tiposDocumentos, empleado.tipoDocumento),
+            },
+            { etiqueta: "Número de documento", valor: empleado.numeroDocumento },
+            { etiqueta: "Género", valor: obtenerNombreCatalogo(catalogos.generos, empleado.genero) },
+            { etiqueta: "Estado civil", valor: obtenerNombreCatalogo(catalogos.estadosCiviles, empleado.estadoCivil) },
+            { etiqueta: "Fecha de nacimiento", valor: formatearFecha(empleado.fechaNacimiento) },
+            { etiqueta: "Edad", valor: `${empleado.edad} años` },
+            { etiqueta: "Nacionalidad", valor: empleado.nacionalidad },
+          ],
+        },
+        {
+          titulo: "Contacto y ubicación",
+          campos: [
+            { etiqueta: "Correo electrónico", valor: empleado.correo },
+            { etiqueta: "Teléfono", valor: empleado.telefonoMovil },
+            { etiqueta: "Dirección", valor: empleado.direccion },
+            { etiqueta: "Departamento", valor: empleado.departamento },
+            { etiqueta: "Provincia", valor: empleado.provincia },
+            { etiqueta: "Distrito", valor: empleado.distrito },
+          ],
+        },
+        {
+          titulo: "Contacto de emergencia",
+          campos: [
+            { etiqueta: "Nombre", valor: empleado.contactoEmergenciaNombre },
+            { etiqueta: "Teléfono", valor: empleado.contactoEmergenciaTelefono },
+            {
+              etiqueta: "Parentesco",
+              valor: obtenerNombreCatalogo(catalogos.tiposParentesco, empleado.contactoEmergenciaParentesco),
+            },
+          ],
+        },
+        {
+          titulo: "Educación",
+          campos: [
+            {
+              etiqueta: "Nivel educativo",
+              valor: obtenerNombreCatalogo(catalogos.nivelesEducativos, empleado.nivelEducativo),
+            },
+            { etiqueta: "Profesión / Oficio", valor: empleado.profesionOficio },
+          ],
+        },
+        {
+          titulo: "Información laboral",
+          campos: [
+            { etiqueta: "Código", valor: empleado.codigoEmpleado },
+            { etiqueta: "Cargo actual", valor: empleado.cargoActual },
+            { etiqueta: "Salario base", valor: formatearSalario(empleado.salarioBase) },
+            {
+              etiqueta: "Tipo de contrato",
+              valor: obtenerNombreCatalogo(catalogos.tiposContrato, empleado.tipoContrato),
+            },
+            { etiqueta: "Tipo de jornada", valor: obtenerNombreCatalogo(catalogos.tiposJornada, empleado.tipoJornada) },
+            { etiqueta: "Fecha de ingreso", valor: formatearFecha(empleado.fechaIngreso) },
+            { etiqueta: "Fecha de egreso", valor: formatearFecha(empleado.fechaEgreso) },
+            { etiqueta: "Motivo de egreso", valor: empleado.motivoEgreso },
+            { etiqueta: "Observaciones", valor: empleado.observaciones },
+          ],
+        },
+        {
+          titulo: "Datos bancarios",
+          campos: [
+            { etiqueta: "Banco sueldo", valor: empleado.bancoSueldo },
+            { etiqueta: "Nro. cuenta sueldo", valor: empleado.cuentaSueldo },
+            { etiqueta: "CCI sueldo", valor: empleado.cciSueldo },
+            { etiqueta: "Banco CTS", valor: empleado.bancoCTS },
+            { etiqueta: "Nro. cuenta CTS", valor: empleado.cuentaCTS },
+            { etiqueta: "CCI CTS", valor: empleado.cciCTS },
+          ],
+        },
+        {
+          titulo: "Pensiones y otros datos",
+          campos: [
+            {
+              etiqueta: "Sistema de pensiones",
+              valor: obtenerNombreCatalogo(catalogos.sistemasPensiones, empleado.sistemaPensiones),
+            },
+            { etiqueta: "CUSPP", valor: empleado.cuspp },
+            { etiqueta: "RUC", valor: empleado.ruc },
+          ],
+        },
+        {
+          titulo: "Auditoría",
+          campos: [
+            { etiqueta: "ID", valor: empleado.id },
+            { etiqueta: "Estado", valor: empleado.isActive ? "Activo" : "Inactivo" },
+            { etiqueta: "Fecha de registro", valor: formatearFecha(empleado.createdAt) },
+          ],
+        },
+      ],
+    });
+  };
+
   return (
     <Box
       sx={{
@@ -224,8 +341,23 @@ export default function DetalleEmpleado({ id }: Props) {
       }}
     >
       {/* ── Header Card ── */}
-      <Card variant="outlined" sx={{ borderRadius: 4, boxShadow: "none", mb: 2 }}>
-        <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
+      <Card
+        variant="outlined"
+        sx={{
+          borderRadius: 3,
+          boxShadow: "none",
+          mb: 2,
+          overflow: "hidden",
+        }}
+      >
+        <CardContent
+          sx={{
+            p: { xs: 2, md: 2.5 },
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+          }}
+        >
           <Stack
             sx={{
               flexDirection: { xs: "column", sm: "row" },
@@ -257,10 +389,11 @@ export default function DetalleEmpleado({ id }: Props) {
                     position: "absolute",
                     bottom: -4,
                     right: -4,
-                    width: 16,
-                    height: 16,
+                    width: 18,
+                    height: 18,
                     borderRadius: "50%",
-                    border: "2px solid white",
+                    border: "2px solid",
+                    borderColor: "background.paper",
                     bgcolor: empleado.isActive ? "success.main" : "error.main",
                   }}
                 />
@@ -274,7 +407,7 @@ export default function DetalleEmpleado({ id }: Props) {
 
                 <Stack sx={{ flexDirection: "row", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
                   <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 0.5 }}>
-                    <Badge sx={{ fontSize: 12, color: "text.disabled" }} />
+                    <Badge sx={{ fontSize: 14, color: "text.disabled" }} />
                     <Typography variant="caption" sx={{ color: "text.secondary" }}>
                       {empleado.codigoEmpleado}
                     </Typography>
@@ -283,9 +416,9 @@ export default function DetalleEmpleado({ id }: Props) {
                     •
                   </Typography>
                   <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 0.5 }}>
-                    <Work sx={{ fontSize: 12, color: "text.disabled" }} />
+                    <Work sx={{ fontSize: 14, color: "text.disabled" }} />
                     <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                      {obtenerNombreCatalogo(catalogos.tiposContrato, empleado.tipoContrato) || empleado.cargoActual}
+                      {empleado.cargoActual}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -330,6 +463,7 @@ export default function DetalleEmpleado({ id }: Props) {
               <Button
                 variant="contained"
                 startIcon={<Download />}
+                onClick={() => void handleExportarPdf()}
                 sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
               >
                 Exportar
@@ -345,9 +479,11 @@ export default function DetalleEmpleado({ id }: Props) {
           <SectionCard title="Datos personales" icon={Person}>
             <Field label="Nombres" value={empleado.nombre} />
             <Field label="Apellidos" value={empleado.apellidos} />
+            <Field label="Tipo doc." value={obtenerNombreCatalogo(catalogos.tiposDocumentos, empleado.tipoDocumento)} />
+            <Field label="Nro. de doc." value={empleado.numeroDocumento} />
             <Field label="Género" value={obtenerNombreCatalogo(catalogos.generos, empleado.genero)} />
             <Field label="Estado civil" value={obtenerNombreCatalogo(catalogos.estadosCiviles, empleado.estadoCivil)} />
-            <Field label="Fecha de nacimiento" value={empleado.fechaNacimiento} />
+            <Field label="F. nacimiento" value={formatearFecha(empleado.fechaNacimiento)} />
             <Field label="Edad" value={empleado.edad ? `${empleado.edad} años` : null} />
             <Field label="Nacionalidad" value={empleado.nacionalidad} />
           </SectionCard>
@@ -355,17 +491,17 @@ export default function DetalleEmpleado({ id }: Props) {
 
         <Grid size={{ xs: 12, lg: 6 }}>
           <SectionCard title="Contacto" icon={Mail}>
-            <Field label="Correo electrónico" value={empleado.correo} />
-            <Field label="Teléfono móvil" value={empleado.telefonoMovil} />
+            <Field label="Correo electrónico" value={empleado.correo} size={{ xs: 12, sm: 8, md: 8 }} />
+            <Field label="Teléfono" value={empleado.telefonoMovil} size={{ xs: 12, sm: 4, md: 4 }} />
           </SectionCard>
         </Grid>
 
         <Grid size={{ xs: 12, lg: 6 }}>
           <SectionCard title="Ubicación" icon={LocationOn}>
-            <Field label="Dirección" value={empleado.direccion} />
-            <Field label="Departamento" value={empleado.departamento} />
-            <Field label="Provincia" value={empleado.provincia} />
-            <Field label="Distrito" value={empleado.distrito} />
+            <Field label="Dirección" value={empleado.direccion} size={{ xs: 12, sm: 12, md: 12 }} />
+            <Field label="Departamento" value={empleado.departamento} size={{ xs: 12, sm: 4, md: 4 }} />
+            <Field label="Provincia" value={empleado.provincia} size={{ xs: 12, sm: 4, md: 4 }} />
+            <Field label="Distrito" value={empleado.distrito} size={{ xs: 12, sm: 4, md: 4 }} />
           </SectionCard>
         </Grid>
 
@@ -380,10 +516,22 @@ export default function DetalleEmpleado({ id }: Props) {
           </SectionCard>
         </Grid>
 
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <SectionCard title="Educación" icon={School}>
+            <Field
+              label="Nivel educativo"
+              value={obtenerNombreCatalogo(catalogos.nivelesEducativos, empleado.nivelEducativo)}
+              size={{ xs: 12, sm: 4, md: 4 }}
+            />
+            <Field label="Profesión / Oficio" value={empleado.profesionOficio} size={{ xs: 12, sm: 8, md: 8 }} />
+          </SectionCard>
+        </Grid>
+
         <Grid size={{ xs: 12 }}>
           <SectionCard title="Información laboral" icon={Work}>
-            <Typography variant="caption">{empleado.cargoActual}</Typography>
-            <Field label="Salario" value={empleado.salarioBase ? `S/ ${empleado.salarioBase}` : null} />
+            <Field label="Código" value={empleado.codigoEmpleado} />
+            <Field label="Cargo actual" value={empleado.cargoActual} />
+            <Field label="Salario base" value={formatearSalario(empleado.salarioBase)} />
             <Field
               label="Tipo de contrato"
               value={obtenerNombreCatalogo(catalogos.tiposContrato, empleado.tipoContrato)}
@@ -392,28 +540,44 @@ export default function DetalleEmpleado({ id }: Props) {
               label="Tipo de jornada"
               value={obtenerNombreCatalogo(catalogos.tiposJornada, empleado.tipoJornada)}
             />
-            <Field label="Fecha de ingreso" value={empleado.fechaIngreso} />
+            <Field label="F. ingreso" value={formatearFecha(empleado.fechaIngreso)} />
+            <Field label="F. egreso" value={formatearFecha(empleado.fechaEgreso)} />
+            <Field label="Motivo de egreso" value={empleado.motivoEgreso} />
+            <Field label="Observaciones" value={empleado.observaciones} />
           </SectionCard>
         </Grid>
 
         <Grid size={{ xs: 12, lg: 6 }}>
           <SectionCard title="Datos bancarios" icon={AccountBalance}>
             <Field label="Banco Sueldo" value={empleado.bancoSueldo} />
-            <Field label="Número de cuenta Sueldo" value={empleado.cuentaSueldo} />
-            <Field label="CCI sueldo" value={empleado.cciSueldo} />
+            <Field label="Nro. Cta. Sueldo" value={empleado.cuentaSueldo} />
+            <Field label="CCI Sueldo" value={empleado.cciSueldo} />
             <Field label="Banco CTS" value={empleado.bancoCTS} />
-            <Field label="Número de cuenta CTS" value={empleado.cuentaCTS} />
+            <Field label="Nro. Cta. CTS" value={empleado.cuentaCTS} />
             <Field label="CCI CTS" value={empleado.cciCTS} />
           </SectionCard>
         </Grid>
 
         <Grid size={{ xs: 12, lg: 6 }}>
-          <SectionCard title="Pensiones y salud" icon={Favorite}>
+          <SectionCard title="Pensiones y otros datos" icon={Favorite}>
             <Field
-              label="Sistema de pensiones"
+              label="Sist. de pensiones"
               value={obtenerNombreCatalogo(catalogos.sistemasPensiones, empleado.sistemaPensiones)}
             />
             <Field label="CUSPP" value={empleado.cuspp} />
+            <Field label="RUC" value={empleado.ruc} />
+          </SectionCard>
+        </Grid>
+
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <SectionCard title="Auditoría" icon={CalendarMonth}>
+            <Field label="ID" value={empleado.id} />
+            <Field
+              label="Estado"
+              value={empleado.isActive ? "Activo" : "Inactivo"}
+              valueColor={empleado.isActive ? "success.main" : "error.main"}
+            />
+            <Field label="Fecha de registro" value={formatearFecha(empleado.createdAt)} />
           </SectionCard>
         </Grid>
       </Grid>
