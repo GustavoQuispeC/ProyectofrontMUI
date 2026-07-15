@@ -1,19 +1,19 @@
-export enum Condicion {
-  Pendiente = "Pendiente",
-  Aprobado = "Aprobado",
-  Rechazado = "Cancelado",
+export enum CondicionFalta {
+  Pendiente = 1,
+  Aprobado = 2,
+  Cancelado = 3,
 }
 
 export enum Justificacion {
-  Si = "Si",
-  No = "No",
+  Si = 1,
+  No = 2,
 }
 
 export interface RegistrarFalta {
   empleadoId: number;
   fechaInicio: string;
   fechaFin: string;
-  justifica: string;
-  condicion: string;
+  justifica: Justificacion;
+  condicion: CondicionFalta;
   observacion?: string;
 }

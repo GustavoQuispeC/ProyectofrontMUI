@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { registrarFalta } from "../falta.logic";
-import { RegistrarFalta } from "../falta.constants";
+import { RegistrarFalta } from "../falta.type";
 
 export function useRegistrarFalta() {
   const queryClient = useQueryClient();

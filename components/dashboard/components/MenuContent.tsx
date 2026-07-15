@@ -22,6 +22,7 @@ import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SummarizeIcon from "@mui/icons-material/Summarize";
+import EventBusyIcon from "@mui/icons-material/EventBusy";
 
 import React from "react";
 import Link from "next/link";
@@ -102,6 +103,12 @@ const mainListItems: MenuItemType[] = [
         allowedRoles: permissions.listarVacacionesById,
       },
     ],
+  },
+  {
+    text: "Faltas",
+    icon: <EventBusyIcon />,
+    href: "/dashboard/faltas/pendientes",
+    allowedRoles: permissions.listarFaltasPendientes,
   },
 ];
 

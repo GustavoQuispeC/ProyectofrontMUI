@@ -30,7 +30,7 @@ import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import { useAprobarPermiso } from "@/features/dashboard/permiso/hooks/useAprobarPermiso";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-import BeachAccessIcon from "@mui/icons-material/BeachAccess";
+import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
 import { chipCondicion } from "@/features/dashboard/permiso/permiso.ui";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
@@ -83,7 +83,7 @@ export default function ListarPermisosPendientes() {
         {/* Título */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
-            <BeachAccessIcon color="primary" />
+            <AccessAlarmIcon color="primary" />
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
               Permisos pendientes
             </Typography>
