@@ -229,6 +229,7 @@ export default function DetalleEmpleado({ id }: Props) {
       nombreCompleto: empleado.nombreCompleto,
       codigoEmpleado: empleado.codigoEmpleado,
       estado: empleado.isActive ? "Activo" : "Inactivo",
+      fotoUrl: empleado.fotoUrl,
       secciones: [
         {
           titulo: "Datos personales",
@@ -477,15 +478,14 @@ export default function DetalleEmpleado({ id }: Props) {
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, lg: 6 }}>
           <SectionCard title="Datos personales" icon={Person}>
-            <Field label="Nombres" value={empleado.nombre} />
-            <Field label="Apellidos" value={empleado.apellidos} />
+            <Field label="Nombres" value={empleado.nombre} size={{ xs: 12, sm: 4 }} />
+            <Field label="Apellidos" value={empleado.apellidos} size={{ xs: 12, sm: 8 }} />
             <Field label="Tipo doc." value={obtenerNombreCatalogo(catalogos.tiposDocumentos, empleado.tipoDocumento)} />
             <Field label="Nro. de doc." value={empleado.numeroDocumento} />
             <Field label="Género" value={obtenerNombreCatalogo(catalogos.generos, empleado.genero)} />
-            <Field label="Estado civil" value={obtenerNombreCatalogo(catalogos.estadosCiviles, empleado.estadoCivil)} />
             <Field label="F. nacimiento" value={formatearFecha(empleado.fechaNacimiento)} />
             <Field label="Edad" value={empleado.edad ? `${empleado.edad} años` : null} />
-            <Field label="Nacionalidad" value={empleado.nacionalidad} />
+            <Field label="Estado civil" value={obtenerNombreCatalogo(catalogos.estadosCiviles, empleado.estadoCivil)} />
           </SectionCard>
         </Grid>
 

@@ -12,6 +12,7 @@ interface ExportarEmpleadoPdfParams {
   nombreCompleto: string;
   codigoEmpleado: string | null;
   estado: string;
+  fotoUrl: string | null;
   secciones: SeccionPdfEmpleado[];
 }
 
@@ -24,29 +25,37 @@ const limpiarNombreArchivo = (valor: string) =>
     .replace(/\s+/g, "-")
     .toLowerCase();
 
-const obtenerLogoDataUrl = async () => {
-  const response = await fetch("/LogoFamet2.png");
-  if (!response.ok) return null;
+const obtenerImagenDataUrl = async (url: string | null) => {
+  if (!url) return null;
 
-  const blob = await response.blob();
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(blob);
-  });
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+
+    const blob = await response.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
 };
 
 export async function exportarEmpleadoPdf({
   nombreCompleto,
   codigoEmpleado,
   estado,
+  fotoUrl,
   secciones,
 }: ExportarEmpleadoPdfParams) {
-  const [{ default: jsPDF }, { default: autoTable }, logoDataUrl] = await Promise.all([
+  const [{ default: jsPDF }, { default: autoTable }, logoDataUrl, fotoDataUrl] = await Promise.all([
     import("jspdf"),
     import("jspdf-autotable"),
-    obtenerLogoDataUrl(),
+    obtenerImagenDataUrl("/LogoFamet2.png"),
+    obtenerImagenDataUrl(fotoUrl ? `/api/firebase-image?url=${encodeURIComponent(fotoUrl)}` : null),
   ]);
   const doc = new jsPDF({ format: "a4", unit: "mm" });
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -60,13 +69,17 @@ export async function exportarEmpleadoPdf({
   doc.setDrawColor(189, 189, 189);
   doc.setLineWidth(0.4);
   doc.roundedRect(pageWidth - 38, 3, 24, 25, 1.5, 1.5, "S");
-  doc.setTextColor(117, 117, 117);
-  doc.setFontSize(8);
-  doc.text("FOTO", pageWidth - 26, 16, { align: "center" });
+  if (fotoDataUrl) {
+    doc.addImage(fotoDataUrl, pageWidth - 37.5, 3.5, 23, 24.5);
+  } else {
+    doc.setTextColor(117, 117, 117);
+    doc.setFontSize(8);
+    doc.text("FOTO", pageWidth - 26, 16, { align: "center" });
+  }
 
   doc.setTextColor(25, 118, 210);
   doc.setFontSize(18);
-  doc.text("Ficha de empleado", 80, 13);
+  doc.text("FICHA DE EMPLEADO", 80, 13);
   doc.setFontSize(11);
   doc.text(nombreCompleto, 80, 21);
 
