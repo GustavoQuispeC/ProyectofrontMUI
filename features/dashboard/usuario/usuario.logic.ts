@@ -5,10 +5,14 @@ import {
   listarUsuariosApi as listarUsuariosService,
   registrarUsuarioApi as registrarUsuarioService,
   actualizarUsuarioApi as actualizarUsuarioService,
+  cambiarEstadoUsuarioApi as cambiarEstadoUsuarioService,
+  resetPasswordUsuarioApi as resetPasswordUsuarioService,
+  changeEmailUsuarioApi as changeEmailUsuarioService,
+  changeRoleUsuarioApi as changeRoleUsuarioService,
 } from "./usuario.service";
 import { ActualizarUsuarioPayload, RegistrarUsuario } from "./usuario.types";
 
-//! Registrar usuario con validación
+//! Registrar usuario
 export async function registrarUsuario(empleadoId: number, payload: RegistrarUsuario): Promise<void> {
   const user = getAuthUser();
 
@@ -22,7 +26,7 @@ export async function registrarUsuario(empleadoId: number, payload: RegistrarUsu
   return registrarUsuarioService(empleadoId, payload);
 }
 
-//! Listar usuarios con validación
+//! Listar usuarios
 export async function listarUsuarios() {
   const user = getAuthUser();
 
@@ -36,7 +40,7 @@ export async function listarUsuarios() {
   return listarUsuariosService();
 }
 
-//! Actualizar usuario con validación
+//! Actualizar usuario
 export async function actualizarUsuario(usuarioId: string, payload: ActualizarUsuarioPayload): Promise<void> {
   const user = getAuthUser();
 
@@ -48,4 +52,60 @@ export async function actualizarUsuario(usuarioId: string, payload: ActualizarUs
     throw new Error("No tienes permisos para actualizar usuarios");
   }
   return actualizarUsuarioService(usuarioId, payload);
+}
+
+//! Cambiar estado
+export async function cambiarEstado(usuarioId: string, estado: boolean): Promise<void> {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  if (!hasPermission(user.rol, permissions.cambiarEstadoUsuarios)) {
+    throw new Error("No tienes permisos para cambiar el estado de usuarios");
+  }
+  return cambiarEstadoUsuarioService(usuarioId, estado);
+}
+
+//! Resetear contraseña
+export async function resetPassword(usuarioId: string, password: string): Promise<void> {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  if (!hasPermission(user.rol, permissions.resetPasswordUsuarios)) {
+    throw new Error("No tienes permisos para resetear la contraseña de usuarios");
+  }
+  return resetPasswordUsuarioService(usuarioId, password);
+}
+
+//! Cambiar correo
+export async function changeEmail(usuarioId: string, email: string): Promise<void> {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  if (!hasPermission(user.rol, permissions.changeEmailUsuarios)) {
+    throw new Error("No tienes permisos para cambiar el correo de usuarios");
+  }
+  return changeEmailUsuarioService(usuarioId, email);
+}
+
+//! Cambiar rol
+export async function changeRole(usuarioId: string, role: string): Promise<void> {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  if (!hasPermission(user.rol, permissions.changeRoleUsuarios)) {
+    throw new Error("No tienes permisos para cambiar el rol de usuarios");
+  }
+  return changeRoleUsuarioService(usuarioId, role);
 }

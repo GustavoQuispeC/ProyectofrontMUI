@@ -24,6 +24,10 @@ export async function apiUsuario(url: string, options: RequestInit = {}) {
       throw new Error(msg);
     }
 
+    if (response.status === 204 || response.headers.get("content-length") === "0") {
+      return undefined;
+    }
+
     return response.json();
   } catch (err) {
     // Relanza el error si es un AbortError (es normal cuando se desmonta)
