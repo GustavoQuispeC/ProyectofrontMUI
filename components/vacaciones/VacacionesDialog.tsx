@@ -27,7 +27,6 @@ import {
 } from "@mui/material";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -36,7 +35,7 @@ import { EstadoVacacion, PeriodoVacacional } from "@/features/dashboard/vacacion
 import type { ChipProps } from "@mui/material";
 import { formatDate } from "@/features/dashboard/vacaciones/vacaciones.constants";
 import { useAprobarVacaciones } from "@/features/dashboard/vacaciones/hooks/useAprobarVacaciones";
-import { useCancelarVacaciones } from "@/features/dashboard/vacaciones/hooks/useCancelarVacaciones";
+import { useCancelarVacacionesAprobadas } from "@/features/dashboard/vacaciones/hooks/useCancelarVacacionesAprobadas";
 import { useState } from "react";
 import ConfirmarCancelarVacacionDialog from "@/components/vacaciones/ConfirmarCancelarVacacionDialog";
 import toast from "react-hot-toast";
@@ -44,28 +43,24 @@ import toast from "react-hot-toast";
 const EstadoVacacionLabel: Record<EstadoVacacion, string> = {
   [EstadoVacacion.Pendiente]: "Pendiente",
   [EstadoVacacion.Aprobado]: "Aprobado",
-  [EstadoVacacion.Rechazado]: "Rechazado",
   [EstadoVacacion.Cancelado]: "Cancelado",
 };
 
 const EstadoVacacionColor: Record<EstadoVacacion, ChipProps["color"]> = {
   [EstadoVacacion.Pendiente]: "warning",
   [EstadoVacacion.Aprobado]: "success",
-  [EstadoVacacion.Rechazado]: "error",
   [EstadoVacacion.Cancelado]: "default",
 };
 
 const EstadoVacacionIcon: Record<EstadoVacacion, React.ReactElement> = {
   [EstadoVacacion.Pendiente]: <HourglassEmptyIcon sx={{ fontSize: 14 }} />,
   [EstadoVacacion.Aprobado]: <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 14 }} />,
-  [EstadoVacacion.Rechazado]: <CancelOutlinedIcon sx={{ fontSize: 14 }} />,
   [EstadoVacacion.Cancelado]: <BlockIcon sx={{ fontSize: 14 }} />,
 };
 
 const EstadoVacacionPorNumero: Record<number, EstadoVacacion> = {
-  0: EstadoVacacion.Pendiente,
-  1: EstadoVacacion.Aprobado,
-  2: EstadoVacacion.Rechazado,
+  1: EstadoVacacion.Pendiente,
+  2: EstadoVacacion.Aprobado,
   3: EstadoVacacion.Cancelado,
 };
 
@@ -114,7 +109,7 @@ interface VacacionesDialogProps {
 export default function VacacionesDialog({ open, onClose, periodo, modo }: VacacionesDialogProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const { cancelarVacacion, loading: cancelando } = useCancelarVacaciones(
+  const { cancelarVacacionAprobada, loading: cancelando } = useCancelarVacacionesAprobadas(
     (mensaje) => {
       toast.success(mensaje ?? "Vacación cancelada exitosamente");
       onClose();
@@ -165,7 +160,6 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
               const cardColor: Record<EstadoVacacion, { bg: string; border: string }> = {
                 [EstadoVacacion.Pendiente]: { bg: "rgba(245,158,11,0.07)", border: "rgba(245,158,11,0.35)" },
                 [EstadoVacacion.Aprobado]: { bg: "rgba(16,185,129,0.07)", border: "rgba(16,185,129,0.35)" },
-                [EstadoVacacion.Rechazado]: { bg: "rgba(239,68,68,0.07)", border: "rgba(239,68,68,0.35)" },
                 [EstadoVacacion.Cancelado]: { bg: "rgba(107,114,128,0.07)", border: "rgba(107,114,128,0.35)" },
               };
               const colors = estadoValido ? cardColor[estadoValido] : { bg: "transparent", border: "divider" };
@@ -392,11 +386,6 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
                             </Tooltip>
                             <Tooltip title="Cancelar">
                               <IconButton size="small" color="error">
-                                <BlockIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Rechazar">
-                              <IconButton size="small" color="error">
                                 <ClearIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
@@ -410,7 +399,7 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
                               onClick={() => setVacacionIdAcancelar(v.vacacionId)}
                               disabled={cancelando}
                             >
-                              <BlockIcon fontSize="small" />
+                              <ClearIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
@@ -434,7 +423,7 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
         onClose={() => setVacacionIdAcancelar(null)}
         onConfirm={() => {
           if (vacacionIdAcancelar !== null) {
-            cancelarVacacion(vacacionIdAcancelar);
+            cancelarVacacionAprobada(vacacionIdAcancelar);
             setVacacionIdAcancelar(null);
           }
         }}

@@ -1,5 +1,5 @@
 import { ChipProps } from "@mui/material";
-import { EstadoPeriodoVacacional, EstadoVacacion } from "./vacaciones.type";
+import { EstadoPeriodoVacacional } from "./vacaciones.type";
 
 // ─── Estados ─────────────────────────────────────────────────────────────────
 export const EstadoPeriodoColor: Record<EstadoPeriodoVacacional, ChipProps["color"]> = {

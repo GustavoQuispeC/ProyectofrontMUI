@@ -7,9 +7,10 @@ import {
   listarVacacionesPendientesApi as listarVacacionesPendientesService,
   registrarVacacionesApi as registrarVacacionesService,
   aprobarVacacionesApi as aprobarVacacionesService,
-  cancelarVacacionesApi as cancelarVacacionesService,
+  cancelarVacacionesAprobadasApi as cancelarVacacionesAprobadasService,
   listarVacacionesResumenApi as listarVacacionesResumenService,
   listarVacacionesByIdApi as listarVacacionesByIdService,
+  cancelarVacacionesPendientesApi as cancelarVacacionesPendientesService,
 } from "./vacaciones.service";
 
 //! Registrar vacaciones
@@ -84,14 +85,26 @@ export async function aprobarVacaciones(id: number) {
   return aprobarVacacionesService(id);
 }
 
-//! Cancelar vacaciones
-export async function cancelarVacaciones(id: number) {
+//! Cancelar vacaciones aprobadas
+export async function cancelarVacacionesAprobadas(id: number) {
   const user = getAuthUser();
   if (!user) {
     throw new Error("No autenticado");
   }
-  if (!hasPermission(user.rol, permissions.cancelarVacaciones)) {
-    throw new Error("No tienes privilegios para cancelar vacaciones");
+  if (!hasPermission(user.rol, permissions.cancelarVacacionesAprobadas)) {
+    throw new Error("No tienes privilegios para cancelar vacaciones aprobadas");
   }
-  return cancelarVacacionesService(id);
+  return cancelarVacacionesAprobadasService(id);
+}
+
+//! Cancelar vacaciones pendientes
+export async function cancelarVacacionesPendientes(id: number) {
+  const user = getAuthUser();
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+  if (!hasPermission(user.rol, permissions.cancelarVacacionesPendientes)) {
+    throw new Error("No tienes privilegios para cancelar vacaciones pendientes");
+  }
+  return cancelarVacacionesPendientesService(id);
 }

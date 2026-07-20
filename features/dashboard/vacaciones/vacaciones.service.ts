@@ -41,9 +41,16 @@ export async function aprobarVacacionesApi(id: number): Promise<void> {
   });
 }
 
-//! Cancelar vacaciones
-export async function cancelarVacacionesApi(id: number): Promise<{ mensaje?: string }> {
-  return apiVacaciones(`${apiUrl}/Vacacion/${id}/cancelar`, {
+//! Cancelar vacaciones aprobadas
+export async function cancelarVacacionesAprobadasApi(id: number): Promise<{ mensaje?: string }> {
+  return apiVacaciones(`${apiUrl}/Vacacion/${id}/cancelarAprobada`, {
+    method: "PUT",
+  });
+}
+
+//! Cancelar vacaciones pendientes
+export async function cancelarVacacionesPendientesApi(id: number): Promise<{ mensaje?: string }> {
+  return apiVacaciones(`${apiUrl}/Vacacion/${id}/cancelarPendiente`, {
     method: "PUT",
   });
 }

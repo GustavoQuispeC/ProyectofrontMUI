@@ -1,7 +1,6 @@
 export enum EstadoVacacion {
   Pendiente = "Pendiente",
   Aprobado = "Aprobado",
-  Rechazado = "Rechazado",
   Cancelado = "Cancelado",
 }
 
