@@ -81,7 +81,7 @@ export default function ListarPermisosPendientes() {
     <Box sx={{ width: "100%", p: { xs: 1, md: 2 } }}>
       <Grid container spacing={2} sx={{ mb: 2 }}>
         {/* Título */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
             <AccessAlarmIcon color="primary" />
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
@@ -91,14 +91,21 @@ export default function ListarPermisosPendientes() {
         </Grid>
 
         {/* Botones */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Stack sx={{ flexDirection: { xs: "column", sm: "row" }, gap: 1, justifyContent: "flex-end" }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Stack
+            sx={{
+              flexDirection: { xs: "column", md: "row" },
+              gap: 1,
+              justifyContent: { xs: "stretch", md: "flex-end" },
+              alignItems: "stretch",
+            }}
+          >
             <Button
               component={Link}
               href="/dashboard/permisos/registrar"
               variant="contained"
               startIcon={<GroupAddIcon />}
-              sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+              sx={{ height: 44, whiteSpace: "nowrap" }}
             >
               Gestionar Permisos
             </Button>
@@ -108,7 +115,7 @@ export default function ListarPermisosPendientes() {
               variant="contained"
               color="success"
               startIcon={<AssessmentIcon />}
-              sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+              sx={{ height: 44, whiteSpace: "nowrap" }}
             >
               Ver Aprobados
             </Button>
@@ -198,7 +205,7 @@ export default function ListarPermisosPendientes() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Tooltip title={permiso.motivoRechazo || ""} arrow>
+                      <Tooltip title={permiso.motivoCancelacion || ""} arrow>
                         <span>{chipCondicion(permiso.condicion)}</span>
                       </Tooltip>
                     </TableCell>

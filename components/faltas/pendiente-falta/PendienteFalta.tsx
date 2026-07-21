@@ -2,6 +2,7 @@
 
 import { CondicionFalta, Justificacion } from "@/features/dashboard/falta/falta.constants";
 import { useFaltasPendientes } from "@/features/dashboard/falta/hooks/useFaltasPendientes";
+import { useAprobarFalta } from "@/features/dashboard/falta/hooks/useAprobarFalta";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { useMounted } from "@/shared/hooks/useMounted";
@@ -33,6 +34,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Chip from "@mui/material/Chip";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 
 const estadoConfig: Record<CondicionFalta, { color: "warning" | "success" | "error"; label: string }> = {
   [CondicionFalta.Pendiente]: { color: "warning", label: "Pendiente" },
@@ -43,8 +45,10 @@ const estadoConfig: Record<CondicionFalta, { color: "warning" | "success" | "err
 export default function FaltasPendientes() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarFaltasPendientes) : false;
+  const puedeAprobar = user ? hasPermission(user.rol, permissions.aprobarFalta) : false;
   const mounted = useMounted(); //? controla el estado de montaje
   const { faltasPendientes, loading: loadingFaltas } = useFaltasPendientes(canAccess);
+  const { aprobarFalta, loading: aprobando } = useAprobarFalta();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -92,6 +96,16 @@ export default function FaltasPendientes() {
               sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
             >
               Gestionar Faltas
+            </Button>
+            <Button
+              component={Link}
+              href="/dashboard/faltas/mensual"
+              variant="contained"
+              color="success"
+              startIcon={<AssessmentIcon />}
+              sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
+            >
+              Aprobadas
             </Button>
           </Stack>
         </Grid>
@@ -168,13 +182,20 @@ export default function FaltasPendientes() {
                       })()}
                     </TableCell>
                     <TableCell align="center">
-                      <Tooltip title="Aprobar falta (pendiente de implementación)">
-                        <span>
-                          <IconButton size="small" color="success">
-                            <CheckIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
+                      {puedeAprobar && (
+                        <Tooltip title="Aprobar falta">
+                          <span>
+                            <IconButton
+                              size="small"
+                              color="success"
+                              onClick={() => aprobarFalta(falta.id)}
+                              disabled={aprobando}
+                            >
+                              <CheckIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
                       <Tooltip title="Cancelar falta">
                         <IconButton
                           size="small"

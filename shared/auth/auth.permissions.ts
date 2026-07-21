@@ -42,4 +42,5 @@ export const permissions = {
   //!Faltas
   registrarFalta: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
   listarFaltasPendientes: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
+  aprobarFalta: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR],
 };

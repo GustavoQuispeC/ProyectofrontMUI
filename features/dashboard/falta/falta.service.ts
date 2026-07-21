@@ -14,3 +14,10 @@ export async function listarFaltasPendientesApi(): Promise<PendientesFaltas[]> {
     method: "GET",
   });
 }
+
+//! Aprobar faltas
+export async function aprobarFaltaApi(faltaId: number): Promise<void> {
+  return apiFalta<void>(`${apiUrl}/faltas/${faltaId}/aprobar`, {
+    method: "PUT",
+  });
+}
