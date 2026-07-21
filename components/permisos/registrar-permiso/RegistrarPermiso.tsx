@@ -176,7 +176,7 @@ export default function RegistrarPermiso() {
           motivo: data.motivo,
           lugar: data.lugar,
           condicion: puedeAprobar ? condicion : undefined,
-          motivoRechazo: condicion === "Rechazado" ? motivoRechazo : undefined,
+          motivoRechazo: condicion === Condicion.Cancelado ? motivoRechazo : undefined,
         }),
         {
           loading: "Registrando permiso...",
@@ -459,7 +459,7 @@ export default function RegistrarPermiso() {
                 </RadioGroup>
               </FormControl>
             </Grid>
-            {condicion === Condicion.Rechazado && (
+            {condicion === Condicion.Cancelado && (
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth

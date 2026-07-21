@@ -22,7 +22,7 @@ import Link from "next/link";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
-import { useRechazarPermiso } from "@/features/dashboard/permiso/hooks/useRechazarPermiso";
+import { useCancelarPermiso } from "@/features/dashboard/permiso/hooks/useCancelarPermiso";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -44,11 +44,11 @@ export default function ListarPermisosPendientes() {
   const { permisosPendientes, loading: loadingPermisos } = usePermisosPendientes(canAccess);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const { rechazarPermiso, loading: rechazando } = useRechazarPermiso();
+  const { cancelarPermiso, loading: cancelando } = useCancelarPermiso();
   const { aprobarPermiso, loading: aprobando } = useAprobarPermiso();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<{ id: number; nombreEmpleado: string } | null>(null);
-  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [motivoCancelacion, setMotivoCancelacion] = useState("");
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
 
@@ -60,13 +60,13 @@ export default function ListarPermisosPendientes() {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedRow(null);
-    setMotivoRechazo("");
+    setMotivoCancelacion("");
   };
 
-  //! guarda el rechazo del permiso
-  const handleRechazar = () => {
+  //! guarda la cancelación del permiso
+  const handleCancelar = () => {
     if (!selectedRow) return;
-    rechazarPermiso({ id: selectedRow.id, motivoRechazo });
+    cancelarPermiso({ id: selectedRow.id, motivoCancelacion: motivoCancelacion });
     handleCloseDialog();
   };
 
@@ -110,7 +110,7 @@ export default function ListarPermisosPendientes() {
               startIcon={<AssessmentIcon />}
               sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
             >
-              Ver todos
+              Ver Aprobados
             </Button>
           </Stack>
         </Grid>
@@ -223,7 +223,7 @@ export default function ListarPermisosPendientes() {
                         </Tooltip>
                       )}
                       {conPrivilegio && (
-                        <Tooltip title="Rechazar">
+                        <Tooltip title="Cancelar">
                           <span>
                             <IconButton
                               size="small"
@@ -262,30 +262,30 @@ export default function ListarPermisosPendientes() {
         <DialogTitle>Rechazar permiso</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            ¿Está seguro que desea rechazar el permiso de <strong>{selectedRow?.nombreEmpleado}</strong>?
+            ¿Está seguro que desea cancelar el permiso de <strong>{selectedRow?.nombreEmpleado}</strong>?
           </Typography>
           <TextField
             fullWidth
-            label="Motivo de rechazo"
+            label="Motivo de cancelación"
             multiline
             rows={3}
-            value={motivoRechazo}
-            onChange={(e) => setMotivoRechazo(e.target.value)}
-            placeholder="Indique el motivo del rechazo..."
+            value={motivoCancelacion}
+            onChange={(e) => setMotivoCancelacion(e.target.value)}
+            placeholder="Indique el motivo de la cancelación..."
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={rechazando} sx={{ minWidth: 120, height: 44 }}>
+          <Button onClick={handleCloseDialog} disabled={cancelando} sx={{ minWidth: 120, height: 44 }}>
             Cancelar
           </Button>
           <Button
             variant="contained"
             color="error"
-            onClick={handleRechazar}
-            disabled={rechazando}
+            onClick={handleCancelar}
+            disabled={cancelando}
             sx={{ minWidth: 140, height: 44, boxShadow: "none", borderRadius: 2 }}
           >
-            {rechazando ? "Rechazando..." : "Rechazar"}
+            {cancelando ? "Cancelando..." : "Cancelar"}
           </Button>
         </DialogActions>
       </Dialog>

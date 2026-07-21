@@ -1,11 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { rechazarPermisoApi } from "../permiso.service";
+import { cancelarPermisoApi } from "../permiso.service";
 
-export function useRechazarPermiso() {
+export function useCancelarPermiso() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({ id, motivoRechazo }: { id: number; motivoRechazo: string }) => rechazarPermisoApi(id, motivoRechazo),
+    mutationFn: ({ id, motivoCancelacion }: { id: number; motivoCancelacion: string }) =>
+      cancelarPermisoApi(id, motivoCancelacion),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["permisos"] });
       queryClient.invalidateQueries({ queryKey: ["permisosPendientes"] });
@@ -14,7 +15,7 @@ export function useRechazarPermiso() {
   });
 
   return {
-    rechazarPermiso: mutation.mutate,
+    cancelarPermiso: mutation.mutate,
     loading: mutation.isPending,
     error: mutation.error,
   };

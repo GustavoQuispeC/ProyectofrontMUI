@@ -1,7 +1,7 @@
 export enum Condicion {
   Pendiente = "Pendiente",
   Aprobado = "Aprobado",
-  Rechazado = "Rechazado",
+  Cancelado = "Cancelado",
 }
 
 export interface RegistrarPermiso {
@@ -12,7 +12,7 @@ export interface RegistrarPermiso {
   motivo: string;
   lugar: string;
   condicion?: string; // ← opcional
-  motivoRechazo?: string; // ← opcional
+  motivoCancelacion?: string; // ← opcional
 }
 
 export interface ListarPermisos {
@@ -26,7 +26,7 @@ export interface ListarPermisos {
   motivo: string;
   lugar: string;
   condicion: string;
-  motivoRechazo: null;
+  motivoCancelacion: null;
   aprobadoPor: null | string;
   aprobadoPorNombre: null | string;
   fechaAprobacion: Date | null;
@@ -44,7 +44,7 @@ export interface PendientesPermisos {
   motivo: string;
   lugar: string;
   condicion: Condicion;
-  motivoRechazo: string | null;
+  motivoCancelacion: string | null;
   aprobadoPor: string | null;
   aprobadoPorNombre: string | null;
   fechaAprobacion: string | null;

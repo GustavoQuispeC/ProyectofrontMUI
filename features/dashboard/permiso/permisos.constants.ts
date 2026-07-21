@@ -4,13 +4,13 @@ import { ChipProps } from "@mui/material";
 export const CondicionPermisoColor: Record<string, ChipProps["color"]> = {
   Pendiente: "warning",
   Aprobado: "success",
-  Rechazado: "error",
+  Cancelado: "error",
 };
 
 export const CondicionPermisoLabel: Record<string, string> = {
   Pendiente: "Pendiente",
   Aprobado: "Aprobado",
-  Rechazado: "Rechazado",
+  Cancelado: "Cancelado",
 };
 
 //! Avatar

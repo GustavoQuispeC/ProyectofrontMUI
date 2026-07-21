@@ -47,7 +47,7 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useRouter } from "next/navigation";
 import ClearIcon from "@mui/icons-material/Clear";
-import { useRechazarPermiso } from "@/features/dashboard/permiso/hooks/useRechazarPermiso";
+import { useCancelarPermiso } from "@/features/dashboard/permiso/hooks/useCancelarPermiso";
 import {
   avatarStyle,
   getInitials,
@@ -278,10 +278,10 @@ export default function ListarPermisosMensual() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarPermisosMensual) : false;
   const [filtros, setFiltros] = useState<PermisoMensualForm>(defaultValues);
-  const { rechazarPermiso, loading: rechazando } = useRechazarPermiso();
+  const { cancelarPermiso, loading: cancelando } = useCancelarPermiso();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<{ id: number; nombreEmpleado: string } | null>(null);
-  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [motivoCancelacion, setMotivoCancelacion] = useState("");
   const { permisosMensuales, loading: loadingPermisos } = usePermisosMensuales(canAccess, filtros.anio, filtros.mes);
   const mounted = useMounted();
   const router = useRouter();
@@ -315,14 +315,14 @@ export default function ListarPermisosMensual() {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedRow(null);
-    setMotivoRechazo("");
+    setMotivoCancelacion("");
   };
 
   //! guarda el rechazo del permiso
-  const handleRechazar = () => {
+  const handleCancelar = () => {
     if (!selectedRow) return;
-    if (!motivoRechazo.trim()) return; // ← falta esta validación
-    rechazarPermiso({ id: selectedRow.id, motivoRechazo });
+    if (!motivoCancelacion.trim()) return; // ← falta esta validación
+    cancelarPermiso({ id: selectedRow.id, motivoCancelacion });
     handleCloseDialog();
   };
 
@@ -497,30 +497,30 @@ export default function ListarPermisosMensual() {
         <DialogTitle>Rechazar permiso</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            ¿Está seguro que desea rechazar el permiso de <strong>{selectedRow?.nombreEmpleado}</strong>?
+            ¿Está seguro que desea cancelar el permiso de <strong>{selectedRow?.nombreEmpleado}</strong>?
           </Typography>
           <TextField
             fullWidth
-            label="Motivo de rechazo"
+            label="Motivo de cancelación"
             multiline
             rows={3}
-            value={motivoRechazo}
-            onChange={(e) => setMotivoRechazo(e.target.value)}
-            placeholder="Indique el motivo del rechazo..."
+            value={motivoCancelacion}
+            onChange={(e) => setMotivoCancelacion(e.target.value)}
+            placeholder="Indique el motivo de la cancelación..."
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={rechazando} sx={{ minWidth: 120 }}>
+          <Button onClick={handleCloseDialog} disabled={cancelando} sx={{ minWidth: 120 }}>
             Cancelar
           </Button>
           <Button
             variant="contained"
             color="error"
-            onClick={handleRechazar}
-            disabled={rechazando || !motivoRechazo.trim()}
+            onClick={handleCancelar}
+            disabled={cancelando || !motivoCancelacion.trim()}
             sx={{ minWidth: 140 }}
           >
-            {rechazando ? "Rechazando..." : "Rechazar"}
+            {cancelando ? "Cancelando..." : "Cancelar"}
           </Button>
         </DialogActions>
       </Dialog>

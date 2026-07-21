@@ -36,6 +36,7 @@ import type { ChipProps } from "@mui/material";
 import { formatDate } from "@/features/dashboard/vacaciones/vacaciones.constants";
 import { useAprobarVacaciones } from "@/features/dashboard/vacaciones/hooks/useAprobarVacaciones";
 import { useCancelarVacacionesAprobadas } from "@/features/dashboard/vacaciones/hooks/useCancelarVacacionesAprobadas";
+import { useCancelarVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/useCancelarVacacionesPendientes";
 import { useState } from "react";
 import ConfirmarCancelarVacacionDialog from "@/components/vacaciones/ConfirmarCancelarVacacionDialog";
 import toast from "react-hot-toast";
@@ -110,6 +111,15 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { cancelarVacacionAprobada, loading: cancelando } = useCancelarVacacionesAprobadas(
+    (mensaje) => {
+      toast.success(mensaje ?? "Vacación cancelada exitosamente");
+      onClose();
+    },
+    (mensaje) => {
+      toast.error(mensaje);
+    },
+  );
+  const { cancelarVacacionesPendientes, loading: cancelandoPendiente } = useCancelarVacacionesPendientes(
     (mensaje) => {
       toast.success(mensaje ?? "Vacación cancelada exitosamente");
       onClose();
@@ -260,7 +270,7 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
                             <Tooltip title="Aprobar">
                               <IconButton
                                 size="small"
-                                color="success"
+                                // color="success"
                                 onClick={() => aprobarVacacion(v.vacacionId)}
                                 disabled={aprobando}
                               >
@@ -268,13 +278,13 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Cancelar">
-                              <IconButton size="small" color="error">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => setVacacionIdAcancelar(v.vacacionId)}
+                                disabled={cancelandoPendiente}
+                              >
                                 <BlockIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Rechazar">
-                              <IconButton size="small" color="error">
-                                <ClearIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
                           </>
@@ -385,7 +395,12 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
                               </IconButton>
                             </Tooltip>
                             <Tooltip title="Cancelar">
-                              <IconButton size="small" color="error">
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => setVacacionIdAcancelar(v.vacacionId)}
+                                disabled={cancelandoPendiente}
+                              >
                                 <ClearIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
@@ -422,12 +437,17 @@ export default function VacacionesDialog({ open, onClose, periodo, modo }: Vacac
         open={vacacionIdAcancelar !== null}
         onClose={() => setVacacionIdAcancelar(null)}
         onConfirm={() => {
-          if (vacacionIdAcancelar !== null) {
+          if (vacacionIdAcancelar === null) return;
+
+          if (modo === "pendientes") {
+            cancelarVacacionesPendientes(vacacionIdAcancelar);
+          } else {
             cancelarVacacionAprobada(vacacionIdAcancelar);
-            setVacacionIdAcancelar(null);
           }
+          setVacacionIdAcancelar(null);
         }}
-        loading={cancelando}
+        loading={modo === "pendientes" ? cancelandoPendiente : cancelando}
+        pendiente={modo === "pendientes"}
       />
     </Dialog>
   );

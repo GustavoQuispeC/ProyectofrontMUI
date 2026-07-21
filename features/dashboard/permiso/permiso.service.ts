@@ -36,10 +36,10 @@ export async function aprobarPermisoApi(id: number): Promise<void> {
   });
 }
 
-//!Rechazar permiso
-export async function rechazarPermisoApi(id: number, motivoRechazo: string): Promise<void> {
-  return apiPermiso(`${apiUrl}/Permisos/${id}/rechazar`, {
+//!Cancelar permiso
+export async function cancelarPermisoApi(id: number, motivoCancelacion: string): Promise<void> {
+  return apiPermiso(`${apiUrl}/Permisos/${id}/cancelar`, {
     method: "PUT",
-    body: JSON.stringify({ motivoRechazo }),
+    body: JSON.stringify({ motivoCancelacion }),
   });
 }

@@ -5,7 +5,7 @@ import { Condicion } from "@/features/dashboard/permiso/permiso.type";
 const condicionConfig: Record<Condicion, { color: ChipProps["color"]; label: string }> = {
   Pendiente: { color: "warning", label: "Pendiente" },
   Aprobado: { color: "success", label: "Aprobado" },
-  Rechazado: { color: "error", label: "Rechazado" },
+  Cancelado: { color: "error", label: "Cancelado" },
 };
 
 const isCondicion = (condicion: string): condicion is Condicion => condicion in condicionConfig;
