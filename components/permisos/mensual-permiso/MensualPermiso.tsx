@@ -131,13 +131,9 @@ function Row({ row, onRechazar }: RowProps) {
         </TableCell>
 
         <TableCell align="center">
-          <Chip
-            label={row.cantidadPermisos}
-            size="small"
-            color="primary"
-            variant="outlined"
-            sx={{ fontWeight: 700, minWidth: 36 }}
-          />
+          <Typography variant="body2" sx={{ fontSize: 14, fontWeight: 700, color: "primary.main" }}>
+            {row.cantidadPermisos}
+          </Typography>
         </TableCell>
 
         <TableCell align="center">
@@ -207,13 +203,9 @@ function Row({ row, onRechazar }: RowProps) {
                         </Typography>
                       </TableCell>
                       <TableCell align="center">
-                        <Chip
-                          label={formatHoras(permiso.totalHoras)}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                          sx={{ fontSize: 11 }}
-                        />
+                        <Typography variant="body2" sx={{ fontSize: 14, fontWeight: 500, color: "primary.main" }}>
+                          {formatHoras(permiso.totalHoras)}
+                        </Typography>
                       </TableCell>
                       <TableCell>
                         <Tooltip title={permiso.motivo} placement="top">
@@ -318,7 +310,7 @@ export default function ListarPermisosMensual() {
     setMotivoCancelacion("");
   };
 
-  //! guarda el rechazo del permiso
+  //! guarda la cancelación del permiso
   const handleCancelar = () => {
     if (!selectedRow) return;
     if (!motivoCancelacion.trim()) return; // ← falta esta validación

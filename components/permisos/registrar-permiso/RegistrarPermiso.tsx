@@ -113,7 +113,7 @@ export default function RegistrarPermiso() {
   const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
   const [saving, setSaving] = useState(false);
   const [condicion, setCondicion] = useState<Condicion>(Condicion.Pendiente);
-  const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [motivoCancelacion, setMotivoCancelacion] = useState("");
   const fechaActual = new Date();
   const [anioFiltro, setAnioFiltro] = useState(fechaActual.getFullYear().toString());
   const [mesFiltro, setMesFiltro] = useState(String(fechaActual.getMonth() + 1).padStart(2, "0"));
@@ -160,7 +160,7 @@ export default function RegistrarPermiso() {
     reset(defaultValues);
     setSelectedEmployee(null);
     setCondicion(Condicion.Pendiente);
-    setMotivoRechazo("");
+    setMotivoCancelacion("");
   };
   //! enviar form
   const onSubmit = async (data: RegistrarPermisoForm) => {
@@ -176,7 +176,7 @@ export default function RegistrarPermiso() {
           motivo: data.motivo,
           lugar: data.lugar,
           condicion: puedeAprobar ? condicion : undefined,
-          motivoRechazo: condicion === Condicion.Cancelado ? motivoRechazo : undefined,
+          motivoCancelacion: condicion === Condicion.Cancelado ? motivoCancelacion : undefined,
         }),
         {
           loading: "Registrando permiso...",
@@ -463,12 +463,12 @@ export default function RegistrarPermiso() {
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
-                  label="Motivo de rechazo"
+                  label="Motivo de cancelación"
                   multiline
                   rows={2}
-                  value={motivoRechazo}
-                  onChange={(e) => setMotivoRechazo(e.target.value)}
-                  placeholder="Indique el motivo del rechazo..."
+                  value={motivoCancelacion}
+                  onChange={(e) => setMotivoCancelacion(e.target.value)}
+                  placeholder="Indique el motivo de la cancelación..."
                   color="error"
                 />
               </Grid>
@@ -658,7 +658,7 @@ export default function RegistrarPermiso() {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Tooltip title={permiso.motivoRechazo || ""} arrow>
+                        <Tooltip title={permiso.motivoCancelacion || ""} arrow>
                           <span>{chipCondicion(permiso.condicion)}</span>
                         </Tooltip>
                       </TableCell>

@@ -23,3 +23,22 @@ export interface RegistrarFalta {
   condicion: CondicionFalta;
   observacion?: string;
 }
+
+export interface FaltaMensualItem {
+  id: number;
+  fechaInicio: string;
+  fechaFin: string;
+  totalDias: number;
+  justifica: Justificacion;
+  observacion: string | null;
+  condicion: CondicionFalta;
+}
+
+export interface ListarFaltaMensual {
+  empleadoId: number;
+  codigoEmpleado: string;
+  nombreCompleto: string;
+  cantidadFaltas: number;
+  totalDiasFaltas: number;
+  faltas: FaltaMensualItem[];
+}

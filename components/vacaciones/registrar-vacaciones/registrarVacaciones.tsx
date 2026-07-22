@@ -16,7 +16,6 @@ import {
   FormHelperText,
   Card,
   CardContent,
-  useTheme,
 } from "@mui/material";
 
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
@@ -29,7 +28,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { useState } from "react";
-import { EmpleadoAutocomplete } from "@/features/dashboard/empleado/empleado.types";
 import { Controller, useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { RegistrarVacacionesForm, RegistrarVacacionesSchema } from "@/features/dashboard/vacaciones/vacaciones.schema";
@@ -64,9 +62,6 @@ interface SectionProps {
 }
 
 function Section({ title, children }: SectionProps) {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
-
   return (
     <Paper
       elevation={0}
@@ -81,7 +76,7 @@ function Section({ title, children }: SectionProps) {
         sx={{
           px: 2.5,
           py: 1.25,
-          bgcolor: isDarkMode ? "rgba(255,255,255,0.05)" : "#F8F9FB",
+          bgcolor: "action.hover",
           borderBottom: "1px solid",
           borderColor: "divider",
         }}
@@ -100,13 +95,10 @@ function Section({ title, children }: SectionProps) {
 export default function RegistrarVacacion() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.registrarVacaciones) : false;
-  const [selectedEmployee, setSelectedEmployee] = useState<EmpleadoAutocomplete | null>(null);
   const [saving, setSaving] = useState(false);
   const mounted = useMounted();
   const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
   const router = useRouter();
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === "dark";
 
   const {
     control,
@@ -130,7 +122,6 @@ export default function RegistrarVacacion() {
 
   const resetForm = () => {
     reset(defaultValues);
-    setSelectedEmployee(null);
   };
 
   const onSubmit = async (data: RegistrarVacacionesForm) => {
@@ -160,16 +151,7 @@ export default function RegistrarVacacion() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-      <Box
-        sx={{
-          width: { xs: "100%", md: "50%" },
-          bgcolor: "background.default",
-          minHeight: "100vh",
-          mx: "auto",
-          py: { xs: 2, md: 5 },
-          px: { xs: 1, sm: 2 },
-        }}
-      >
+      <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" }}>
         {/* ── HEADER ── */}
         <Card
           variant="outlined"
@@ -217,7 +199,7 @@ export default function RegistrarVacacion() {
                 </Typography>
 
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  Solicitud de días de descanso del empleado
+                  Solicitud de días de descanso del empleado.
                 </Typography>
               </Box>
             </Stack>
@@ -237,7 +219,6 @@ export default function RegistrarVacacion() {
                   value={empleados.find((x) => x.id === field.value) ?? null}
                   onChange={(_, value) => {
                     field.onChange(value?.id ?? 0);
-                    setSelectedEmployee(value);
                   }}
                   getOptionLabel={(option) => option.nombreCompleto ?? ""}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -257,27 +238,6 @@ export default function RegistrarVacacion() {
                 />
               )}
             />
-
-            {selectedEmployee && (
-              <Box
-                sx={{
-                  mt: 1.5,
-                  px: 1.5,
-                  py: 1,
-                  bgcolor: "#F0F4FF",
-                  border: "1px solid #C7D7FD",
-                  borderRadius: "6px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.25,
-                }}
-              >
-                <Box>
-                  <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{selectedEmployee.nombreCompleto}</Typography>
-                  <Typography sx={{ fontSize: 11, color: "text.secondary" }}>{selectedEmployee.id}</Typography>
-                </Box>
-              </Box>
-            )}
           </Section>
 
           {/* ── SECCIÓN 2: FECHAS ── */}
@@ -289,7 +249,6 @@ export default function RegistrarVacacion() {
                 alignItems: { xs: "stretch", sm: "flex-start" },
               }}
             >
-              {/* Fecha inicio — ✅ FIX 4: sin LocalizationProvider extra */}
               <Controller
                 name="fechaInicio"
                 control={control}
@@ -308,7 +267,6 @@ export default function RegistrarVacacion() {
                 )}
               />
 
-              {/* Fecha fin — ✅ FIX 4: sin LocalizationProvider extra */}
               <Controller
                 name="fechaFin"
                 control={control}
@@ -333,15 +291,8 @@ export default function RegistrarVacacion() {
                   minWidth: { xs: 80, sm: 110 },
                   width: { xs: "100%", sm: "auto" },
                   border: "1px solid",
-                  borderColor: diasCalculados !== null ? (isDarkMode ? "#22C55E" : "#BBF7D0") : "divider",
-                  bgcolor:
-                    diasCalculados !== null
-                      ? isDarkMode
-                        ? "rgba(34, 197, 94, 0.1)"
-                        : "#F0FDF4"
-                      : isDarkMode
-                        ? "rgba(255,255,255,0.05)"
-                        : "#F8F9FB",
+                  borderColor: diasCalculados !== null ? "success.main" : "divider",
+                  bgcolor: diasCalculados !== null ? "success.50" : "action.hover",
                   borderRadius: "6px",
                   px: { xs: 1, sm: 1.5 },
                   py: 0.75,
@@ -356,7 +307,7 @@ export default function RegistrarVacacion() {
                   sx={{
                     fontSize: diasCalculados !== null ? 22 : 14,
                     fontWeight: 700,
-                    color: diasCalculados !== null ? (isDarkMode ? "#4ADE80" : "#15803D") : "text.disabled",
+                    color: diasCalculados !== null ? "success.main" : "text.disabled",
                     lineHeight: 1,
                   }}
                 >
@@ -365,7 +316,7 @@ export default function RegistrarVacacion() {
                 <Typography
                   sx={{
                     fontSize: 10,
-                    color: diasCalculados !== null ? (isDarkMode ? "#86EFAC" : "#4ADE80") : "text.disabled",
+                    color: diasCalculados !== null ? "success.main" : "text.disabled",
                     mt: 0.25,
                   }}
                 >
@@ -390,14 +341,12 @@ export default function RegistrarVacacion() {
                   placeholder="Describa la observación..."
                   error={!!errors.observacion}
                   helperText={errors.observacion?.message}
+                  sx={{ "& .MuiInputBase-input": { textTransform: "uppercase" } }}
                 />
               )}
             />
           </Section>
-
-          {/* ── DIVIDER + ACCIONES ── */}
-          <Divider />
-
+          {/* Botones de acción */}
           <Stack
             sx={{
               flexDirection: { xs: "column", sm: "row" },

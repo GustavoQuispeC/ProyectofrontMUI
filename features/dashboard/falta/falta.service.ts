@@ -1,5 +1,5 @@
 import { apiFalta } from "@/lib/api-falta";
-import { PendientesFaltas, RegistrarFalta } from "./falta.type";
+import { ListarFaltaMensual, PendientesFaltas, RegistrarFalta } from "./falta.type";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -19,5 +19,19 @@ export async function listarFaltasPendientesApi(): Promise<PendientesFaltas[]> {
 export async function aprobarFaltaApi(faltaId: number): Promise<void> {
   return apiFalta<void>(`${apiUrl}/faltas/${faltaId}/aprobar`, {
     method: "PUT",
+  });
+}
+
+//!Cancelar falta
+export async function cancelarFaltaApi(faltaId: number): Promise<void> {
+  return apiFalta<void>(`${apiUrl}/faltas/${faltaId}/cancelar`, {
+    method: "PUT",
+  });
+}
+
+//! Listar falta mensual
+export async function listarFaltaMensualApi(anio: number, mes: number): Promise<ListarFaltaMensual[]> {
+  return apiFalta<ListarFaltaMensual[]>(`${apiUrl}/faltas/reporte-mensual?anio=${anio}&mes=${mes}`, {
+    method: "GET",
   });
 }

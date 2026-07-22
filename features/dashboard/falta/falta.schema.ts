@@ -20,3 +20,10 @@ export const RegistrarFaltasSchema = z
   });
 
 export type RegistrarFaltasForm = z.infer<typeof RegistrarFaltasSchema>;
+
+export const FaltaMensualSchema = z.object({
+  anio: z.number().min(2000).max(2100),
+  mes: z.number().min(1).max(12),
+});
+
+export type FaltaMensualForm = z.infer<typeof FaltaMensualSchema>;

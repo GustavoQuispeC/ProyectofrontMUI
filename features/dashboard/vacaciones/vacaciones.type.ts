@@ -53,5 +53,5 @@ export interface RegistrarVacaciones {
   empleadoId: number;
   fechaInicio: string;
   fechaFin: string;
-  observacion: string;
+  observacion: string | null;
 }
