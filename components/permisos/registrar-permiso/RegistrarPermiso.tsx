@@ -75,7 +75,6 @@ const defaultValues: RegistrarPermisoForm = {
   lugar: "",
 };
 
-const anios = ["2024", "2025", "2026", "2027", "2028"];
 const meses = [
   { value: "01", label: "Enero" },
   { value: "02", label: "Febrero" },
@@ -145,12 +144,9 @@ export default function RegistrarPermiso() {
   const horaInicio = watch("horaInicio");
   const horaFin = watch("horaFin");
 
-  const { permisos, loading: loadingPermisos } = usePermisos(
-    canAccess,
-    empleadoId,
-    parseInt(anioFiltro),
-    parseInt(mesFiltro),
-  );
+  const anioValido = /^(19|20)\d{2}$/.test(anioFiltro) ? parseInt(anioFiltro) : fechaActual.getFullYear();
+
+  const { permisos, loading: loadingPermisos } = usePermisos(canAccess, empleadoId, anioValido, parseInt(mesFiltro));
 
   //! ── Calculado el tiempo de duracion
   const duracion = useMemo(() => calcularDuracion(horaInicio, horaFin), [horaInicio, horaFin]);
@@ -484,16 +480,22 @@ export default function RegistrarPermiso() {
           {puedeAprobar && (
             <Grid size={{ xs: 12 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Año</InputLabel>
-                  <Select value={anioFiltro} label="Año" onChange={(e) => setAnioFiltro(e.target.value)}>
-                    {anios.map((a) => (
-                      <MenuItem key={a} value={a}>
-                        {a}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Año"
+                  value={anioFiltro}
+                  onChange={(e) => {
+                    const valor = e.target.value.replace(/\D/g, "").slice(0, 4);
+                    setAnioFiltro(valor);
+                  }}
+                  onBlur={() => {
+                    if (!/^(19|20)\d{2}$/.test(anioFiltro)) {
+                      setAnioFiltro(fechaActual.getFullYear().toString());
+                    }
+                  }}
+                  slotProps={{ htmlInput: { inputMode: "numeric", maxLength: 4 } }}
+                />
                 <FormControl fullWidth size="small">
                   <InputLabel>Mes</InputLabel>
                   <Select value={mesFiltro} label="Mes" onChange={(e) => setMesFiltro(e.target.value)}>
