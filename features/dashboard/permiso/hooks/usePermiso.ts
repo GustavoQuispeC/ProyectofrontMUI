@@ -16,7 +16,7 @@ export function usePermisos(canAccess: boolean, empleadoId: number, anio: number
 
     retry: 1,
 
-    enabled: canAccess,
+    enabled: canAccess && empleadoId > 0,
   });
 
   return {
@@ -26,4 +26,3 @@ export function usePermisos(canAccess: boolean, empleadoId: number, anio: number
     refetch,
   };
 }
-
