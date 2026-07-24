@@ -1,5 +1,5 @@
 import { apiUsuario } from "@/lib/api-usuario";
-import { ActualizarUsuarioPayload, ListarUsuarios, RegistrarUsuario } from "./usuario.types";
+import { ListarUsuarios, RegistrarUsuario } from "./usuario.types";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -25,7 +25,7 @@ export function loginUsuarioApi(email: string, password: string) {
   });
 }
 
-//! Registrar usuario, token y rol requrido
+//! Registrar usuario
 export async function registrarUsuarioApi(empleadoId: number, payload: RegistrarUsuario): Promise<void> {
   return apiUsuario(`${apiUrl}/Admin/empleados/${empleadoId}/create-user`, {
     method: "POST",
@@ -34,12 +34,12 @@ export async function registrarUsuarioApi(empleadoId: number, payload: Registrar
 }
 
 //! Actualizar usuario
-export async function actualizarUsuarioApi(usuarioId: string, payload: ActualizarUsuarioPayload): Promise<void> {
-  return apiUsuario(`${apiUrl}/usuarios/${usuarioId}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
-}
+// export async function actualizarUsuarioApi(usuarioId: string, payload: ActualizarUsuarioPayload): Promise<void> {
+//   return apiUsuario(`${apiUrl}/usuarios/${usuarioId}`, {
+//     method: "PUT",
+//     body: JSON.stringify(payload),
+//   });
+// }
 
 //! Cambiar estado
 export async function cambiarEstadoUsuarioApi(usuarioId: string, isActive: boolean): Promise<void> {

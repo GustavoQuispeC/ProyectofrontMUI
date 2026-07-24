@@ -4,13 +4,13 @@ import { permissions } from "@/shared/auth/auth.permissions";
 import {
   listarUsuariosApi as listarUsuariosService,
   registrarUsuarioApi as registrarUsuarioService,
-  actualizarUsuarioApi as actualizarUsuarioService,
+  // actualizarUsuarioApi as actualizarUsuarioService,
   cambiarEstadoUsuarioApi as cambiarEstadoUsuarioService,
   resetPasswordUsuarioApi as resetPasswordUsuarioService,
   changeEmailUsuarioApi as changeEmailUsuarioService,
   changeRoleUsuarioApi as changeRoleUsuarioService,
 } from "./usuario.service";
-import { ActualizarUsuarioPayload, RegistrarUsuario } from "./usuario.types";
+import { RegistrarUsuario } from "./usuario.types";
 
 //! Registrar usuario
 export async function registrarUsuario(empleadoId: number, payload: RegistrarUsuario): Promise<void> {
@@ -41,18 +41,18 @@ export async function listarUsuarios() {
 }
 
 //! Actualizar usuario
-export async function actualizarUsuario(usuarioId: string, payload: ActualizarUsuarioPayload): Promise<void> {
-  const user = getAuthUser();
+// export async function actualizarUsuario(usuarioId: string, payload: ActualizarUsuarioPayload): Promise<void> {
+//   const user = getAuthUser();
 
-  if (!user) {
-    throw new Error("No autenticado");
-  }
+//   if (!user) {
+//     throw new Error("No autenticado");
+//   }
 
-  if (!hasPermission(user.rol, permissions.actualizarUsuarios)) {
-    throw new Error("No tienes permisos para actualizar usuarios");
-  }
-  return actualizarUsuarioService(usuarioId, payload);
-}
+//   if (!hasPermission(user.rol, permissions.actualizarUsuarios)) {
+//     throw new Error("No tienes permisos para actualizar usuarios");
+//   }
+//   return actualizarUsuarioService(usuarioId, payload);
+// }
 
 //! Cambiar estado
 export async function cambiarEstado(usuarioId: string, estado: boolean): Promise<void> {
