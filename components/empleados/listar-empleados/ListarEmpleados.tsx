@@ -11,6 +11,7 @@ import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { esES } from "@mui/x-data-grid/locales";
 import { useCallback, useMemo, useState } from "react";
 import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
+import { formatDate } from "@/shared/utils/date";
 import CircularProgress from "@mui/material/CircularProgress";
 import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
 import Dialog from "@mui/material/Dialog";
@@ -117,6 +118,7 @@ const getColumns = (
     field: "fechaNacimiento",
     headerName: "F. Nacimiento",
     minWidth: 120,
+    valueFormatter: (value) => formatDate(value),
   },
   {
     field: "edad",

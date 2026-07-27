@@ -30,23 +30,16 @@ import { hasPermission } from "@/shared/auth/auth.helper";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { ListarEmpleadoVacaciones, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
-
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useMounted } from "@/shared/hooks/useMounted";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import Link from "next/link";
 import VacacionesDialog from "@/components/vacaciones/VacacionesDialog";
-import {
-  avatarStyle,
-  EstadoPeriodoColor,
-  EstadoPeriodoLabel,
-  formatDate,
-  getInitials,
-} from "@/features/dashboard/vacaciones/vacaciones.constants";
+import { EstadoPeriodoColor, EstadoPeriodoLabel } from "@/features/dashboard/vacaciones/vacaciones.constants";
+import { formatDate } from "@/shared/utils/date";
+import { avatarStyle, getInitials } from "@/shared/utils/avatar";
 
-// ─────────────────────────────────────────────────────────────────────────────
 //! NIVEL 2 — FILA DE PERÍODO
-// ─────────────────────────────────────────────────────────────────────────────
 interface PeriodoRowProps {
   periodo: PeriodoVacacional;
   isLast: boolean;
@@ -135,9 +128,7 @@ function PeriodoRow({ periodo, isLast, onVerDetalle }: PeriodoRowProps) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 //! NIVEL 1 — FILA DE EMPLEADO
-// ─────────────────────────────────────────────────────────────────────────────
 interface RowProps {
   row: ListarEmpleadoVacaciones;
   onVerDetalle: (periodo: PeriodoVacacional) => void;
@@ -277,9 +268,7 @@ function Row({ row, onVerDetalle }: RowProps) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 //! COMPONENTE PRINCIPAL
-// ─────────────────────────────────────────────────────────────────────────────
 export default function ListarVacacionesAprobadas() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarVacacionesGenerales) : false;
@@ -288,10 +277,7 @@ export default function ListarVacacionesAprobadas() {
   const theme = useTheme();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("xl"));
   const rowsPerPage = isLargeScreen ? 20 : 10;
-
   const [page, setPage] = React.useState(0);
-
-  // Estado del Dialog
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectedPeriodo, setSelectedPeriodo] = React.useState<PeriodoVacacional | null>(null);
 

@@ -32,6 +32,8 @@ import { useAprobarPermiso } from "@/features/dashboard/permiso/hooks/useAprobar
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
 import { chipCondicion } from "@/features/dashboard/permiso/permiso.ui";
+import { formatDate } from "@/shared/utils/date";
+import { formatTime } from "@/shared/utils/time";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 
@@ -161,12 +163,12 @@ export default function ListarPermisosPendientes() {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ maxWidth: 100 }}>
-                      {permiso.fecha}
+                      {formatDate(permiso.fecha)}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ maxWidth: 100 }}>
-                      {permiso.horaInicio} - {permiso.horaFin}
+                      {formatTime(permiso.horaInicio)} - {formatTime(permiso.horaFin)}
                     </Typography>
                   </TableCell>
                   {/*permiso.duracionMin en lugar de permisosPendientes.duracionMin */}

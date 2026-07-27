@@ -10,6 +10,7 @@ import { useMounted } from "@/shared/hooks/useMounted";
 import { useState } from "react";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { permissions } from "@/shared/auth/auth.permissions";
+import { formatDate } from "@/shared/utils/date";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
@@ -169,8 +170,8 @@ export default function FaltasPendientes() {
                         {falta.nombreEmpleado}
                       </Typography>
                     </TableCell>
-                    <TableCell>{falta.fechaInicio}</TableCell>
-                    <TableCell>{falta.fechaFin}</TableCell>
+                    <TableCell>{formatDate(falta.fechaInicio)}</TableCell>
+                    <TableCell>{formatDate(falta.fechaFin)}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"

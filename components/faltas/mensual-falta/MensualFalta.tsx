@@ -51,7 +51,8 @@ import { useRouter } from "next/navigation";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useCancelarFalta } from "@/features/dashboard/falta/hooks/useCancelarFalta";
 import { CondicionFalta, Justificacion } from "@/features/dashboard/falta/falta.constants";
-import { avatarStyle, formatDate, getInitials } from "@/features/dashboard/permiso/permisos.constants";
+import { formatDate } from "@/shared/utils/date";
+import { avatarStyle, getInitials } from "@/shared/utils/avatar";
 
 const meses = [
   { value: 1, label: "Enero" },

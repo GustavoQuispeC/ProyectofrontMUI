@@ -48,13 +48,10 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { useRouter } from "next/navigation";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useCancelarPermiso } from "@/features/dashboard/permiso/hooks/useCancelarPermiso";
-import {
-  avatarStyle,
-  getInitials,
-  formatHoras,
-  CondicionPermisoColor,
-  CondicionPermisoLabel,
-} from "@/features/dashboard/permiso/permisos.constants";
+import { CondicionPermisoColor, CondicionPermisoLabel } from "@/features/dashboard/permiso/permisos.constants";
+import { formatDate } from "@/shared/utils/date";
+import { formatHoras, formatTime } from "@/shared/utils/time";
+import { avatarStyle, getInitials } from "@/shared/utils/avatar";
 
 const meses = [
   { value: 1, label: "Enero" },
@@ -190,16 +187,16 @@ function Row({ row, onRechazar }: RowProps) {
                   {row.permisos.map((permiso) => (
                     <TableRow key={permiso.id} hover>
                       <TableCell>
-                        <Typography variant="body2">{permiso.fecha}</Typography>
+                        <Typography variant="body2">{formatDate(permiso.fecha)}</Typography>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-                          {permiso.horaInicio}
+                          {formatTime(permiso.horaInicio)}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-                          {permiso.horaFin}
+                          {formatTime(permiso.horaFin)}
                         </Typography>
                       </TableCell>
                       <TableCell align="center">

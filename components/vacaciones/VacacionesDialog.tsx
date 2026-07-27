@@ -30,10 +30,9 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
-
 import { EstadoVacacion, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
 import type { ChipProps } from "@mui/material";
-import { formatDate } from "@/features/dashboard/vacaciones/vacaciones.constants";
+import { formatDate } from "@/shared/utils/date";
 import { useAprobarVacaciones } from "@/features/dashboard/vacaciones/hooks/useAprobarVacaciones";
 import { useCancelarVacacionesAprobadas } from "@/features/dashboard/vacaciones/hooks/useCancelarVacacionesAprobadas";
 import { useCancelarVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/useCancelarVacacionesPendientes";

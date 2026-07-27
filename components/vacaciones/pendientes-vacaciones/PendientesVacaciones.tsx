@@ -34,13 +34,9 @@ import Link from "next/link";
 import VacacionesDialog from "@/components/vacaciones/VacacionesDialog";
 import { useVacacionesPendientes } from "@/features/dashboard/vacaciones/hooks/useVacacionesPendientes";
 import { ListarEmpleadoVacaciones, PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.type";
-import {
-  avatarStyle,
-  EstadoPeriodoColor,
-  EstadoPeriodoLabel,
-  formatDate,
-  getInitials,
-} from "@/features/dashboard/vacaciones/vacaciones.constants";
+import { EstadoPeriodoColor, EstadoPeriodoLabel } from "@/features/dashboard/vacaciones/vacaciones.constants";
+import { formatDate } from "@/shared/utils/date";
+import { avatarStyle, getInitials } from "@/shared/utils/avatar";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { getAuthUser } from "@/shared/auth/auth.service";

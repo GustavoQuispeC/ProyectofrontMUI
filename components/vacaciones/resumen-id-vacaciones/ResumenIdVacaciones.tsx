@@ -35,17 +35,11 @@ import { PeriodoVacacional } from "@/features/dashboard/vacaciones/vacaciones.ty
 import { useTheme, useMediaQuery } from "@mui/material";
 import { useMounted } from "@/shared/hooks/useMounted";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
-import {
-  avatarStyle,
-  EstadoPeriodoColor,
-  EstadoPeriodoLabel,
-  formatDate,
-  getInitials,
-} from "@/features/dashboard/vacaciones/vacaciones.constants";
+import { EstadoPeriodoColor, EstadoPeriodoLabel } from "@/features/dashboard/vacaciones/vacaciones.constants";
+import { formatDate } from "@/shared/utils/date";
+import { avatarStyle, getInitials } from "@/shared/utils/avatar";
 
-// ─────────────────────────────────────────────────────────────────────────────
 //! CARD DE PERÍODO — Vista móvil
-// ─────────────────────────────────────────────────────────────────────────────
 function PeriodoCard({
   periodo,
   onVerDetalle,
@@ -203,9 +197,7 @@ function PeriodoCard({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 //! FILA DE PERÍODO — Vista desktop
-// ─────────────────────────────────────────────────────────────────────────────
 function PeriodoRow({
   periodo,
   isLast,
@@ -271,9 +263,7 @@ function PeriodoRow({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 //! SKELETON — estado de carga
-// ─────────────────────────────────────────────────────────────────────────────
 function ResumenSkeleton({ isMobile }: { isMobile: boolean }) {
   if (isMobile) {
     return (
@@ -307,9 +297,7 @@ function ResumenSkeleton({ isMobile }: { isMobile: boolean }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 //! COMPONENTE PRINCIPAL
-// ─────────────────────────────────────────────────────────────────────────────
 export default function ResumenIdVacaciones() {
   const mounted = useMounted();
   const theme = useTheme();

@@ -16,7 +16,6 @@ import {
   School,
   CalendarMonth,
 } from "@mui/icons-material";
-import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useEmpleado } from "@/features/dashboard/empleado/hooks/useEmpleado";
 import { useCatalogos } from "@/features/dashboard/catalogo/hooks/useCatalogos";
@@ -24,6 +23,7 @@ import { exportarEmpleadoPdf } from "@/features/dashboard/empleado/helpers/expor
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
+import { formatDate } from "@/shared/utils/date";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 interface Props {
@@ -33,12 +33,6 @@ interface Props {
 //! Función auxiliar para obtener el nombre de un ítem de catálogo a partir de su ID
 function obtenerNombreCatalogo(items: { id: number; nombre: string }[], id?: number | null) {
   return items.find((x) => x.id === id)?.nombre ?? "—";
-}
-
-function formatearFecha(value: string | null | undefined) {
-  if (!value) return null;
-  const date = dayjs(value);
-  return date.isValid() ? date.format("DD/MM/YYYY") : value;
 }
 
 function formatearSalario(value: number | null | undefined) {
@@ -243,7 +237,7 @@ export default function DetalleEmpleado({ id }: Props) {
             { etiqueta: "Número de documento", valor: empleado.numeroDocumento },
             { etiqueta: "Género", valor: obtenerNombreCatalogo(catalogos.generos, empleado.genero) },
             { etiqueta: "Estado civil", valor: obtenerNombreCatalogo(catalogos.estadosCiviles, empleado.estadoCivil) },
-            { etiqueta: "Fecha de nacimiento", valor: formatearFecha(empleado.fechaNacimiento) },
+            { etiqueta: "Fecha de nacimiento", valor: formatDate(empleado.fechaNacimiento) },
             { etiqueta: "Edad", valor: `${empleado.edad} años` },
             { etiqueta: "Nacionalidad", valor: empleado.nacionalidad },
           ],
@@ -291,8 +285,8 @@ export default function DetalleEmpleado({ id }: Props) {
               valor: obtenerNombreCatalogo(catalogos.tiposContrato, empleado.tipoContrato),
             },
             { etiqueta: "Tipo de jornada", valor: obtenerNombreCatalogo(catalogos.tiposJornada, empleado.tipoJornada) },
-            { etiqueta: "Fecha de ingreso", valor: formatearFecha(empleado.fechaIngreso) },
-            { etiqueta: "Fecha de egreso", valor: formatearFecha(empleado.fechaEgreso) },
+            { etiqueta: "Fecha de ingreso", valor: formatDate(empleado.fechaIngreso) },
+            { etiqueta: "Fecha de egreso", valor: formatDate(empleado.fechaEgreso) },
             { etiqueta: "Motivo de egreso", valor: empleado.motivoEgreso },
             { etiqueta: "Observaciones", valor: empleado.observaciones },
           ],
@@ -324,7 +318,7 @@ export default function DetalleEmpleado({ id }: Props) {
           campos: [
             { etiqueta: "ID", valor: empleado.id },
             { etiqueta: "Estado", valor: empleado.isActive ? "Activo" : "Inactivo" },
-            { etiqueta: "Fecha de registro", valor: formatearFecha(empleado.createdAt) },
+            { etiqueta: "Fecha de registro", valor: formatDate(empleado.createdAt) },
           ],
         },
       ],
@@ -483,7 +477,7 @@ export default function DetalleEmpleado({ id }: Props) {
             <Field label="Tipo doc." value={obtenerNombreCatalogo(catalogos.tiposDocumentos, empleado.tipoDocumento)} />
             <Field label="Nro. de doc." value={empleado.numeroDocumento} />
             <Field label="Género" value={obtenerNombreCatalogo(catalogos.generos, empleado.genero)} />
-            <Field label="F. nacimiento" value={formatearFecha(empleado.fechaNacimiento)} />
+            <Field label="F. nacimiento" value={formatDate(empleado.fechaNacimiento)} />
             <Field label="Edad" value={empleado.edad ? `${empleado.edad} años` : null} />
             <Field label="Estado civil" value={obtenerNombreCatalogo(catalogos.estadosCiviles, empleado.estadoCivil)} />
           </SectionCard>
@@ -540,8 +534,8 @@ export default function DetalleEmpleado({ id }: Props) {
               label="Tipo de jornada"
               value={obtenerNombreCatalogo(catalogos.tiposJornada, empleado.tipoJornada)}
             />
-            <Field label="F. ingreso" value={formatearFecha(empleado.fechaIngreso)} />
-            <Field label="F. egreso" value={formatearFecha(empleado.fechaEgreso)} />
+            <Field label="F. ingreso" value={formatDate(empleado.fechaIngreso)} />
+            <Field label="F. egreso" value={formatDate(empleado.fechaEgreso)} />
             <Field label="Motivo de egreso" value={empleado.motivoEgreso} />
             <Field label="Observaciones" value={empleado.observaciones} />
           </SectionCard>
@@ -577,7 +571,7 @@ export default function DetalleEmpleado({ id }: Props) {
               value={empleado.isActive ? "Activo" : "Inactivo"}
               valueColor={empleado.isActive ? "success.main" : "error.main"}
             />
-            <Field label="Fecha de registro" value={formatearFecha(empleado.createdAt)} />
+            <Field label="Fecha de registro" value={formatDate(empleado.createdAt)} />
           </SectionCard>
         </Grid>
       </Grid>
