@@ -187,14 +187,14 @@ export default function RegistrarVacacion() {
 
               <Box>
                 <Typography
-                  variant="h5"
+                  variant="h6"
                   sx={{
                     fontWeight: 700,
                     color: "text.primary",
                     fontSize: { xs: "1.25rem", sm: "1.5rem" },
                   }}
                 >
-                  Registro de Vacaciones
+                  REGISTRO DE VACACIONES
                 </Typography>
 
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>

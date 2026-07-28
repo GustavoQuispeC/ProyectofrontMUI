@@ -8,9 +8,12 @@ import IconButton from "@mui/material/IconButton";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { esES } from "@mui/x-data-grid/locales";
 import { useCallback, useMemo, useState } from "react";
 import { useEmpleados } from "@/features/dashboard/empleado/hooks/useEmpleados";
+import { useCatalogos } from "@/features/dashboard/catalogo";
+import { useCargos } from "@/features/dashboard/cargo/hooks/useCargos";
 import { formatDate } from "@/shared/utils/date";
 import CircularProgress from "@mui/material/CircularProgress";
 import { EmpleadosListar } from "@/features/dashboard/empleado/empleado.types";
@@ -20,7 +23,19 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import { useEliminarEmpleado } from "@/features/dashboard/empleado/hooks/useEliminarEmpleado";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import Grid from "@mui/material/Grid";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import { useDesactivarEmpleado } from "@/features/dashboard/empleado/hooks/useDesactivarEmpleado";
+import { useReactivarEmpleado } from "@/features/dashboard/empleado/hooks/useReactivarEmpleado";
 import { useRouter } from "next/navigation";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import Link from "next/link";
@@ -85,7 +100,10 @@ export function ImageWithLoader({ src, alt }: Props) {
 const getColumns = (
   onDelete: (row: EmpleadosListar) => void,
   onView: (row: EmpleadosListar) => void,
+  onEdit: (row: EmpleadosListar) => void,
+  onReactivate: (row: EmpleadosListar) => void,
   canDelete: boolean,
+  canEdit: boolean,
 ): GridColDef<EmpleadosListar>[] => [
   {
     field: "codigoEmpleado",
@@ -165,10 +183,12 @@ const getColumns = (
             <RemoveRedEyeOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Editar">
-          <IconButton size="small" color="inherit" onClick={() => console.log("Editar", params.row)}>
-            <ModeEditOutlineOutlinedIcon fontSize="small" />
-          </IconButton>
+        <Tooltip title={canEdit ? "Editar" : "No tienes permisos para editar empleados"}>
+          <span>
+            <IconButton size="small" color="inherit" disabled={!canEdit} onClick={() => onEdit(params.row)}>
+              <ModeEditOutlineOutlinedIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
         <Tooltip
           title={
@@ -185,8 +205,30 @@ const getColumns = (
               color="error"
               disabled={!params.row.isActive || !canDelete}
               onClick={() => onDelete(params.row)}
+              sx={{ display: params.row.isActive ? "flex" : "none" }}
             >
               <DeleteForeverOutlinedIcon fontSize="small" />
+            </IconButton>
+          </span>
+        </Tooltip>
+        <Tooltip
+          title={
+            !canEdit
+              ? "No tienes permisos para reactivar empleados"
+              : params.row.isActive
+                ? "No se puede reactivar un empleado activo"
+                : "Reactivar"
+          }
+        >
+          <span>
+            <IconButton
+              size="small"
+              color="success"
+              disabled={params.row.isActive || !canEdit}
+              onClick={() => onReactivate(params.row)}
+              sx={{ display: !params.row.isActive ? "flex" : "none" }}
+            >
+              <RestartAltIcon fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
@@ -205,14 +247,28 @@ export default function ListarEmpleadosDataTable() {
   const { empleados, loading } = useEmpleados();
   const mounted = useMounted();
   const [openDialog, setOpenDialog] = useState(false);
+  const [openReactivateDialog, setOpenReactivateDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<EmpleadosListar | null>(null);
-  const { eliminarEmpleado } = useEliminarEmpleado();
+  const [motivoEgreso, setMotivoEgreso] = useState<number | null>(null);
+  const [reactivateData, setReactivateData] = useState({
+    cargoId: 0,
+    salarioBase: 0,
+    tipoContrato: 0,
+    tipoJornada: 0,
+    fechaIngreso: "",
+    observaciones: "",
+  });
+  const { catalogos } = useCatalogos();
+  const { cargos } = useCargos();
+  const { desactivarEmpleado, loading: desactivarLoading } = useDesactivarEmpleado();
+  const { reactivarEmpleado, loading: reactivarLoading } = useReactivarEmpleado();
   const router = useRouter();
 
   //!Validando permisos
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarEmpleados) : false;
   const canDelete = user ? hasPermission(user.rol, permissions.eliminarEmpleado) : false;
+  const canEdit = user ? hasPermission(user.rol, permissions.editarEmpleado) : false;
 
   const handleOpenDialog = useCallback((row: EmpleadosListar) => {
     setSelectedRow(row);
@@ -222,6 +278,32 @@ export default function ListarEmpleadosDataTable() {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedRow(null);
+    setMotivoEgreso(null);
+  };
+
+  const handleCloseReactivateDialog = () => {
+    setOpenReactivateDialog(false);
+    setSelectedRow(null);
+    setReactivateData({
+      cargoId: 0,
+      salarioBase: 0,
+      tipoContrato: 0,
+      tipoJornada: 0,
+      fechaIngreso: "",
+      observaciones: "",
+    });
+  };
+
+  const handleReactivateSubmit = () => {
+    if (!selectedRow) return;
+    reactivarEmpleado({
+      id: selectedRow.id,
+      payload: {
+        ...reactivateData,
+        fechaIngreso: new Date(reactivateData.fechaIngreso).toISOString(),
+      },
+    });
+    handleCloseReactivateDialog();
   };
 
   const handleView = useCallback(
@@ -231,11 +313,23 @@ export default function ListarEmpleadosDataTable() {
     [router],
   );
 
+  const handleEdit = useCallback(
+    (row: EmpleadosListar) => {
+      router.push(`/dashboard/empleados/${row.id}/editar`);
+    },
+    [router],
+  );
+
+  const handleReactivate = useCallback((row: EmpleadosListar) => {
+    setSelectedRow(row);
+    setOpenReactivateDialog(true);
+  }, []);
+
   const localeText = useMemo(() => esES.components.MuiDataGrid.defaultProps.localeText, []);
 
   const columns = useMemo(
-    () => getColumns(handleOpenDialog, handleView, canDelete),
-    [handleOpenDialog, handleView, canDelete],
+    () => getColumns(handleOpenDialog, handleView, handleEdit, handleReactivate, canDelete, canEdit),
+    [handleOpenDialog, handleView, handleEdit, handleReactivate, canDelete, canEdit],
   );
 
   //! controla el renderizado
@@ -280,12 +374,30 @@ export default function ListarEmpleadosDataTable() {
         }}
       />
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogTitle>Confirmar desactivación</DialogTitle>
 
         <DialogContent>
-          <DialogContentText>
-            ¿Seguro que deseas eliminar a <strong>{selectedRow?.nombreCompleto}</strong>?
+          <DialogContentText sx={{ mb: 2 }}>
+            ¿Seguro que deseas desactivar a <strong>{selectedRow?.nombreCompleto}</strong>?
           </DialogContentText>
+          <FormControl fullWidth size="small">
+            <InputLabel>Motivo de egreso</InputLabel>
+            <Select
+              autoFocus
+              value={motivoEgreso ?? ""}
+              label="Motivo de egreso"
+              onChange={(e) => setMotivoEgreso(Number(e.target.value))}
+            >
+              <MenuItem value="">
+                <em>Seleccione...</em>
+              </MenuItem>
+              {catalogos.motivosEgreso.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogContent>
 
         <DialogActions>
@@ -293,14 +405,129 @@ export default function ListarEmpleadosDataTable() {
 
           <Button
             color="error"
+            disabled={desactivarLoading}
             onClick={() => {
               if (!selectedRow) return;
 
-              eliminarEmpleado(selectedRow.id);
+              desactivarEmpleado({ id: selectedRow.id, payload: { motivoEgreso: motivoEgreso ?? 0 } });
               handleCloseDialog();
             }}
           >
-            Eliminar
+            {desactivarLoading ? "Desactivando..." : "Desactivar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openReactivateDialog} onClose={handleCloseReactivateDialog} maxWidth="md" fullWidth>
+        <DialogTitle>Confirmar reactivación</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            ¿Seguro que deseas reactivar a <strong>{selectedRow?.nombreCompleto}</strong>? Completa los datos laborales:
+          </DialogContentText>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Cargo</InputLabel>
+                <Select
+                  value={reactivateData.cargoId || ""}
+                  label="Cargo"
+                  onChange={(e) => setReactivateData({ ...reactivateData, cargoId: Number(e.target.value) })}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione...</em>
+                  </MenuItem>
+                  {cargos.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Salario Base"
+                type="number"
+                value={reactivateData.salarioBase}
+                onChange={(e) => setReactivateData({ ...reactivateData, salarioBase: Number(e.target.value) })}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo de Contrato</InputLabel>
+                <Select
+                  value={reactivateData.tipoContrato || ""}
+                  label="Tipo de Contrato"
+                  onChange={(e) => setReactivateData({ ...reactivateData, tipoContrato: Number(e.target.value) })}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione...</em>
+                  </MenuItem>
+                  {catalogos.tiposContrato.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo de Jornada</InputLabel>
+                <Select
+                  value={reactivateData.tipoJornada || ""}
+                  label="Tipo de Jornada"
+                  onChange={(e) => setReactivateData({ ...reactivateData, tipoJornada: Number(e.target.value) })}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione...</em>
+                  </MenuItem>
+                  {catalogos.tiposJornada.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                <DatePicker
+                  label="Fecha de Ingreso"
+                  value={reactivateData.fechaIngreso ? dayjs(reactivateData.fechaIngreso) : null}
+                  onChange={(val) =>
+                    setReactivateData({ ...reactivateData, fechaIngreso: val?.format("YYYY-MM-DD") ?? "" })
+                  }
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </LocalizationProvider>
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Observaciones"
+                multiline
+                rows={3}
+                value={reactivateData.observaciones}
+                onChange={(e) => setReactivateData({ ...reactivateData, observaciones: e.target.value.toUpperCase() })}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseReactivateDialog}>Cancelar</Button>
+          <Button color="success" disabled={reactivarLoading} onClick={handleReactivateSubmit}>
+            {reactivarLoading ? "Reactivando..." : "Reactivar"}
           </Button>
         </DialogActions>
       </Dialog>

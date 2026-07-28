@@ -25,6 +25,7 @@ import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { formatDate } from "@/shared/utils/date";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
+import { useMounted } from "@/shared/hooks/useMounted";
 
 interface Props {
   id: number;
@@ -161,11 +162,16 @@ const LoadingSkeleton = () => (
 
 //! Componente principal
 export default function DetalleEmpleado({ id }: Props) {
+  const mounted = useMounted();
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.detalleEmpleado) : false;
   const { empleado, loading, error } = useEmpleado(id, canAccess);
   const { catalogos, loading: loadingCatalogos } = useCatalogos();
   const router = useRouter();
+
+  if (!mounted) {
+    return null;
+  }
 
   if (!canAccess) {
     return <AccessDenied />;

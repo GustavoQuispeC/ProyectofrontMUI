@@ -47,7 +47,7 @@ export default function SideMenu() {
       sx={{
         display: { xs: "none", md: "block" },
         [`& .${drawerClasses.paper}`]: {
-          backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#0F172A" : "#FFFFFF"),
+          backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#0F172A" : "grey.50"),
           borderRight: "1px solid",
           borderColor: (theme) => (theme.palette.mode === "dark" ? "#1E293B" : "#E2E8F0"),
         },

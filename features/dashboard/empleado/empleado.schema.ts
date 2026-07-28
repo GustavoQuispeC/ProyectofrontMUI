@@ -1,13 +1,7 @@
 import { z } from "zod";
 
 const nullableSelect = z.preprocess((value) => {
-  if (
-    value === "" ||
-    value === null ||
-    value === undefined ||
-    value === 0 ||
-    value === "0"
-  ) {
+  if (value === "" || value === null || value === undefined || value === 0 || value === "0") {
     return null;
   }
 
@@ -26,9 +20,7 @@ export const empleadoSchema = z.object({
   nacionalidad: z.string().trim().default(""),
   // CONTACTO
   correo: z.string().trim().min(1, "El correo es obligatorio").email("Correo inválido"),
-  telefonoMovil: z
-  .string()
-  .regex(/^\d{9}$/, "El teléfono móvil debe contener exactamente 9 dígitos"),
+  telefonoMovil: z.string().regex(/^\d{9}$/, "El teléfono móvil debe contener exactamente 9 dígitos"),
   direccion: z.string().trim().min(1, "La dirección es obligatoria"),
   departamento: z.string().min(1, "Seleccione un departamento"),
   provincia: z.string().min(1, "Seleccione una provincia"),
@@ -36,10 +28,7 @@ export const empleadoSchema = z.object({
   // CONTACTO DE EMERGENCIA
   contactoEmergenciaNombre: z.string().trim().default(""),
   contactoEmergenciaParentesco: nullableSelect,
-  contactoEmergenciaTelefono: z.union([
-    z.string().regex(/^\d{9}$/, "Debe tener 9 dígitos"),
-    z.literal("")
-  ]).default(""),
+  contactoEmergenciaTelefono: z.union([z.string().regex(/^\d{9}$/, "Debe tener 9 dígitos"), z.literal("")]).default(""),
   // CUENTA SUELDO
   bancoSueldo: z.string().trim().default(""),
   cuentaSueldo: z.string().trim().default(""),
@@ -62,7 +51,13 @@ export const empleadoSchema = z.object({
   tipoContrato: z.coerce.number().min(1, "Seleccione un tipo de contrato"),
   tipoJornada: z.coerce.number().min(1, "Seleccione un tipo de jornada"),
   fechaIngreso: z.string().min(1, "La fecha de ingreso es obligatoria"),
-  observaciones: z.string().trim().default("")
+  observaciones: z.string().trim().default(""),
 });
 
 export type EmpleadoForm = z.infer<typeof empleadoSchema>;
+
+export const empleadoEdicionSchema = empleadoSchema.omit({
+  fechaIngreso: true,
+});
+
+export type EmpleadoEdicionForm = z.infer<typeof empleadoEdicionSchema>;

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   listarEstadosCiviles,
   listarGeneros,
+  listarMotivosEgreso,
   listarNivelesEducativos,
   listarSistemasPensiones,
   listarTiposContrato,
@@ -24,6 +25,7 @@ interface Catalogos {
   tiposParentesco: CatalogoItem[];
   tiposContrato: CatalogoItem[];
   tiposJornada: CatalogoItem[];
+  motivosEgreso: CatalogoItem[];
 }
 
 const initialCatalogos: Catalogos = {
@@ -35,6 +37,7 @@ const initialCatalogos: Catalogos = {
   tiposParentesco: [],
   tiposContrato: [],
   tiposJornada: [],
+  motivosEgreso: [],
 };
 
 export function useCatalogos() {
@@ -57,6 +60,7 @@ export function useCatalogos() {
           tiposParentesco,
           tiposContrato,
           tiposJornada,
+          motivosEgreso,
         ] = await Promise.all([
           listarTiposDocumento(),
           listarGeneros(),
@@ -66,6 +70,7 @@ export function useCatalogos() {
           listarTiposParentesco(),
           listarTiposContrato(),
           listarTiposJornada(),
+          listarMotivosEgreso(),
         ]);
 
         setCatalogos({
@@ -77,6 +82,7 @@ export function useCatalogos() {
           tiposParentesco: tiposParentesco ?? [],
           tiposContrato: tiposContrato ?? [],
           tiposJornada: tiposJornada ?? [],
+          motivosEgreso: motivosEgreso ?? [],
         });
       } catch (err) {
         console.error("Error en la carga masiva de catálogos:", err);

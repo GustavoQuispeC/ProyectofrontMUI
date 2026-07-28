@@ -102,7 +102,6 @@ export default function RegistrarFaltas() {
   const mounted = useMounted();
   const { empleados, loading: loadingEmployees } = useEmpleadosAutocomplete();
   const router = useRouter();
-
   const {
     control,
     handleSubmit,
@@ -197,10 +196,10 @@ export default function RegistrarFaltas() {
                   sx={{
                     fontWeight: 700,
                     color: "text.primary",
-                    fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                    fontSize: { xs: "1.25rem", sm: "1.25rem" },
                   }}
                 >
-                  Registro de Faltas
+                  REGISTRO DE FALTAS
                 </Typography>
 
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -386,10 +385,10 @@ export default function RegistrarFaltas() {
                     multiline
                     rows={3}
                     fullWidth
-                    sx={{ mt: 2 }}
                     placeholder="Describa la justificación..."
                     error={!!errors.observacion}
                     helperText={errors.observacion?.message}
+                    sx={{ mt: 2, "& .MuiInputBase-input": { textTransform: "uppercase" } }}
                   />
                 )}
               />

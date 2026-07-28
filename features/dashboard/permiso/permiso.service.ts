@@ -3,19 +3,19 @@ import { ListarPermisoMensual, ListarPermisos, PendientesPermisos, RegistrarPerm
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-//!Listar permisos
+//! Listar permisos
 export async function listarPermisosApi(empleadoId: number, anio: number, mes: number): Promise<ListarPermisos[]> {
   return apiPermiso(`${apiUrl}/Permisos?empleadoId=${empleadoId}&anio=${anio}&mes=${mes}`, {
     method: "GET",
   });
 }
 
-//!Registrar permiso
+//! Registrar permiso
 export async function registrarPermisoApi(data: RegistrarPermiso): Promise<{ permisoId: number }> {
   return apiPermiso<{ permisoId: number }>(`${apiUrl}/Permisos`, { method: "POST", body: JSON.stringify(data) });
 }
 
-//!Listar permisos pendientes
+//! Listar permisos pendientes
 export async function listarPermisosPendientesApi(): Promise<PendientesPermisos[]> {
   return apiPermiso(`${apiUrl}/Permisos/pendientes`, {
     method: "GET",
@@ -29,14 +29,14 @@ export async function listarPermisosMensualApi(anio: number, mes: number): Promi
   });
 }
 
-//!Aprobar permiso
+//! Aprobar permiso
 export async function aprobarPermisoApi(id: number): Promise<void> {
   return apiPermiso(`${apiUrl}/Permisos/${id}/aprobar`, {
     method: "PUT",
   });
 }
 
-//!Cancelar permiso
+//! Cancelar permiso
 export async function cancelarPermisoApi(id: number, motivoCancelacion: string): Promise<void> {
   return apiPermiso(`${apiUrl}/Permisos/${id}/cancelar`, {
     method: "PUT",

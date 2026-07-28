@@ -197,14 +197,14 @@ export default function RegistrarPermiso() {
 
             <Box>
               <Typography
-                variant="h5"
+                variant="h6"
                 sx={{
                   fontWeight: 700,
                   color: "text.primary",
                   fontSize: { xs: "1.25rem", sm: "1.5rem" },
                 }}
               >
-                Registro de Permisos
+                REGISTRO DE PERMISOS
               </Typography>
 
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -371,6 +371,7 @@ export default function RegistrarPermiso() {
                   placeholder="Describa el motivo del permiso..."
                   error={!!errors.motivo}
                   helperText={errors.motivo?.message}
+                  sx={{ mt: 2, "& .MuiInputBase-input": { textTransform: "uppercase" } }}
                 />
               )}
             />
@@ -389,6 +390,7 @@ export default function RegistrarPermiso() {
                   placeholder="Indique el lugar al que se dirige..."
                   error={!!errors.lugar}
                   helperText={errors.lugar?.message}
+                  sx={{ mt: 2, "& .MuiInputBase-input": { textTransform: "uppercase" } }}
                 />
               )}
             />

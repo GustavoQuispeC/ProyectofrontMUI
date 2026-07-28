@@ -25,18 +25,18 @@ import Paper from "@mui/material/Paper";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import Tooltip from "@mui/material/Tooltip";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
-import IconButton from "@mui/material/IconButton";
+import ChecklistIcon from "@mui/icons-material/Checklist";
 import TablePagination from "@mui/material/TablePagination";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Chip from "@mui/material/Chip";
-import AssessmentIcon from "@mui/icons-material/Assessment";
+import IconButton from "@mui/material/IconButton";
 
 const estadoConfig: Record<CondicionFalta, { color: "warning" | "success" | "error"; label: string }> = {
   [CondicionFalta.Pendiente]: { color: "warning", label: "Pendiente" },
@@ -54,7 +54,11 @@ export default function FaltasPendientes() {
   const { aprobarFalta, loading: aprobando } = useAprobarFalta();
   const { cancelarFalta, loading: cancelando } = useCancelarFalta();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const isLargeScreen = useMediaQuery((theme) => theme.breakpoints.up("xl"));
+  const rowsPerPage = isLargeScreen ? 20 : 10;
+  const maxPage = Math.max(0, Math.ceil(faltasPendientes.length / rowsPerPage) - 1);
+  const safePage = Math.min(page, maxPage);
+  const paginatedRows = faltasPendientes.slice(safePage * rowsPerPage, safePage * rowsPerPage + rowsPerPage);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<{ id: number; nombreEmpleado: string } | null>(null);
@@ -88,8 +92,8 @@ export default function FaltasPendientes() {
         <Grid size={{ xs: 12, md: 8 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
             <EventBusyIcon color="primary" />
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              Faltas pendientes
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              FALTAS PENDIENTES
             </Typography>
           </Stack>
         </Grid>
@@ -101,17 +105,17 @@ export default function FaltasPendientes() {
               component={Link}
               href="/dashboard/faltas/registrar"
               variant="contained"
-              startIcon={<GroupAddIcon />}
+              startIcon={<EventBusyIcon />}
               sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
             >
-              Gestionar Faltas
+              Programar
             </Button>
             <Button
               component={Link}
               href="/dashboard/faltas/mensual"
               variant="contained"
               color="success"
-              startIcon={<AssessmentIcon />}
+              startIcon={<ChecklistIcon />}
               sx={{ height: 44, width: { xs: "100%", sm: "auto" } }}
             >
               Aprobadas
@@ -150,9 +154,8 @@ export default function FaltasPendientes() {
                 </TableCell>
               </TableRow>
             ) : (
-              faltasPendientes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((falta, idx) => {
-                const isLast =
-                  idx === faltasPendientes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).length - 1;
+              paginatedRows.map((falta, idx) => {
+                const isLast = idx === paginatedRows.length - 1;
                 return (
                   <TableRow
                     key={falta.id}
@@ -164,7 +167,7 @@ export default function FaltasPendientes() {
                       },
                     }}
                   >
-                    <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
+                    <TableCell>{safePage * rowsPerPage + idx + 1}</TableCell>
                     <TableCell>
                       <Typography variant="body2" noWrap sx={{ maxWidth: 250 }}>
                         {falta.nombreEmpleado}
@@ -230,14 +233,10 @@ export default function FaltasPendientes() {
         <TablePagination
           component="div"
           count={faltasPendientes.length}
-          page={page}
+          page={safePage}
           rowsPerPage={rowsPerPage}
           onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[rowsPerPage]}
           labelRowsPerPage="Filas por página:"
           labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
         />

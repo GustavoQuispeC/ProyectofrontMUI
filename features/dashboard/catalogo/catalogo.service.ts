@@ -18,3 +18,4 @@ export const listarNivelesEducativos = () => fetchCatalogo("niveles-educativos")
 export const listarTiposParentesco = () => fetchCatalogo("tipos-parentesco");
 export const listarTiposContrato = () => fetchCatalogo("tipos-contrato");
 export const listarTiposJornada = () => fetchCatalogo("tipos-jornada");
+export const listarMotivosEgreso = () => fetchCatalogo("motivos-egreso");

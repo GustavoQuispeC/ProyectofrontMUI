@@ -296,8 +296,8 @@ export default function PendientesVacaciones() {
         <Grid size={{ xs: 12 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
             <BeachAccessIcon color="primary" />
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              Vacaciones pendientes
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              VACACIONES PENDIENTES
             </Typography>
           </Stack>
         </Grid>

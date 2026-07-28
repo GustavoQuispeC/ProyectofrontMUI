@@ -304,8 +304,8 @@ export default function ResumenVacaciones() {
         <Grid size={{ xs: 12 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
             <AssessmentIcon color="primary" />
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              Resumen de vacaciones
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              RESUMEN DE VACACIONES
             </Typography>
           </Stack>
         </Grid>

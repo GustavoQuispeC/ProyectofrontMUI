@@ -1,21 +1,18 @@
 "use client";
 import { useCargos } from "@/features/dashboard/cargo/hooks/useCargos";
 import { useCatalogos } from "@/features/dashboard/catalogo";
-import { EmpleadoForm, empleadoSchema } from "@/features/dashboard/empleado/empleado.schema";
-import { useDni } from "@/features/dashboard/identidad";
+import { EmpleadoEdicionForm, empleadoEdicionSchema } from "@/features/dashboard/empleado/empleado.schema";
 import { useFirebaseStorage } from "@/shared/hooks/useFirebaseStorage";
 import { useUbigeo } from "@/shared/hooks/useUbigeo";
 import { useRouter } from "next/navigation";
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toastPromise } from "@/shared/utils/toast";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import TextField, { TextFieldProps } from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import Divider from "@mui/material/Divider";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/Card";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -31,29 +28,30 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
-import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import BadgeIcon from "@mui/icons-material/Badge";
 import HomeIcon from "@mui/icons-material/Home";
 import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
-import WorkIcon from "@mui/icons-material/Work";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import WorkIcon from "@mui/icons-material/Work";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
-import InputAdornment from "@mui/material/InputAdornment";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import FormHelperText from "@mui/material/FormHelperText";
+import InputAdornment from "@mui/material/InputAdornment";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
-import { RegistrarEmpleadoRequest } from "@/features/dashboard/empleado/empleado.types";
-import { useRegistrarEmpleado } from "@/features/dashboard/empleado/hooks/useRegistrarEmpleado";
+import { ActualizarEmpleadoRequest } from "@/features/dashboard/empleado/empleado.types";
+import { useEmpleadoEdicion } from "@/features/dashboard/empleado/hooks/useEmpleadoEdicion";
+import { useActualizarEmpleado } from "@/features/dashboard/empleado/hooks/useActualizarEmpleado";
+import { InputCard } from "@/components/empleados/registrar-empleado/RegistrarEmpleado";
 
-const defaultValues: EmpleadoForm = {
+const defaultValues: EmpleadoEdicionForm = {
   nombre: "",
   apellidos: "",
   tipoDocumento: 0,
@@ -87,26 +85,8 @@ const defaultValues: EmpleadoForm = {
   salarioBase: 0,
   tipoContrato: 0,
   tipoJornada: 0,
-  fechaIngreso: "",
   observaciones: "",
 };
-
-type InputCardProps = TextFieldProps;
-//! Card
-export const InputCard = (props: InputCardProps) => (
-  <TextField
-    fullWidth
-    size="small"
-    {...props}
-    sx={{
-      "& .MuiOutlinedInput-root": {
-        borderRadius: 2,
-        backgroundColor: (theme) => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#f8fafc"),
-      },
-      ...props.sx,
-    }}
-  />
-);
 
 //! Sección encabezada
 interface SectionProps {
@@ -146,29 +126,30 @@ const Section = ({ icon, title, children }: SectionProps) => (
         {title}
       </Typography>
     </Stack>
-    <Divider sx={{ mb: 2 }} />
     <Grid container spacing={2}>
       {children}
     </Grid>
   </Paper>
 );
 
+interface EditarEmpleadoProps {
+  id: string;
+}
+
 //! Componente principal
-export default function RegistrarEmpleado() {
+export default function EditarEmpleado({ id }: EditarEmpleadoProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [dniBusqueda, setDniBusqueda] = useState("");
-  const [resetKey, setResetKey] = useState(0);
   const { loadingUbigeo, departamentos, getProvincias, getDistritos } = useUbigeo();
   const { catalogos } = useCatalogos();
   const { cargos } = useCargos();
-  const { dniData, loadingDni, errorDni, consultarDni, resetDni } = useDni();
   const { uploading, uploadFile, deleteFile } = useFirebaseStorage();
   const router = useRouter();
   const user = getAuthUser();
-  const canAccess = user ? hasPermission(user.rol, permissions.registrarEmpleado) : false;
-  const registrarEmpleadoMutation = useRegistrarEmpleado();
-  const isSubmitting = uploading || registrarEmpleadoMutation.isPending;
+  const canAccess = user ? hasPermission(user.rol, permissions.editarEmpleado) : false;
+  const { empleado, loading: loadingEmpleado, error: errorEmpleado } = useEmpleadoEdicion(id, canAccess);
+  const actualizarEmpleadoMutation = useActualizarEmpleado();
+  const isSubmitting = uploading || actualizarEmpleadoMutation.isPending;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     control,
@@ -177,8 +158,8 @@ export default function RegistrarEmpleado() {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<EmpleadoForm>({
-    resolver: standardSchemaResolver(empleadoSchema),
+  } = useForm<EmpleadoEdicionForm>({
+    resolver: standardSchemaResolver(empleadoEdicionSchema),
     defaultValues,
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -189,21 +170,52 @@ export default function RegistrarEmpleado() {
   const departamento = watch("departamento");
   const provincia = watch("provincia");
 
-  //! Ubigeo
+  //! Precargar datos del empleado
+  useEffect(() => {
+    if (!empleado) return;
+    reset({
+      nombre: empleado.nombre ?? "",
+      apellidos: empleado.apellidos ?? "",
+      tipoDocumento: empleado.tipoDocumento ?? 0,
+      numeroDocumento: empleado.numeroDocumento ?? "",
+      fechaNacimiento: empleado.fechaNacimiento ? dayjs(empleado.fechaNacimiento).format("YYYY-MM-DD") : "",
+      genero: empleado.genero ?? 0,
+      estadoCivil: empleado.estadoCivil ?? 0,
+      nacionalidad: empleado.nacionalidad ?? "",
+      correo: empleado.correo ?? "",
+      telefonoMovil: empleado.telefonoMovil ?? "",
+      direccion: empleado.direccion ?? "",
+      departamento: empleado.departamento ?? "",
+      provincia: empleado.provincia ?? "",
+      distrito: empleado.distrito ?? "",
+      contactoEmergenciaNombre: empleado.contactoEmergenciaNombre ?? "",
+      contactoEmergenciaParentesco: empleado.contactoEmergenciaParentesco ?? null,
+      contactoEmergenciaTelefono: empleado.contactoEmergenciaTelefono ?? "",
+      bancoSueldo: empleado.bancoSueldo ?? "",
+      cuentaSueldo: empleado.cuentaSueldo ?? "",
+      cciSueldo: empleado.cciSueldo ?? "",
+      bancoCTS: empleado.bancoCTS ?? "",
+      cuentaCTS: empleado.cuentaCTS ?? "",
+      cciCTS: empleado.ccicts ?? "",
+      ruc: empleado.ruc ?? "",
+      sistemaPensiones: empleado.sistemaPensiones ?? null,
+      cuspp: empleado.cuspp ?? "",
+      nivelEducativo: empleado.nivelEducativo ?? null,
+      profesionOficio: empleado.profesionOficio ?? "",
+      fotoUrl: empleado.fotoUrl ?? "",
+      cargoId: empleado.cargoId ?? 0,
+      salarioBase: empleado.salarioBase ?? 0,
+      tipoContrato: empleado.tipoContrato ?? 0,
+      tipoJornada: empleado.tipoJornada ?? 0,
+      observaciones: empleado.observaciones ?? "",
+    });
+    setPreview(empleado.fotoUrl || null);
+    setSelectedFile(null);
+  }, [empleado, reset]);
 
+  //! Ubigeo
   const provincias = useMemo(() => getProvincias(departamento), [departamento, getProvincias]);
   const distritos = useMemo(() => getDistritos(departamento, provincia), [departamento, provincia, getDistritos]);
-
-  //! Búsqueda DNI
-  const handleBuscarDni = async () => {
-    if (!dniBusqueda.trim() || dniBusqueda.trim().length !== 8) return;
-    const response = await consultarDni(dniBusqueda.trim());
-    if (response) {
-      setValue("nombre", response.nombres ?? "");
-      setValue("apellidos", `${response.apellidoPaterno ?? ""} ${response.apellidoMaterno ?? ""}`.trim());
-      setValue("numeroDocumento", response.dni ?? "");
-    }
-  };
 
   //! Imagen
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -217,29 +229,16 @@ export default function RegistrarEmpleado() {
   const handleRemoveImage = () => {
     setPreview(null);
     setSelectedFile(null);
-    const fileInput = document.getElementById("foto-input") as HTMLInputElement;
-    if (fileInput) fileInput.value = "";
-  };
-
-  //! RESET
-  const resetForm = () => {
-    reset(defaultValues);
-    setResetKey((k) => k + 1);
-    setPreview(null);
-    setSelectedFile(null);
-    setDniBusqueda("");
-    resetDni();
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    setValue("fotoUrl", "");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   //! SUBMIT
-  const onSubmit = async (data: EmpleadoForm) => {
+  const onSubmit = async (data: EmpleadoEdicionForm) => {
     let fotoUrl = data.fotoUrl;
     let storagePath: string | null = null;
     try {
-      // Subir imagen (si existe)
+      // Subir imagen nueva (si existe)
       if (selectedFile) {
         const result = await uploadFile(selectedFile, "empleados");
         if (!result) {
@@ -248,16 +247,48 @@ export default function RegistrarEmpleado() {
         fotoUrl = result.url;
         storagePath = result.path;
       }
-      const payload: RegistrarEmpleadoRequest = {
-        ...data,
+      const payload: ActualizarEmpleadoRequest = {
+        nombre: data.nombre,
+        apellidos: data.apellidos,
+        tipoDocumento: data.tipoDocumento,
+        numeroDocumento: data.numeroDocumento,
+        fechaNacimiento: data.fechaNacimiento,
+        genero: data.genero,
+        estadoCivil: data.estadoCivil,
+        nacionalidad: data.nacionalidad,
+        correo: data.correo,
+        telefonoMovil: data.telefonoMovil,
+        direccion: data.direccion,
+        distrito: data.distrito,
+        provincia: data.provincia,
+        departamento: data.departamento,
+        contactoEmergenciaNombre: data.contactoEmergenciaNombre,
+        contactoEmergenciaParentesco: data.contactoEmergenciaParentesco,
+        contactoEmergenciaTelefono: data.contactoEmergenciaTelefono,
+        bancoSueldo: data.bancoSueldo,
+        cuentaSueldo: data.cuentaSueldo,
+        cciSueldo: data.cciSueldo,
+        bancoCTS: data.bancoCTS,
+        cuentaCTS: data.cuentaCTS,
+        ccicts: data.cciCTS,
+        ruc: data.ruc,
+        sistemaPensiones: data.sistemaPensiones,
+        cuspp: data.cuspp,
+        nivelEducativo: data.nivelEducativo,
+        profesionOficio: data.profesionOficio,
         fotoUrl,
+        cargoId: data.cargoId,
+        salarioBase: data.salarioBase,
+        tipoContrato: data.tipoContrato,
+        tipoJornada: data.tipoJornada,
+        observaciones: data.observaciones,
       };
-      await toastPromise(registrarEmpleadoMutation.mutateAsync(payload), {
-        loading: "Registrando empleado...",
-        success: "Empleado registrado correctamente.",
+      await toastPromise(actualizarEmpleadoMutation.mutateAsync({ id, payload }), {
+        loading: "Actualizando empleado...",
+        success: "Empleado actualizado correctamente.",
         error: (error) => error.message,
       });
-      resetForm();
+      router.push("/dashboard/empleados/listar");
     } catch (error) {
       if (storagePath) {
         await deleteFile(storagePath);
@@ -270,6 +301,33 @@ export default function RegistrarEmpleado() {
   if (!canAccess) {
     return <AccessDenied />;
   }
+
+  //! Cargando datos
+  if (loadingEmpleado) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  //! Error al cargar
+  if (errorEmpleado) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{errorEmpleado}</Alert>
+        <Button
+          variant="outlined"
+          startIcon={<KeyboardBackspaceIcon />}
+          onClick={() => router.push("/dashboard/empleados/listar")}
+          sx={{ mt: 2 }}
+        >
+          Volver
+        </Button>
+      </Box>
+    );
+  }
+
   return (
     <Box
       component="form"
@@ -313,7 +371,7 @@ export default function RegistrarEmpleado() {
                 height: { xs: 48, md: 52 },
               }}
             >
-              <PersonAddIcon />
+              <ModeEditOutlineOutlinedIcon />
             </Avatar>
 
             <Box>
@@ -325,18 +383,18 @@ export default function RegistrarEmpleado() {
                   fontSize: { xs: "1.25rem", sm: "1.5rem" },
                 }}
               >
-                Registrar Empleado
+                Editar Empleado
               </Typography>
 
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                Complete todos los campos requeridos
+                Actualice los datos del empleado
               </Typography>
             </Box>
           </Stack>
         </CardContent>
       </Card>
 
-      {/* SECCIÓN: Foto + Búsqueda DNI */}
+      {/* SECCIÓN: Foto */}
       <Paper
         elevation={0}
         sx={{
@@ -347,98 +405,43 @@ export default function RegistrarEmpleado() {
           mb: 2,
         }}
       >
-        <Grid container sx={{ alignItems: "center", gap: { xs: 2, sm: 3 } }}>
-          {/* Foto */}
-          <Grid size={{ xs: 12, sm: "auto" }}>
-            <Stack sx={{ alignItems: "center", gap: 1 }}>
-              <Avatar
-                src={preview ?? ""}
-                sx={{
-                  width: 110,
-                  height: 110,
-                  border: "3px dashed",
-                  borderColor: preview ? "primary.main" : "divider",
-                  bgcolor: "grey.100",
-                }}
-              >
-                {!preview && <PhotoCamera sx={{ fontSize: 36, color: "grey.400" }} />}
-              </Avatar>
+        <Stack sx={{ alignItems: "center", gap: 1 }} direction={{ xs: "column", sm: "row" }}>
+          <Avatar
+            src={preview ?? ""}
+            sx={{
+              width: 110,
+              height: 110,
+              border: "3px dashed",
+              borderColor: preview ? "primary.main" : "divider",
+              bgcolor: "grey.100",
+            }}
+          >
+            {!preview && <PhotoCamera sx={{ fontSize: 36, color: "grey.400" }} />}
+          </Avatar>
+          <Stack sx={{ gap: 1, ml: { sm: 2 } }}>
+            <Button
+              component="label"
+              variant="outlined"
+              startIcon={<CloudUploadIcon />}
+              size="small"
+              sx={{ borderRadius: 2, fontSize: 12 }}
+            >
+              Cambiar Foto
+              <input ref={fileInputRef} hidden type="file" accept="image/*" onChange={handleImageChange} />
+            </Button>
+            {preview && (
               <Button
-                component="label"
-                variant="outlined"
-                startIcon={<CloudUploadIcon />}
                 size="small"
-                sx={{ borderRadius: 2, fontSize: 12 }}
+                color="error"
+                startIcon={<DeleteForeverIcon />}
+                onClick={handleRemoveImage}
+                sx={{ fontSize: 12 }}
               >
-                Subir Foto
-                <input
-                  ref={fileInputRef}
-                  id="foto-input"
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
+                Eliminar
               </Button>
-              {preview && (
-                <Button
-                  size="small"
-                  color="error"
-                  startIcon={<DeleteForeverIcon />}
-                  onClick={handleRemoveImage}
-                  sx={{ fontSize: 12 }}
-                >
-                  Eliminar
-                </Button>
-              )}
-            </Stack>
-          </Grid>
-
-          {/* Búsqueda DNI */}
-          <Grid size={{ xs: 12, sm: "grow" }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              Búsqueda rápida por DNI
-            </Typography>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-              <TextField
-                size="small"
-                label="Número de DNI"
-                value={dniBusqueda}
-                onChange={(e) => setDniBusqueda(e.target.value.replace(/\D/g, "").slice(0, 8))}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleBuscarDni();
-                  }
-                }}
-                slotProps={{ htmlInput: { maxLength: 8 } }}
-                sx={{ flexGrow: 1, maxWidth: { sm: 260 } }}
-              />
-              <Button
-                variant="contained"
-                endIcon={<PersonSearchIcon />}
-                onClick={handleBuscarDni}
-                disabled={loadingDni || dniBusqueda.length !== 8}
-                sx={{ whiteSpace: "nowrap", minWidth: 130 }}
-              >
-                {loadingDni ? "Buscando..." : "Buscar DNI"}
-              </Button>
-            </Stack>
-            {errorDni && (
-              <Typography variant="caption" color="error" sx={{ mt: 0.5, display: "block" }}>
-                {errorDni}
-              </Typography>
             )}
-            {dniData && (
-              <Chip
-                label={`${dniData.nombres} ${dniData.apellidoPaterno} ${dniData.apellidoMaterno}`}
-                color="success"
-                size="small"
-                sx={{ mt: 1 }}
-              />
-            )}
-          </Grid>
-        </Grid>
+          </Stack>
+        </Stack>
       </Paper>
 
       {/* SECCIÓN 1: Datos Personales */}
@@ -480,7 +483,6 @@ export default function RegistrarEmpleado() {
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.genero}>
                 <InputLabel>Género *</InputLabel>
-
                 <Select
                   value={field.value || ""}
                   label="Género *"
@@ -491,7 +493,6 @@ export default function RegistrarEmpleado() {
                   <MenuItem value="">
                     <em>Seleccione</em>
                   </MenuItem>
-
                   {catalogos.generos.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
@@ -505,15 +506,12 @@ export default function RegistrarEmpleado() {
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-            {" "}
             <Controller
               name="fechaNacimiento"
               control={control}
               render={({ field }) => (
                 <FormControl fullWidth error={!!errors.fechaNacimiento}>
-                  {" "}
                   <DatePicker
-                    key={resetKey}
                     label="Fecha de Nacimiento *"
                     value={field.value ? dayjs(field.value) : null}
                     onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
@@ -649,7 +647,7 @@ export default function RegistrarEmpleado() {
               <InputCard
                 {...field}
                 value={field.value ?? ""}
-                label="Nacionalidad (Optional)"
+                label="Nacionalidad (Opcional)"
                 onChange={(e) => field.onChange(e.target.value.toUpperCase())}
               />
             )}
@@ -657,27 +655,63 @@ export default function RegistrarEmpleado() {
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Controller
-            name="salarioBase"
+            name="nivelEducativo"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <InputLabel>Nivel Educativo</InputLabel>
+                <Select
+                  value={field.value ?? ""}
+                  label="Nivel Educativo"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    field.onChange(value ? Number(value) : null);
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+                  {catalogos.nivelesEducativos.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{errors.nivelEducativo?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="profesionOficio"
             control={control}
             render={({ field }) => (
               <InputCard
                 {...field}
                 value={field.value ?? ""}
-                label="Salario Base"
-                type="number"
-                error={!!errors.salarioBase}
-                helperText={errors.salarioBase?.message}
-                onFocus={(e) => e.target.select()}
-                slotProps={{
-                  input: {
-                    startAdornment: <InputAdornment position="start">S/</InputAdornment>,
-                  },
-                }}
+                label="Profesión / Oficio"
+                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+              />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="ruc"
+            control={control}
+            render={({ field }) => (
+              <InputCard
+                {...field}
+                value={field.value ?? ""}
+                label="RUC"
+                onChange={(e) => field.onChange(e.target.value.replace(/\D/g, "").slice(0, 11))}
               />
             )}
           />
         </Grid>
       </Section>
+
       {/* SECCIÓN 2: Dirección */}
       <Section icon={<HomeIcon />} title="Dirección">
         <Grid size={{ xs: 12, md: 6 }}>
@@ -782,196 +816,8 @@ export default function RegistrarEmpleado() {
           />
         </Grid>
       </Section>
-      {/* SECCIÓN 3: Datos Laborales */}
-      <Section icon={<WorkIcon />} title="Datos Laborales">
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Controller
-            name="cargoId"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth size="small" error={!!errors.cargoId}>
-                <InputLabel>Cargo</InputLabel>
-                <Select
-                  value={field.value || ""}
-                  label="Cargo"
-                  onChange={(e) => {
-                    field.onChange(Number(e.target.value));
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>Seleccione...</em>
-                  </MenuItem>
-                  {cargos.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>{errors.cargoId?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-            <Controller
-              name="fechaIngreso"
-              control={control}
-              render={({ field }) => (
-                <FormControl fullWidth error={!!errors.fechaIngreso}>
-                  {" "}
-                  <DatePicker
-                    key={resetKey}
-                    label="Fecha de Ingreso"
-                    value={field.value ? dayjs(field.value) : null}
-                    onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        fullWidth: true,
-                        error: !!errors.fechaIngreso,
-                      },
-                    }}
-                  />
-                  <FormHelperText>{errors.fechaIngreso?.message}</FormHelperText>
-                </FormControl>
-              )}
-            />
-          </LocalizationProvider>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Controller
-            name="tipoContrato"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth size="small" error={!!errors.tipoContrato}>
-                <InputLabel>Tipo de Contrato</InputLabel>
-                <Select
-                  value={field.value || ""}
-                  label="Tipo de Contrato"
-                  onChange={(e) => {
-                    field.onChange(Number(e.target.value));
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>Seleccione</em>
-                  </MenuItem>
-                  {catalogos.tiposContrato.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>{errors.tipoContrato?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Controller
-            name="tipoJornada"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth size="small" error={!!errors.tipoJornada}>
-                <InputLabel>Tipo de Jornada</InputLabel>
-                <Select
-                  value={field.value || ""}
-                  label="Tipo de Jornada"
-                  onChange={(e) => {
-                    field.onChange(Number(e.target.value));
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>Seleccione</em>
-                  </MenuItem>
-                  {catalogos.tiposJornada.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>{errors.tipoJornada?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Controller
-            name="nivelEducativo"
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth size="small">
-                <InputLabel>Nivel Educativo</InputLabel>
-                <Select
-                  value={field.value ?? ""}
-                  label="Nivel Educativo"
-                  onChange={(e) => {
-                    const value = e.target.value;
 
-                    field.onChange(value ? Number(value) : null);
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>Seleccione</em>
-                  </MenuItem>
-                  {catalogos.nivelesEducativos.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>{errors.nivelEducativo?.message}</FormHelperText>
-              </FormControl>
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Controller
-            name="profesionOficio"
-            control={control}
-            render={({ field }) => (
-              <InputCard
-                {...field}
-                value={field.value ?? ""}
-                label="Profesión / Oficio"
-                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-              />
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Controller
-            name="ruc"
-            control={control}
-            render={({ field }) => (
-              <InputCard
-                {...field}
-                value={field.value ?? ""}
-                label="RUC"
-                onChange={(e) => field.onChange(e.target.value.replace(/\D/g, "").slice(0, 11))}
-              />
-            )}
-          />
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <Controller
-            name="observaciones"
-            control={control}
-            render={({ field }) => (
-              <InputCard
-                {...field}
-                value={field.value ?? ""}
-                label="Observaciones"
-                multiline
-                rows={2}
-                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-              />
-            )}
-          />
-        </Grid>
-      </Section>
-
-      {/* SECCIÓN 4: Contacto de Emergencia */}
+      {/* SECCIÓN 3: Contacto de Emergencia */}
       <Section icon={<ContactPhoneIcon />} title="Contacto de Emergencia">
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Controller
@@ -1032,7 +878,7 @@ export default function RegistrarEmpleado() {
         </Grid>
       </Section>
 
-      {/* SECCIÓN 5: Financiero y seguros */}
+      {/* SECCIÓN 4: Financiero y seguros */}
       <Section icon={<AccountBalanceIcon />} title="Financiero y Seguros">
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Controller
@@ -1177,7 +1023,133 @@ export default function RegistrarEmpleado() {
         </Grid>
       </Section>
 
-      {/* Botones inferiores (móvil) */}
+      {/* SECCIÓN 4: Datos Laborales */}
+      <Section icon={<WorkIcon />} title="Datos Laborales">
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="cargoId"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small" error={!!errors.cargoId}>
+                <InputLabel>Cargo</InputLabel>
+                <Select
+                  value={field.value || ""}
+                  label="Cargo"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione...</em>
+                  </MenuItem>
+                  {cargos.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{errors.cargoId?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="salarioBase"
+            control={control}
+            render={({ field }) => (
+              <InputCard
+                {...field}
+                value={field.value ?? ""}
+                label="Salario Base"
+                type="number"
+                error={!!errors.salarioBase}
+                helperText={errors.salarioBase?.message}
+                onFocus={(e) => e.target.select()}
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">S/</InputAdornment>,
+                  },
+                }}
+              />
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="tipoContrato"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small" error={!!errors.tipoContrato}>
+                <InputLabel>Tipo de Contrato</InputLabel>
+                <Select
+                  value={field.value || ""}
+                  label="Tipo de Contrato"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+                  {catalogos.tiposContrato.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{errors.tipoContrato?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Controller
+            name="tipoJornada"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small" error={!!errors.tipoJornada}>
+                <InputLabel>Tipo de Jornada</InputLabel>
+                <Select
+                  value={field.value || ""}
+                  label="Tipo de Jornada"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>Seleccione</em>
+                  </MenuItem>
+                  {catalogos.tiposJornada.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{errors.tipoJornada?.message}</FormHelperText>
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Controller
+            name="observaciones"
+            control={control}
+            render={({ field }) => (
+              <InputCard
+                {...field}
+                value={field.value ?? ""}
+                label="Observaciones"
+                multiline
+                rows={3}
+                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+              />
+            )}
+          />
+        </Grid>
+      </Section>
+
+      {/* Botones inferiores */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         sx={{
@@ -1197,21 +1169,10 @@ export default function RegistrarEmpleado() {
         </Button>
 
         <Button
-          variant="outlined"
-          color="warning"
-          startIcon={<RestartAltIcon />}
-          onClick={resetForm}
-          sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
-        >
-          Limpiar
-        </Button>
-
-        <Button
           type="button"
           variant="contained"
           startIcon={<SaveRoundedIcon />}
           loading={isSubmitting}
-          disabled={isSubmitting}
           onClick={handleSubmit(onSubmit)}
           sx={{
             minWidth: 140,
@@ -1221,7 +1182,7 @@ export default function RegistrarEmpleado() {
             width: { xs: "100%", sm: "auto" },
           }}
         >
-          Guardar
+          Actualizar
         </Button>
       </Stack>
     </Box>

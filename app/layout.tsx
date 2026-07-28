@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const themeCookie = (await cookies()).get("theme")?.value;
 
-  const initialMode = themeCookie === "dark" ? "dark" : "light";
+  const initialMode = themeCookie === "light" ? "light" : "dark";
 
   return (
     <html

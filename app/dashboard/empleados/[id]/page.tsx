@@ -6,14 +6,15 @@ import { use } from "react";
 
 export default function DetalleEmpleadoPage({ params }: { params: Promise<{ id: number }> }) {
   const { id } = use(params);
+  const numericId = Number(id);
 
-  if (!id) {
+  if (!numericId) {
     return <p>No se encontró el empleado</p>;
   }
 
   return (
     <Box sx={{ display: "flex" }}>
-      <DetalleEmpleado id={id} />
+      <DetalleEmpleado id={numericId} />
     </Box>
   );
 }

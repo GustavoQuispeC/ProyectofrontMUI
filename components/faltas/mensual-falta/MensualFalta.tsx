@@ -334,7 +334,7 @@ export default function ListarFaltasMensual() {
         <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
           <EventNote color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Reporte mensual de faltas
+            REPORTE MENSUAL DE FALTAS
           </Typography>
         </Stack>
 

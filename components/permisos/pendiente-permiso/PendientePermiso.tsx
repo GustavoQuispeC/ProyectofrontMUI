@@ -12,6 +12,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
@@ -19,7 +20,6 @@ import { useMounted } from "@/shared/hooks/useMounted";
 import { useState } from "react";
 import Button from "@mui/material/Button";
 import Link from "next/link";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useCancelarPermiso } from "@/features/dashboard/permiso/hooks/useCancelarPermiso";
@@ -29,7 +29,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import { useAprobarPermiso } from "@/features/dashboard/permiso/hooks/useAprobarPermiso";
-import AssessmentIcon from "@mui/icons-material/Assessment";
+import ChecklistIcon from "@mui/icons-material/Checklist";
 import AccessAlarmIcon from "@mui/icons-material/AccessAlarm";
 import { chipCondicion } from "@/features/dashboard/permiso/permiso.ui";
 import { formatDate } from "@/shared/utils/date";
@@ -45,7 +45,11 @@ export default function ListarPermisosPendientes() {
   const mounted = useMounted();
   const { permisosPendientes, loading: loadingPermisos } = usePermisosPendientes(canAccess);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const isLargeScreen = useMediaQuery((theme) => theme.breakpoints.up("xl"));
+  const rowsPerPage = isLargeScreen ? 20 : 10;
+  const maxPage = Math.max(0, Math.ceil(permisosPendientes.length / rowsPerPage) - 1);
+  const safePage = Math.min(page, maxPage);
+  const paginatedRows = permisosPendientes.slice(safePage * rowsPerPage, safePage * rowsPerPage + rowsPerPage);
   const { cancelarPermiso, loading: cancelando } = useCancelarPermiso();
   const { aprobarPermiso, loading: aprobando } = useAprobarPermiso();
   const [openDialog, setOpenDialog] = useState(false);
@@ -84,8 +88,8 @@ export default function ListarPermisosPendientes() {
         <Grid size={{ xs: 12, md: 6 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
             <AccessAlarmIcon color="primary" />
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              Permisos pendientes
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              PERMISOS PENDIENTES
             </Typography>
           </Stack>
         </Grid>
@@ -104,18 +108,18 @@ export default function ListarPermisosPendientes() {
               component={Link}
               href="/dashboard/permisos/registrar"
               variant="contained"
-              startIcon={<GroupAddIcon />}
+              startIcon={<AccessAlarmIcon />}
             >
-              Gestionar Permisos
+              Programar
             </Button>
             <Button
               component={Link}
               href="/dashboard/permisos/mensual"
               variant="contained"
               color="success"
-              startIcon={<AssessmentIcon />}
+              startIcon={<ChecklistIcon />}
             >
-              Ver Aprobados
+              Aprobados
             </Button>
           </Stack>
         </Grid>
@@ -153,9 +157,9 @@ export default function ListarPermisosPendientes() {
                 </TableCell>
               </TableRow>
             ) : (
-              permisosPendientes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((permiso, idx) => (
+              paginatedRows.map((permiso, idx) => (
                 <TableRow key={permiso.id} hover>
-                  <TableCell>{page * rowsPerPage + idx + 1}</TableCell>
+                  <TableCell>{safePage * rowsPerPage + idx + 1}</TableCell>
                   <TableCell>
                     <Typography variant="body2" noWrap sx={{ maxWidth: 250 }}>
                       {permiso.nombreEmpleado}
@@ -227,14 +231,10 @@ export default function ListarPermisosPendientes() {
         <TablePagination
           component="div"
           count={permisosPendientes.length}
-          page={page}
+          page={safePage}
           rowsPerPage={rowsPerPage}
           onPageChange={(_, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(e) => {
-            setRowsPerPage(parseInt(e.target.value, 10));
-            setPage(0);
-          }}
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[rowsPerPage]}
           labelRowsPerPage="Filas por página:"
           labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count}`}
         />

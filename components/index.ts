@@ -7,6 +7,7 @@ export { default as Contactenos } from "./contactenos/Contactenos";
 export { default as ListarUsuarios } from "./usuario/listar-usuarios/ListarUsuarios";
 export { default as ListarEmpleados } from "./empleados/listar-empleados/ListarEmpleados";
 export { default as RegistrarEmpleado } from "./empleados/registrar-empleado/RegistrarEmpleado";
+export { default as EditarEmpleado } from "./empleados/editar-empleado/EditarEmpleado";
 export { default as RegistrarUsuario } from "./usuario/registrar-usuario/RegistrarUsuario";
 export { default as RegistrarPermisos } from "./permisos/registrar-permiso/RegistrarPermiso";
 export { default as ListarPermisosPendientes } from "./permisos/pendiente-permiso/PendientePermiso";

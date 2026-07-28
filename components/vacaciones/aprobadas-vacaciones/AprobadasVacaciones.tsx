@@ -6,6 +6,7 @@ import {
   Button,
   Chip,
   Collapse,
+  Grid,
   IconButton,
   Paper,
   Stack,
@@ -38,6 +39,7 @@ import VacacionesDialog from "@/components/vacaciones/VacacionesDialog";
 import { EstadoPeriodoColor, EstadoPeriodoLabel } from "@/features/dashboard/vacaciones/vacaciones.constants";
 import { formatDate } from "@/shared/utils/date";
 import { avatarStyle, getInitials } from "@/shared/utils/avatar";
+import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 
 //! NIVEL 2 — FILA DE PERÍODO
 interface PeriodoRowProps {
@@ -322,15 +324,14 @@ export default function ListarVacacionesAprobadas() {
           Programar
         </Button>
       </Box>
-      <Typography
-        variant="h5"
-        color={"primary"}
-        sx={{
-          mb: 2,
-        }}
-      >
-        Vacaciones aprobadas
-      </Typography>
+      <Grid size={{ xs: 12 }}>
+        <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
+          <BeachAccessIcon color="primary" />
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            VACACIONES APROBADAS
+          </Typography>
+        </Stack>
+      </Grid>
       <TableContainer
         component={Paper}
         elevation={0}

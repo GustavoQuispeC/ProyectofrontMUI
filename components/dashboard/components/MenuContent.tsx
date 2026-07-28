@@ -65,13 +65,27 @@ const mainListItems: MenuItemType[] = [
     icon: <GroupIcon />,
     href: "/dashboard/usuarios/listar",
 
-    allowedRoles: permissions.listarUsuarios,
+    allowedRoles: [
+      ...permissions.listarUsuarios,
+      ...permissions.registrarUsuarios,
+      ...permissions.cambiarEstadoUsuarios,
+      ...permissions.resetPasswordUsuarios,
+      ...permissions.changeEmailUsuarios,
+      ...permissions.changeRoleUsuarios,
+    ],
   },
 
   {
     text: "Empleados",
     icon: <AnalyticsRoundedIcon />,
     href: "/dashboard/empleados/listar",
+    allowedRoles: [
+      ...permissions.registrarEmpleado,
+      ...permissions.listarEmpleados,
+      ...permissions.detalleEmpleado,
+      ...permissions.eliminarEmpleado,
+      ...permissions.editarEmpleado,
+    ],
   },
 
   {
@@ -84,17 +98,41 @@ const mainListItems: MenuItemType[] = [
     text: "Permisos",
     icon: <PendingActionsIcon />,
     href: "/dashboard/permisos/pendiente",
+    allowedRoles: [
+      ...permissions.registrarPermiso,
+      ...permissions.listarPermisosPendientes,
+      ...permissions.aprobarPermiso,
+      ...permissions.cancelarPermiso,
+      ...permissions.listarPermisosMensual,
+    ],
   },
   {
     text: "Vacaciones",
     icon: <AssignmentRoundedIcon />,
-    allowedRoles: permissions.listarVacacionesResumen,
+    allowedRoles: [
+      ...permissions.listarVacacionesGenerales,
+      ...permissions.listarVacacionesPendientes,
+      ...permissions.registrarVacaciones,
+      ...permissions.aprobarVacaciones,
+      ...permissions.cancelarVacacionesAprobadas,
+      ...permissions.listarVacacionesResumen,
+      ...permissions.cancelarVacacionesPendientes,
+      ...permissions.listarVacacionesById,
+    ],
     children: [
       {
         text: "Resumen",
         icon: <SummarizeIcon />,
         href: "/dashboard/vacaciones/resumen",
-        allowedRoles: permissions.listarVacacionesResumen,
+        allowedRoles: [
+          ...permissions.listarVacacionesGenerales,
+          ...permissions.listarVacacionesPendientes,
+          ...permissions.registrarVacaciones,
+          ...permissions.aprobarVacaciones,
+          ...permissions.cancelarVacacionesAprobadas,
+          ...permissions.listarVacacionesResumen,
+          ...permissions.cancelarVacacionesPendientes,
+        ],
       },
       {
         text: "Mis Vacaciones",
@@ -108,7 +146,13 @@ const mainListItems: MenuItemType[] = [
     text: "Faltas",
     icon: <EventBusyIcon />,
     href: "/dashboard/faltas/pendientes",
-    allowedRoles: permissions.listarFaltasPendientes,
+    allowedRoles: [
+      ...permissions.registrarFalta,
+      ...permissions.listarFaltasPendientes,
+      ...permissions.aprobarFalta,
+      ...permissions.cancelarFalta,
+      ...permissions.listarFaltaMensual,
+    ],
   },
 ];
 
@@ -174,7 +218,11 @@ export default function MenuContent() {
               <React.Fragment key={index}>
                 <ListItem disablePadding sx={{ display: "block" }}>
                   <ListItemButton onClick={() => toggleGroup(item.text)}>
-                    <ListItemIcon>{item.icon}</ListItemIcon>
+                    <ListItemIcon
+                      sx={{ color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark") }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
                     <ListItemText primary={item.text} />
                     {isOpen ? <ExpandLess /> : <ExpandMore />}
                   </ListItemButton>
@@ -185,7 +233,14 @@ export default function MenuContent() {
                       <ListItem key={ci} disablePadding sx={{ display: "block" }}>
                         <Link href={child.href} passHref>
                           <ListItemButton sx={{ pl: 4 }}>
-                            <ListItemIcon sx={{ minWidth: 36 }}>{child.icon}</ListItemIcon>
+                            <ListItemIcon
+                              sx={{
+                                minWidth: 36,
+                                color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                              }}
+                            >
+                              {child.icon}
+                            </ListItemIcon>
                             <ListItemText primary={child.text} />
                           </ListItemButton>
                         </Link>
@@ -200,7 +255,11 @@ export default function MenuContent() {
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <Link href={item.href!} passHref>
                 <ListItemButton>
-                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemIcon
+                    sx={{ color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark") }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
                   <ListItemText primary={item.text} />
                 </ListItemButton>
               </Link>
@@ -214,7 +273,11 @@ export default function MenuContent() {
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <Link href={item.href} passHref>
               <ListItemButton>
-                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemIcon
+                  sx={{ color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark") }}
+                >
+                  {item.icon}
+                </ListItemIcon>
 
                 <ListItemText primary={item.text} />
               </ListItemButton>
