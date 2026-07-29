@@ -145,7 +145,7 @@ function Row({ row, puedeCancelar, onCancelar }: RowProps) {
 
         <TableCell align="center">
           <Stack sx={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 0.5 }}>
-            <AccessTime sx={{ fontSize: 15, color: "primary.main" }} />
+            <EventNote sx={{ fontSize: 15, color: "primary.main" }} />
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
               {row.totalDiasFaltas} día{row.totalDiasFaltas !== 1 ? "s" : ""}
             </Typography>

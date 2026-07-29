@@ -19,6 +19,7 @@ import {
   Tooltip,
   Typography,
   Grid,
+  Skeleton,
 } from "@mui/material";
 import EventRepeatIcon from "@mui/icons-material/EventRepeat";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
@@ -375,17 +376,17 @@ export default function ResumenVacaciones() {
           </TableHead>
 
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6}>
-                  <Box sx={{ py: 6, textAlign: "center" }}>
-                    <Typography sx={{ fontSize: 14, color: "text.disabled" }}>Cargando...</Typography>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedRows.map((row) => <Row key={row.empleadoId} row={row} onVerDetalle={handleVerDetalle} />)
-            )}
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array.from({ length: 6 }).map((_, j) => (
+                      <TableCell key={j}>
+                        <Skeleton variant="text" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              : paginatedRows.map((row) => <Row key={row.empleadoId} row={row} onVerDetalle={handleVerDetalle} />)}
 
             {!loading && vacacionesResumen.length === 0 && (
               <TableRow>

@@ -22,6 +22,7 @@ import {
   useMediaQuery,
   useTheme,
   Grid,
+  Skeleton,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
@@ -362,13 +363,15 @@ export default function PendientesVacaciones() {
           </TableHead>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={9}>
-                  <Box sx={{ py: 6, textAlign: "center" }}>
-                    <Typography sx={{ fontSize: 14, color: "text.secondary" }}>Cargando...</Typography>
-                  </Box>
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 6 }).map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton variant="text" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : paginatedRows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9}>

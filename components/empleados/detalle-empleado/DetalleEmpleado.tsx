@@ -130,33 +130,82 @@ const Field = ({
 
 //! Skeleton de carga
 const LoadingSkeleton = () => (
-  <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1100, mx: "auto" }}>
-    <Card variant="outlined" sx={{ borderRadius: 4, boxShadow: "none", mb: 2 }}>
-      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-        <Stack sx={{ flexDirection: { xs: "column", sm: "row" }, gap: 2 }}>
-          <Skeleton variant="rounded" width={96} height={96} sx={{ borderRadius: 3 }} />
-          <Stack sx={{ gap: 1, flex: 1 }}>
-            <Skeleton variant="rounded" width={200} height={24} />
-            <Skeleton variant="rounded" width={140} height={16} />
-            <Skeleton variant="rounded" width={80} height={22} sx={{ borderRadius: 99, mt: 0.5 }} />
+  <Box sx={{ width: "100%", maxWidth: 1100, mx: "auto", px: { xs: 2, md: 3 }, py: { xs: 2, md: 3 } }}>
+    {/* Header */}
+    <Card variant="outlined" sx={{ borderRadius: 3, boxShadow: "none", mb: 2, overflow: "hidden" }}>
+      <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
+        <Stack
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { sm: "flex-start" },
+            gap: 2,
+          }}
+        >
+          <Stack sx={{ flexDirection: "row", gap: 2, alignItems: "flex-start" }}>
+            <Skeleton variant="rounded" width={96} height={96} sx={{ borderRadius: 3, flexShrink: 0 }} />
+            <Stack sx={{ gap: 0.5 }}>
+              <Skeleton variant="rounded" width={240} height={28} />
+              <Stack sx={{ flexDirection: "row", gap: 1, mt: 0.5 }}>
+                <Skeleton variant="rounded" width={100} height={18} />
+                <Skeleton variant="rounded" width={120} height={18} />
+              </Stack>
+              <Stack sx={{ flexDirection: "row", gap: 1, mt: 0.5 }}>
+                <Skeleton variant="rounded" width={90} height={28} sx={{ borderRadius: 99 }} />
+                <Skeleton variant="rounded" width={110} height={28} sx={{ borderRadius: 99 }} />
+              </Stack>
+            </Stack>
+          </Stack>
+          <Stack sx={{ flexDirection: { xs: "column", sm: "row" }, gap: 1, width: { xs: "100%", sm: "auto" } }}>
+            <Skeleton variant="rounded" width={120} height={44} />
+            <Skeleton variant="rounded" width={120} height={44} />
           </Stack>
         </Stack>
       </CardContent>
     </Card>
-    {[1, 2, 3, 4].map((i) => (
-      <Card key={i} variant="outlined" sx={{ borderRadius: 3, boxShadow: "none", mb: 2 }}>
-        <CardContent>
-          <Skeleton variant="rounded" width={140} height={16} sx={{ mb: 2 }} />
-          <Grid container spacing={2}>
-            {[1, 2, 3, 4].map((j) => (
-              <Grid key={j} size={{ xs: 12, sm: 6 }}>
-                <Skeleton variant="rounded" height={40} />
-              </Grid>
-            ))}
-          </Grid>
-        </CardContent>
-      </Card>
-    ))}
+
+    {/* Grid de secciones */}
+    <Grid container spacing={2}>
+      {[
+        { xs: 12, lg: 6, fields: 8 },
+        { xs: 12, lg: 6, fields: 2 },
+        { xs: 12, lg: 6, fields: 4 },
+        { xs: 12, lg: 6, fields: 3 },
+        { xs: 12, lg: 6, fields: 2 },
+        { xs: 12, fields: 9 },
+        { xs: 12, lg: 6, fields: 6 },
+        { xs: 12, lg: 6, fields: 3 },
+      ].map((section, i) => (
+        <Grid key={i} size={{ xs: section.xs, lg: section.lg }}>
+          <Paper
+            elevation={0}
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 3,
+              p: { xs: 2, sm: 2.5 },
+              height: "100%",
+            }}
+          >
+            <Stack direction="row" sx={{ mb: 2, gap: 1.5, alignItems: "center" }}>
+              <Skeleton variant="rounded" width={34} height={34} sx={{ borderRadius: 2 }} />
+              <Skeleton variant="rounded" width={140} height={20} />
+            </Stack>
+            <Divider sx={{ mb: 2 }} />
+            <Grid container spacing={2}>
+              {Array.from({ length: section.fields }).map((_, j) => (
+                <Grid key={j} size={{ xs: 12, sm: 6, md: section.xs === 12 && !section.lg ? 4 : 6 }}>
+                  <Stack sx={{ gap: 0.25 }}>
+                    <Skeleton variant="text" width="40%" />
+                    <Skeleton variant="rounded" height={22} />
+                  </Stack>
+                </Grid>
+              ))}
+            </Grid>
+          </Paper>
+        </Grid>
+      ))}
+    </Grid>
   </Box>
 );
 

@@ -28,7 +28,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
-import CircularProgress from "@mui/material/CircularProgress";
+import Skeleton from "@mui/material/Skeleton";
 import Alert from "@mui/material/Alert";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import BadgeIcon from "@mui/icons-material/Badge";
@@ -135,6 +135,94 @@ const Section = ({ icon, title, children }: SectionProps) => (
 interface EditarEmpleadoProps {
   id: string;
 }
+
+//! Sección Skeleton
+const SectionSkeleton = ({ fields }: { fields: number }) => (
+  <Paper
+    elevation={0}
+    sx={{
+      border: "1px solid",
+      borderColor: "divider",
+      borderRadius: 3,
+      p: { xs: 2, sm: 3 },
+      mb: 2,
+    }}
+  >
+    <Stack direction="row" sx={{ mb: 2, gap: 1, alignItems: "center" }}>
+      <Skeleton variant="rounded" width={32} height={32} sx={{ borderRadius: 2 }} />
+      <Skeleton variant="rounded" width={180} height={20} />
+    </Stack>
+    <Grid container spacing={2}>
+      {Array.from({ length: fields }).map((_, i) => (
+        <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}>
+          <Stack sx={{ gap: 0.25 }}>
+            <Skeleton variant="text" width="40%" />
+            <Skeleton variant="rounded" height={40} />
+          </Stack>
+        </Grid>
+      ))}
+    </Grid>
+  </Paper>
+);
+
+//! Skeleton de carga
+const LoadingSkeleton = () => (
+  <Box
+    sx={{
+      width: "100%",
+      bgcolor: "background.default",
+      minHeight: "100vh",
+      py: { xs: 2, md: 5 },
+      px: 2,
+    }}
+  >
+    {/* Header */}
+    <Card variant="outlined" sx={{ mb: 2, borderRadius: 3, boxShadow: "none" }}>
+      <CardContent sx={{ p: { xs: 2, md: 3 } }}>
+        <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
+          <Skeleton variant="circular" width={52} height={52} />
+          <Stack sx={{ gap: 0.75 }}>
+            <Skeleton variant="rounded" width={220} height={28} />
+            <Skeleton variant="rounded" width={170} height={16} />
+          </Stack>
+        </Stack>
+      </CardContent>
+    </Card>
+
+    {/* Foto */}
+    <Paper
+      elevation={0}
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 3,
+        p: { xs: 2, sm: 3 },
+        mb: 2,
+      }}
+    >
+      <Stack sx={{ alignItems: "center", gap: 1.5 }} direction={{ xs: "column", sm: "row" }}>
+        <Skeleton variant="circular" width={110} height={110} />
+        <Stack sx={{ gap: 1 }}>
+          <Skeleton variant="rounded" width={120} height={32} sx={{ borderRadius: 2 }} />
+          <Skeleton variant="rounded" width={100} height={32} sx={{ borderRadius: 2 }} />
+        </Stack>
+      </Stack>
+    </Paper>
+
+    {/* Secciones */}
+    <SectionSkeleton fields={13} />
+    <SectionSkeleton fields={4} />
+    <SectionSkeleton fields={3} />
+    <SectionSkeleton fields={8} />
+    <SectionSkeleton fields={5} />
+
+    {/* Botones */}
+    <Stack direction={{ xs: "column", sm: "row" }} sx={{ gap: 2, justifyContent: "flex-end", flexWrap: "wrap" }}>
+      <Skeleton variant="rounded" width={120} height={44} sx={{ borderRadius: 2 }} />
+      <Skeleton variant="rounded" width={140} height={44} sx={{ borderRadius: 2 }} />
+    </Stack>
+  </Box>
+);
 
 //! Componente principal
 export default function EditarEmpleado({ id }: EditarEmpleadoProps) {
@@ -304,11 +392,7 @@ export default function EditarEmpleado({ id }: EditarEmpleadoProps) {
 
   //! Cargando datos
   if (loadingEmpleado) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSkeleton />;
   }
 
   //! Error al cargar

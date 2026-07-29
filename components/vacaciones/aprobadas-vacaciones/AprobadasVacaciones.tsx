@@ -19,6 +19,7 @@ import {
   TableRow,
   Tooltip,
   Typography,
+  Skeleton,
 } from "@mui/material";
 
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
@@ -355,9 +356,17 @@ export default function ListarVacacionesAprobadas() {
           </TableHead>
 
           <TableBody>
-            {paginatedRows.map((row) => (
-              <Row key={row.empleadoId} row={row} onVerDetalle={handleVerDetalle} />
-            ))}
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array.from({ length: 6 }).map((_, j) => (
+                      <TableCell key={j}>
+                        <Skeleton variant="text" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              : paginatedRows.map((row) => <Row key={row.empleadoId} row={row} onVerDetalle={handleVerDetalle} />)}
 
             {!loading && vacacionesAprobadas.length === 0 && (
               <TableRow>

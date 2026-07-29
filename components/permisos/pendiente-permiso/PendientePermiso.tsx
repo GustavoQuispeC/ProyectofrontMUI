@@ -15,6 +15,7 @@ import TableRow from "@mui/material/TableRow";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import Skeleton from "@mui/material/Skeleton";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { useMounted } from "@/shared/hooks/useMounted";
 import { useState } from "react";
@@ -141,13 +142,15 @@ export default function ListarPermisosPendientes() {
           </TableHead>
           <TableBody>
             {loadingPermisos ? (
-              <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Cargando...
-                  </Typography>
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 9 }).map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton variant="text" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : permisosPendientes.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} align="center" sx={{ py: 4 }}>

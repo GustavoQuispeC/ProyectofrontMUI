@@ -57,7 +57,7 @@ const mainListItems: MenuItemType[] = [
   {
     text: "Productos",
     icon: <ProductionQuantityLimitsIcon />,
-    href: "/dashboard/productos",
+    href: "#",
   },
 
   {
@@ -91,7 +91,7 @@ const mainListItems: MenuItemType[] = [
   {
     text: "Clientes",
     icon: <AccountBoxIcon />,
-    href: "/dashboard/clientes",
+    href: "#",
   },
 
   {
