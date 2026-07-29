@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { NavDesktop } from "./components/NavDesktop";
 import { NavMobile } from "./components/NavMobile";
 import { NavActions } from "./components/NavActions";
@@ -13,7 +14,7 @@ export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<DropdownId>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeNav, setActiveNav] = useState("Inicio");
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // ← conectar con auth real
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   // Shadow on scroll
@@ -92,6 +93,15 @@ export default function Navbar() {
               onLogin={handleLogin}
               onLogout={handleLogout}
             />
+
+            {/* Acceso interno discreto */}
+            <Link
+              href="/login-usuario"
+              className="hidden md:inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-300 transition-colors duration-200 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+              aria-label="Acceso interno"
+            >
+              <LockOutlinedIcon style={{ fontSize: 14 }} />
+            </Link>
 
             {/* Mobile hamburger */}
             <button

@@ -10,7 +10,6 @@ import {
   StorefrontOutlined,
   X,
 } from "@mui/icons-material";
-import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -71,7 +70,10 @@ export default function Footer() {
               className="group mt-6 inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-950"
             >
               Cotizar por WhatsApp
-              <ArrowForward fontSize="small" className="transition-transform duration-200 group-hover:translate-x-0.5" />
+              <ArrowForward
+                fontSize="small"
+                className="transition-transform duration-200 group-hover:translate-x-0.5"
+              />
             </a>
 
             <ul className="mt-6 flex items-center gap-2" aria-label="Redes sociales">
@@ -109,16 +111,6 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-
-            <div className="mt-5 border-t border-dashed border-slate-300 pt-4 dark:border-white/10">
-              <Link
-                href="/login-usuario"
-                className="inline-flex items-center gap-2 rounded-full px-2 py-1 text-xs text-slate-400 transition-colors duration-200 hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:text-slate-500 dark:hover:text-orange-300"
-              >
-                <GridViewOutlinedIcon className="h-3.5 w-3.5" />
-                Acceso interno
-              </Link>
-            </div>
           </nav>
 
           <section aria-label="Contacto">
@@ -138,7 +130,7 @@ export default function Footer() {
                 icon={<StorefrontOutlined fontSize="small" />}
                 variant="whatsapp"
               />
-               <FooterContactItem
+              <FooterContactItem
                 label="Almacén principal"
                 value="904 193 374"
                 href={WA_LINK}
