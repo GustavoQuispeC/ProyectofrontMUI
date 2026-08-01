@@ -1,6 +1,9 @@
+// components/Dropdown.tsx
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { DropdownId } from "../types";
+
+// ─── Dropdown ────────────────────────────────────────────────────────────────
 
 interface DropdownProps {
   id: DropdownId;
@@ -30,14 +33,17 @@ export function Dropdown({ id, openId, onToggle, trigger, children, align = "lef
   return (
     <div ref={rootRef} className="relative">
       <button
-        type="button"
         onClick={() => onToggle(id)}
-        className="inline-flex h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-white/90 transition-colors duration-150 hover:bg-white/10 whitespace-nowrap"
+        className={`inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+          isOpen
+            ? "border-blue-500/20 bg-blue-50 text-blue-700 shadow-lg shadow-blue-500/15 dark:bg-blue-950/70 dark:text-blue-300"
+            : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:border-white/10 dark:hover:bg-white/5 dark:hover:text-white"
+        }`}
       >
         {trigger}
       </button>
       <div
-        className={`absolute top-full mt-2 ${width} rounded-xl border border-border-base bg-surface p-2 shadow-2xl z-50 transition-all duration-200 origin-top ${
+        className={`absolute top-full mt-2 ${width} rounded-2xl border border-slate-200/80 bg-white/95 p-2 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl z-50 transition-all duration-200 origin-top dark:border-white/10 dark:bg-zinc-950/95 ${
           align === "right" ? "right-0" : "left-0"
         } ${isOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-1 pointer-events-none"}`}
       >
@@ -46,6 +52,8 @@ export function Dropdown({ id, openId, onToggle, trigger, children, align = "lef
     </div>
   );
 }
+
+// ─── DropdownItem ─────────────────────────────────────────────────────────────
 
 interface DropdownItemProps {
   icon: React.ReactNode;
@@ -57,16 +65,18 @@ interface DropdownItemProps {
 }
 
 export function DropdownItem({ icon, label, href, badge, danger, onClick }: DropdownItemProps) {
-  const className = `flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-all duration-150 ${
-    danger ? "text-red-600 hover:bg-red-50" : "text-text-primary hover:bg-surface-secondary"
+  const className = `flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all duration-150 ${
+    danger
+      ? "text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white"
   }`;
 
   const content = (
     <>
-      <span className="shrink-0 text-text-secondary">{icon}</span>
+      <span className="shrink-0 text-slate-400 dark:text-slate-500">{icon}</span>
       <span className="flex-1">{label}</span>
       {badge && (
-        <span className="rounded-full bg-orange-600 px-2 py-0.5 text-[10px] font-semibold leading-tight text-white">
+        <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-semibold leading-tight text-white">
           {badge}
         </span>
       )}
