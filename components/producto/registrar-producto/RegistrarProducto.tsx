@@ -492,18 +492,23 @@ export default function RegistrarProducto() {
       {/* SECCIÓN 2: Imágenes */}
       <Section icon={<ImageIcon />} title={`Imágenes (máximo ${MAX_IMAGENES})`}>
         <Grid size={12}>
-          <Stack direction="row" sx={{ gap: 2, flexWrap: "wrap" }}>
+          <Stack direction="row" sx={{ gap: 2, flexWrap: "wrap", alignItems: "center" }}>
             {imagenes.map((img, index) => (
               <Box
                 key={img.preview}
                 sx={{
                   position: "relative",
-                  width: 110,
-                  height: 110,
+                  width: 120,
+                  height: 120,
                   borderRadius: 2,
                   overflow: "hidden",
                   border: "2px solid",
                   borderColor: index === principalIndex ? "primary.main" : "divider",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    borderColor: "primary.main",
+                    transform: "scale(1.02)",
+                  },
                 }}
               >
                 <Box
@@ -512,38 +517,50 @@ export default function RegistrarProducto() {
                   alt={`Imagen ${index + 1}`}
                   sx={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
-                <IconButton
-                  size="small"
-                  onClick={() => setPrincipalIndex(index)}
+                <Box
                   sx={{
                     position: "absolute",
-                    top: 2,
-                    left: 2,
-                    bgcolor: "background.paper",
-                    "&:hover": { bgcolor: "background.paper" },
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    bgcolor: "rgba(0,0,0,0.3)",
+                    opacity: 0,
+                    transition: "opacity 0.2s",
+                    "&:hover": { opacity: 1 },
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1,
                   }}
-                  title="Marcar como principal"
                 >
-                  {index === principalIndex ? (
-                    <StarIcon fontSize="small" color="primary" />
-                  ) : (
-                    <StarBorderIcon fontSize="small" />
-                  )}
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveImage(index)}
-                  sx={{
-                    position: "absolute",
-                    top: 2,
-                    right: 2,
-                    bgcolor: "background.paper",
-                    "&:hover": { bgcolor: "background.paper" },
-                  }}
-                  title="Eliminar imagen"
-                >
-                  <CloseIcon fontSize="small" color="error" />
-                </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => setPrincipalIndex(index)}
+                    sx={{
+                      bgcolor: "background.paper",
+                      "&:hover": { bgcolor: "background.paper" },
+                    }}
+                    title="Marcar como principal"
+                  >
+                    {index === principalIndex ? (
+                      <StarIcon fontSize="small" color="primary" />
+                    ) : (
+                      <StarBorderIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveImage(index)}
+                    sx={{
+                      bgcolor: "background.paper",
+                      "&:hover": { bgcolor: "background.paper" },
+                    }}
+                    title="Eliminar imagen"
+                  >
+                    <CloseIcon fontSize="small" color="error" />
+                  </IconButton>
+                </Box>
               </Box>
             ))}
 
@@ -551,16 +568,28 @@ export default function RegistrarProducto() {
               <Button
                 component="label"
                 variant="outlined"
-                startIcon={<CloudUploadIcon />}
-                sx={{ width: 110, height: 110, borderRadius: 2, flexDirection: "column", gap: 0.5, fontSize: 11 }}
+                sx={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: 2,
+                  flexDirection: "column",
+                  gap: 1,
+                  fontSize: 12,
+                  borderStyle: "dashed",
+                  "&:hover": {
+                    borderColor: "primary.main",
+                    bgcolor: "action.hover",
+                  },
+                }}
               >
+                <CloudUploadIcon sx={{ fontSize: 32 }} />
                 Agregar
                 <input ref={fileInputRef} hidden type="file" accept="image/*" multiple onChange={handleAddImages} />
               </Button>
             )}
           </Stack>
           {imagenes.length > 0 && (
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block" }}>
               La imagen marcada con <StarIcon sx={{ fontSize: 12, verticalAlign: "middle" }} /> será la principal.
             </Typography>
           )}
@@ -587,13 +616,20 @@ export default function RegistrarProducto() {
                   size="small"
                   color="error"
                   onClick={() => remove(index)}
-                  sx={{ position: "absolute", top: 8, right: 8 }}
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 1,
+                    pt: 2,
+                    boxShadow: "none",
+                    "&:hover": { bgcolor: "transparent" },
+                  }}
                   title="Eliminar precio"
                 >
-                  <DeleteForeverIcon fontSize="small" />
+                  <DeleteForeverIcon fontSize="medium" />
                 </IconButton>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid container spacing={2} sx={{ alignItems: "center" }}>
+                  <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                     <Controller
                       name={`precios.${index}.listaPrecioId`}
                       control={control}
@@ -619,7 +655,7 @@ export default function RegistrarProducto() {
                       )}
                     />
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
                     <Controller
                       name={`precios.${index}.precio`}
                       control={control}
@@ -676,7 +712,7 @@ export default function RegistrarProducto() {
                       )}
                     />
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
+                  <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                       <Controller
                         name={`precios.${index}.fechaInicio`}
@@ -706,7 +742,7 @@ export default function RegistrarProducto() {
                       />
                     </LocalizationProvider>
                   </Grid>
-                  <Grid size={{ xs: 12, sm: 6, md: 1.5 }}>
+                  <Grid size={{ xs: 12, sm: 6, md: 2 }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                       <Controller
                         name={`precios.${index}.fechaFin`}
@@ -732,6 +768,9 @@ export default function RegistrarProducto() {
                         )}
                       />
                     </LocalizationProvider>
+                  </Grid>
+                  <Grid size={{ xs: 6, md: 1.5 }} sx={{ display: "flex" }}>
+                    {/* Espacio para el botón eliminar */}
                   </Grid>
                 </Grid>
               </Paper>
