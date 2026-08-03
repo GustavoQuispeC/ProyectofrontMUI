@@ -1,5 +1,5 @@
 export interface ImagenProducto {
-  url: string;
+  url: string | null;
   esPrincipal: boolean;
   orden: number;
 }
@@ -7,19 +7,19 @@ export interface ImagenProducto {
 export interface PrecioProducto {
   listaPrecioId: number;
   precio: number;
-  precioMinimo: number;
-  precioMaximo: number;
+  precioMinimo: number | null;
+  precioMaximo: number | null;
   fechaInicio: string;
   fechaFin: string | null;
 }
 
 export interface CrearProductoRequest {
-  codigoBarras: string;
+  codigoBarras: string | null;
   categoriaId: number;
   marcaId: number;
   unidadMedidaId: number;
   nombre: string;
-  descripcion: string;
+  descripcion: string | null;
   costoActual: number;
   stockMinimo: number;
   fechaVencimiento: string | null;

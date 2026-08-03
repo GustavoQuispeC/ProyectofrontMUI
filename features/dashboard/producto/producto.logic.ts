@@ -1,5 +1,5 @@
 import { getAuthUser } from "@/shared/auth/auth.service";
-import { crearProductoApi } from "./producto.service";
+import { crearProductoApi, subirImagen } from "./producto.service";
 import { CrearProductoRequest } from "./Producto.types";
 
 export async function crearProducto(data: CrearProductoRequest) {
@@ -10,4 +10,15 @@ export async function crearProducto(data: CrearProductoRequest) {
   }
 
   return crearProductoApi(data);
+}
+
+// Función para subir imagen individual
+export async function subirImagenLogic(file: File) {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  return subirImagen(file);
 }

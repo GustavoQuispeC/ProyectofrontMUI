@@ -3,10 +3,9 @@ import { useCategorias } from "@/features/dashboard/categoria/hooks/useCategoria
 import { useMarcas } from "@/features/dashboard/marca/hooks/useMarcas";
 import { useUnidadesMedida } from "@/features/dashboard/unidadMedida/hooks/useUnidadesMedida";
 import { useListasPrecio } from "@/features/dashboard/listaPrecio/hooks/useListasPrecio";
-import { useCrearProducto } from "@/features/dashboard/producto/hooks/useCrearProducto";
+import { useCrearProducto, useSubirImagen } from "@/features/dashboard/producto/hooks/useCrearProducto";
 import { ProductoForm, productoSchema } from "@/features/dashboard/producto/producto.schema";
 import { CrearProductoRequest } from "@/features/dashboard/producto/Producto.types";
-import { useFirebaseStorage } from "@/shared/hooks/useFirebaseStorage";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
@@ -159,9 +158,9 @@ export default function RegistrarProducto() {
   const { unidadesMedida } = useUnidadesMedida(true);
   const { listasPrecio } = useListasPrecio(true);
 
-  const { uploadFile, deleteFile, uploading } = useFirebaseStorage();
   const crearProductoMutation = useCrearProducto();
-  const isSubmitting = uploading || crearProductoMutation.loading;
+  const subirImagenMutation = useSubirImagen();
+  const isSubmitting = crearProductoMutation.loading || subirImagenMutation.loading;
 
   const {
     control,
@@ -218,15 +217,11 @@ export default function RegistrarProducto() {
 
   //! SUBMIT
   const onSubmit = async (data: ProductoForm) => {
-    const uploadedPaths: string[] = [];
     try {
+      // Subir imágenes primero
       const imagenesSubidas = [];
       for (let i = 0; i < imagenes.length; i++) {
-        const result = await uploadFile(imagenes[i].file, "productos");
-        if (!result) {
-          throw new Error("No fue posible subir una de las imágenes.");
-        }
-        uploadedPaths.push(result.path);
+        const result = await subirImagenMutation.subirImagen(imagenes[i].file);
         imagenesSubidas.push({
           url: result.url,
           esPrincipal: i === principalIndex,
@@ -246,9 +241,6 @@ export default function RegistrarProducto() {
       });
       resetForm();
     } catch (error) {
-      for (const path of uploadedPaths) {
-        await deleteFile(path);
-      }
       console.error(error);
     }
   };
