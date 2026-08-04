@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
 
 export interface Category {
   label: string;
@@ -17,64 +18,28 @@ interface CategoryCarouselProps {
   onSelectCategory?: (category: Category) => void;
 }
 
-// Tamaño de imagen recomendado: 600x800px (aspect ratio 3:4) para mejor calidad en todas las resoluciones
-const DEFAULT_CATEGORIES: Category[] = [
-  {
-    label: "Cementos",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FCEMENTOS.png?alt=media&token=5d3cda29-4bb0-4995-8a06-8ba682fad27d",
-  },
-  {
-    label: "Ladrillos",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FLADRILLOS.png?alt=media&token=d5e605cf-989e-4687-9117-6f7d9ae937a7",
-  },
-  {
-    label: "Clavos",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FCLAVOS.png?alt=media&token=b28b962f-bab1-4ab4-a8af-39554ac19f70",
-  },
-  {
-    label: "Perfiles y Tubos",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FPERFILES.png?alt=media&token=a9a0deef-eb83-458a-8275-72cf3b3d9338",
-  },
-  {
-    label: "Alambres",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FALAMBRES.png?alt=media&token=90569c1e-7376-4c63-8de0-bd811dac7435",
-  },
-  {
-    label: "Teja Andina",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FTEJA%20ANDINA.png?alt=media&token=783b20f5-7e8d-4cce-bc89-b8a85f45d2c2",
-  },
-  {
-    label: "Tuberías, tanques y accesorios",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FTUBERIAS.png?alt=media&token=11c93a02-c2fa-4d91-8687-1dcc0d76127e",
-  },
-  {
-    label: "Fierros",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FFIERROS.png?alt=media&token=bed4ba9b-a40d-40b3-a0c3-e0dff043de68",
-  },
-  {
-    label: "Calaminas",
-    image:
-      "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Categorias%2FCALAMINA.png?alt=media&token=58b0c4dc-2a02-467e-8bf3-4edc4a0f9ec3",
-  },
-];
-
-export default function Categorias({
+export default function MostrarCategorias({
   title = "Busca por categoría",
-  categories = DEFAULT_CATEGORIES,
+  categories: propCategories,
   onSelectCategory,
 }: CategoryCarouselProps) {
   const router = useRouter();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const { categorias } = useCategoriasPublicas();
+
+  const categories =
+    propCategories ||
+    (categorias.length > 0
+      ? categorias
+          .sort((a, b) => a.orden - b.orden)
+          .map((cat) => ({
+            label: cat.nombre,
+            image: cat.imagen || "https://via.placeholder.com/600x800?text=Sin+Imagen",
+          }))
+      : []);
 
   const updateArrows = useCallback(() => {
     const el = scrollerRef.current;

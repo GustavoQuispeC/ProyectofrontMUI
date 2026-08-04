@@ -1,5 +1,5 @@
 export { default as Carousel } from "./ui/carousel/Carousel";
-export { default as Categorias } from "./categorias/Categorias";
+export { default as Categorias } from "./categorias/mostrar-categorias/MostrarCategorias";
 export { default as Gallery } from "./gallery/Gallery";
 export { default as Marcas } from "./marcas/Marcas";
 export { default as Productos } from "./product/Productos";

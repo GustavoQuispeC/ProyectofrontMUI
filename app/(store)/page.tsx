@@ -1,5 +1,5 @@
 "use client";
-import { Carousel, Categorias, Gallery, Marcas, Productos, Contactenos } from "@/components";
+import { Carousel, Gallery, Marcas, Productos, Contactenos, Categorias } from "@/components";
 export default function Home() {
   //Móvil (16:9): 640x360px o 1280x720px
   const imagenesBannerMobile = [
