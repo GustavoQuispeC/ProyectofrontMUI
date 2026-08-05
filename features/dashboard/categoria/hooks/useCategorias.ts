@@ -2,10 +2,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   listarCategorias,
   listarCategoriasPublicas,
+  obtenerCategoria,
   registrarCategoria,
+  editarCategoria,
   subirImagenCategoriaLogic,
 } from "../categoria.logic";
-import { ListarCategoria, RegistrarCategoriaRequest } from "../Categoria.types";
+import {
+  ListarCategoria,
+  DetalleCategoria,
+  RegistrarCategoriaRequest,
+  EditarCategoriaRequest,
+} from "../Categoria.types";
 
 export function useCategorias(canAccess: boolean) {
   const {
@@ -57,6 +64,30 @@ export function useCategoriasPublicas() {
   };
 }
 
+export function useCategoria(id: number | null) {
+  const {
+    data: categoria,
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<DetalleCategoria>({
+    queryKey: ["categoria", id],
+
+    queryFn: () => obtenerCategoria(id!),
+
+    enabled: !!id,
+
+    retry: 1,
+  });
+
+  return {
+    categoria,
+    loading,
+    error: error instanceof Error ? error.message : null,
+    refetch,
+  };
+}
+
 export function useRegistrarCategoria() {
   const queryClient = useQueryClient();
 
@@ -74,6 +105,29 @@ export function useRegistrarCategoria() {
 
   return {
     registrarCategoria: registrar,
+    loading,
+    error: error instanceof Error ? error.message : null,
+  };
+}
+
+export function useEditarCategoria(id: number) {
+  const queryClient = useQueryClient();
+
+  const {
+    mutateAsync: editar,
+    isPending: loading,
+    error,
+  } = useMutation({
+    mutationFn: (data: EditarCategoriaRequest) => editarCategoria(data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categorias"] });
+      queryClient.invalidateQueries({ queryKey: ["categoria", id] });
+    },
+  });
+
+  return {
+    editarCategoria: editar,
     loading,
     error: error instanceof Error ? error.message : null,
   };

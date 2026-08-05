@@ -5,6 +5,7 @@ export const categoriaSchema = z.object({
   descripcion: z.string().trim().nullable().default(null),
   imagen: z.string().trim().nullable().default(null),
   orden: z.coerce.number().int().min(0, "El orden debe ser mayor o igual a 0").default(0),
+  isActive: z.boolean().default(true),
 });
 
 export type CategoriaForm = z.infer<typeof categoriaSchema>;

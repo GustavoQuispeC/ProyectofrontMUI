@@ -65,6 +65,12 @@ const mainListItems: MenuItemType[] = [
         href: "/dashboard/productos/registrar",
         allowedRoles: [...permissions.registrarProducto],
       },
+      {
+        text: "Categorias",
+        icon: <SummarizeIcon />,
+        href: "/dashboard/categorias/listar",
+        allowedRoles: [...permissions.registrarProducto],
+      },
     ],
   },
 

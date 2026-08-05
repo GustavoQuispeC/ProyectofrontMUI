@@ -1,18 +1,24 @@
 import { apiCategoria } from "@/lib/api-categoria";
-import { RegistrarCategoriaRequest, CategoriaRegistrada } from "./Categoria.types";
+import {
+  ListarCategoria,
+  DetalleCategoria,
+  RegistrarCategoriaRequest,
+  EditarCategoriaRequest,
+  CategoriaRegistrada,
+} from "./Categoria.types";
 import { getToken } from "@/shared/auth/auth.service";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 //! Listar categorias
-export function listarCategoriasApi() {
+export function listarCategoriasApi(): Promise<ListarCategoria[]> {
   return apiCategoria(`${apiUrl}/categorias`, {
     method: "GET",
   });
 }
 
 //! Listar categorias (publico - sin autenticacion)
-export function listarCategoriasPublicasApi() {
+export function listarCategoriasPublicasApi(): Promise<ListarCategoria[]> {
   return fetch(`${apiUrl}/categorias`, {
     method: "GET",
   }).then((res) => {
@@ -23,10 +29,25 @@ export function listarCategoriasPublicasApi() {
   });
 }
 
+//! Obtener categoria por id
+export function obtenerCategoriaApi(id: number): Promise<DetalleCategoria> {
+  return apiCategoria(`${apiUrl}/categorias/${id}`, {
+    method: "GET",
+  });
+}
+
 //! Registrar categoria
 export function registrarCategoriaApi(data: RegistrarCategoriaRequest): Promise<CategoriaRegistrada> {
   return apiCategoria(`${apiUrl}/categorias`, {
     method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+//! Editar categoria
+export function editarCategoriaApi(data: EditarCategoriaRequest): Promise<CategoriaRegistrada> {
+  return apiCategoria(`${apiUrl}/categorias/${data.id}`, {
+    method: "PUT",
     body: JSON.stringify(data),
   });
 }
