@@ -31,7 +31,7 @@ const GALLERY_IMAGES = [
 
 export default function Gallery() {
   return (
-    <section className="px-4 md:px-8 mt-6">
+    <section className="hidden md:block px-4 md:px-8 mt-6">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6">
           {/* Primera fila: 3 cols + 6 cols */}

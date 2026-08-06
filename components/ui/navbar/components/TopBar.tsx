@@ -44,7 +44,7 @@ export function TopBar({
               width={96}
               height={12}
               priority
-              className="h-8 w-auto object-contain md:h-9"
+              className="h-10 w-auto object-contain md:h-12"
             />
           </Link>
 
