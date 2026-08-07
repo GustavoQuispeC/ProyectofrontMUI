@@ -60,9 +60,9 @@ const mainListItems: MenuItemType[] = [
     allowedRoles: [...permissions.registrarProducto],
     children: [
       {
-        text: "Registrar",
+        text: "Listar",
         icon: <SummarizeIcon />,
-        href: "/dashboard/productos/registrar",
+        href: "/dashboard/productos/listar",
         allowedRoles: [...permissions.registrarProducto],
       },
       {

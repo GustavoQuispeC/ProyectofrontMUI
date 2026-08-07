@@ -3,11 +3,11 @@ import { useCategorias } from "@/features/dashboard/categoria/hooks/useCategoria
 import { useMarcas } from "@/features/dashboard/marca/hooks/useMarcas";
 import { useUnidadesMedida } from "@/features/dashboard/unidadMedida/hooks/useUnidadesMedida";
 import { useListasPrecio } from "@/features/dashboard/listaPrecio/hooks/useListasPrecio";
-import { useCrearProducto, useSubirImagen } from "@/features/dashboard/producto/hooks/useProductos";
+import { useProducto, useEditarProducto, useSubirImagen } from "@/features/dashboard/producto/hooks/useProductos";
 import { ProductoForm, productoSchema } from "@/features/dashboard/producto/producto.schema";
-import { CrearProductoRequest } from "@/features/dashboard/producto/Producto.types";
+import { EditarProductoRequest } from "@/features/dashboard/producto/Producto.types";
 import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { toastPromise } from "@/shared/utils/toast";
@@ -43,7 +43,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import PriceChangeIcon from "@mui/icons-material/PriceChange";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
-import AddBoxIcon from "@mui/icons-material/AddBox";
+import EditIcon from "@mui/icons-material/Edit";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -140,27 +140,35 @@ const Section = ({ icon, title, children }: SectionProps) => (
 );
 
 interface ImagenLocal {
-  file: File;
-  preview: string;
+  key: string;
+  id?: number;
+  url: string;
+  file?: File;
+  esPrincipal: boolean;
 }
 
-export default function RegistrarProducto() {
+interface EditarProductoProps {
+  id: number;
+}
+
+export default function EditarProducto({ id }: EditarProductoProps) {
   const [imagenes, setImagenes] = useState<ImagenLocal[]>([]);
   const [principalIndex, setPrincipalIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const user = getAuthUser();
-  const canAccess = user ? hasPermission(user.rol, permissions.registrarProducto) : false;
+  const canAccess = user ? hasPermission(user.rol, permissions.editarProducto) : false;
 
   const { categorias } = useCategorias(true);
   const { marcas } = useMarcas(true);
   const { unidadesMedida } = useUnidadesMedida(true);
   const { listasPrecio } = useListasPrecio(true);
 
-  const crearProductoMutation = useCrearProducto();
+  const { producto, loading: loadingProducto } = useProducto(String(id));
+  const editarProductoMutation = useEditarProducto();
   const subirImagenMutation = useSubirImagen();
-  const isSubmitting = crearProductoMutation.loading || subirImagenMutation.loading;
+  const isSubmitting = editarProductoMutation.loading || subirImagenMutation.loading || loadingProducto;
 
   const {
     control,
@@ -180,22 +188,67 @@ export default function RegistrarProducto() {
     name: "precios",
   });
 
+  //! Precargar datos del producto
+  useEffect(() => {
+    if (!producto) return;
+
+    reset({
+      ...producto,
+      codigoBarras: producto.codigoBarras ?? "",
+      descripcion: producto.descripcion ?? "",
+      fechaVencimiento: producto.fechaVencimiento ?? null,
+      imagenes: producto.imagenes.map((img) => ({
+        id: img.id,
+        url: img.url ?? "",
+        esPrincipal: img.esPrincipal,
+        orden: img.orden,
+        eliminar: false,
+      })),
+      precios: producto.precios.map((p) => ({
+        id: p.id,
+        listaPrecioId: p.listaPrecioId,
+        precio: p.precio,
+        precioMinimo: p.precioMinimo ?? 0,
+        precioMaximo: p.precioMaximo ?? 0,
+        fechaInicio: p.fechaInicio,
+        fechaFin: p.fechaFin,
+        eliminar: false,
+      })),
+    });
+
+    setImagenes(
+      producto.imagenes.map((img) => ({
+        key: `img-${img.id ?? Math.random().toString(36).slice(2)}`,
+        id: img.id,
+        url: img.url ?? "",
+        esPrincipal: img.esPrincipal,
+      })),
+    );
+    const principal = producto.imagenes.findIndex((img) => img.esPrincipal);
+    setPrincipalIndex(Math.max(0, principal));
+  }, [producto, reset]);
+
   //! Imágenes
   const handleAddImages = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
 
-    const restantes = MAX_IMENES_RESTANTES();
+    const restantes = Math.max(0, MAX_IMAGENES - imagenes.length);
     const nuevos = Array.from(files)
       .slice(0, restantes)
-      .map((file) => ({ file, preview: URL.createObjectURL(file) }));
+      .map((file) => ({
+        key: Math.random().toString(36).slice(2),
+        file,
+        url: URL.createObjectURL(file),
+        esPrincipal: false,
+      }));
 
-    setImagenes((prev) => [...prev, ...nuevos]);
+    setImagenes((prev) => {
+      const updated = [...prev, ...nuevos];
+      if (updated.length > 0 && principalIndex === -1) setPrincipalIndex(0);
+      return updated;
+    });
     if (fileInputRef.current) fileInputRef.current.value = "";
-
-    function MAX_IMENES_RESTANTES() {
-      return Math.max(0, MAX_IMAGENES - imagenes.length);
-    }
   };
 
   const handleRemoveImage = (index: number) => {
@@ -207,39 +260,88 @@ export default function RegistrarProducto() {
     });
   };
 
+  const handleSetPrincipal = (index: number) => {
+    setImagenes((prev) => prev.map((img, i) => ({ ...img, esPrincipal: i === index })));
+    setPrincipalIndex(index);
+  };
+
   //! RESET
   const resetForm = () => {
-    reset(defaultValues);
-    setImagenes([]);
-    setPrincipalIndex(0);
+    if (producto) {
+      reset({
+        ...producto,
+        codigoBarras: producto.codigoBarras ?? "",
+        descripcion: producto.descripcion ?? "",
+        fechaVencimiento: producto.fechaVencimiento ?? null,
+        imagenes: producto.imagenes.map((img) => ({
+          id: img.id,
+          url: img.url ?? "",
+          esPrincipal: img.esPrincipal,
+          orden: img.orden,
+          eliminar: false,
+        })),
+        precios: producto.precios.map((p) => ({
+          id: p.id,
+          listaPrecioId: p.listaPrecioId,
+          precio: p.precio,
+          precioMinimo: p.precioMinimo ?? 0,
+          precioMaximo: p.precioMaximo ?? 0,
+          fechaInicio: p.fechaInicio,
+          fechaFin: p.fechaFin,
+          eliminar: false,
+        })),
+      });
+      setImagenes(
+        producto.imagenes.map((img) => ({
+          key: `img-${img.id ?? Math.random().toString(36).slice(2)}`,
+          id: img.id,
+          url: img.url ?? "",
+          esPrincipal: img.esPrincipal,
+        })),
+      );
+      const principal = producto.imagenes.findIndex((img) => img.esPrincipal);
+      setPrincipalIndex(Math.max(0, principal));
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   //! SUBMIT
   const onSubmit = async (data: ProductoForm) => {
     try {
-      // Subir imágenes primero
-      const imagenesSubidas = [];
+      const imagenesPayload = [];
       for (let i = 0; i < imagenes.length; i++) {
-        const result = await subirImagenMutation.subirImagen(imagenes[i].file);
-        imagenesSubidas.push({
-          url: result.url,
+        const img = imagenes[i];
+        let url = img.url;
+        if (img.file) {
+          const result = await subirImagenMutation.subirImagen(img.file);
+          url = result.url;
+        }
+        imagenesPayload.push({
+          id: img.id,
+          url,
           esPrincipal: i === principalIndex,
           orden: i + 1,
         });
       }
 
-      const payload: CrearProductoRequest = {
+      const payload: EditarProductoRequest = {
         ...data,
-        imagenes: imagenesSubidas,
+        isActive: producto?.isActive ?? true,
+        imagenes: imagenesPayload,
+        precios: data.precios.map((p) => ({
+          id: p.id,
+          listaPrecioId: p.listaPrecioId,
+          precio: p.precio,
+          fechaInicio: p.fechaInicio,
+        })),
       };
 
-      await toastPromise(crearProductoMutation.crearProducto(payload), {
-        loading: "Registrando producto...",
-        success: "Producto registrado correctamente.",
+      await toastPromise(editarProductoMutation.editarProducto({ id, data: payload }), {
+        loading: "Actualizando producto...",
+        success: "Producto actualizado correctamente.",
         error: (error) => error.message,
       });
-      resetForm();
+      router.push("/dashboard/productos/listar");
     } catch (error) {
       console.error(error);
     }
@@ -248,6 +350,14 @@ export default function RegistrarProducto() {
   //! Validación de acceso
   if (!canAccess) {
     return <AccessDenied />;
+  }
+
+  if (loadingProducto) {
+    return (
+      <Box sx={{ width: "100%", minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Typography color="text.secondary">Cargando producto...</Typography>
+      </Box>
+    );
   }
 
   return (
@@ -280,17 +390,17 @@ export default function RegistrarProducto() {
                 height: { xs: 48, md: 52 },
               }}
             >
-              <AddBoxIcon />
+              <EditIcon />
             </Avatar>
             <Box>
               <Typography
                 variant="h5"
                 sx={{ fontWeight: 700, color: "text.primary", fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
               >
-                Registrar Producto
+                Editar Producto
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                Complete la información, imágenes y precios del producto
+                Modifique la información, imágenes y precios del producto
               </Typography>
             </Box>
           </Stack>
@@ -495,7 +605,7 @@ export default function RegistrarProducto() {
           <Stack direction="row" sx={{ gap: 2, flexWrap: "wrap", alignItems: "center" }}>
             {imagenes.map((img, index) => (
               <Box
-                key={img.preview}
+                key={img.key}
                 sx={{
                   position: "relative",
                   width: 120,
@@ -513,7 +623,7 @@ export default function RegistrarProducto() {
               >
                 <Box
                   component="img"
-                  src={img.preview}
+                  src={img.url}
                   alt={`Imagen ${index + 1}`}
                   sx={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -536,7 +646,7 @@ export default function RegistrarProducto() {
                 >
                   <IconButton
                     size="small"
-                    onClick={() => setPrincipalIndex(index)}
+                    onClick={() => handleSetPrincipal(index)}
                     sx={{
                       bgcolor: "background.paper",
                       "&:hover": { bgcolor: "background.paper" },
@@ -807,7 +917,7 @@ export default function RegistrarProducto() {
           onClick={resetForm}
           sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
         >
-          Limpiar
+          Restaurar
         </Button>
 
         <Button

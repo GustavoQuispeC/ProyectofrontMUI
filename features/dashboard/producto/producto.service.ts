@@ -5,6 +5,7 @@ import {
   ProductosResponse,
   DetalleProducto,
   ListarProductosRequest,
+  EditarProductoRequest,
 } from "./Producto.types";
 import { getToken } from "@/shared/auth/auth.service";
 
@@ -44,6 +45,14 @@ export async function obtenerProductosApi(params: ListarProductosRequest): Promi
 export function crearProductoApi(data: CrearProductoRequest): Promise<ProductoCreado> {
   return apiProducto(`${apiUrl}/productos`, {
     method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+//! Editar producto
+export function editarProductoApi(id: number, data: EditarProductoRequest): Promise<ProductoCreado> {
+  return apiProducto(`${apiUrl}/productos/${id}`, {
+    method: "PUT",
     body: JSON.stringify(data),
   });
 }

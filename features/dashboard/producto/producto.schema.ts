@@ -3,19 +3,23 @@ import { z } from "zod";
 const MAX_IMAGENES = 5;
 
 export const imagenProductoSchema = z.object({
+  id: z.number().optional(),
   url: z.string().trim().nullable().default(null),
   esPrincipal: z.boolean(),
   orden: z.coerce.number().int().min(1, "El orden debe ser mayor o igual a 1"),
+  eliminar: z.boolean().optional(),
 });
 
 export const precioProductoSchema = z
   .object({
+    id: z.number().optional(),
     listaPrecioId: z.coerce.number().min(1, "Seleccione una lista de precio"),
     precio: z.coerce.number().positive("El precio debe ser mayor a 0.00"),
     precioMinimo: z.coerce.number().nullable().default(null),
     precioMaximo: z.coerce.number().nullable().default(null),
     fechaInicio: z.string().min(1, "La fecha de inicio es obligatoria"),
     fechaFin: z.string().nullable().default(null),
+    eliminar: z.boolean().optional(),
   })
   .refine((data) => data.precioMinimo === null || data.precioMinimo === 0 || data.precioMinimo <= data.precio, {
     message: "El precio mínimo no puede ser mayor al precio",

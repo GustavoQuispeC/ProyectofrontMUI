@@ -1,20 +1,19 @@
 "use client";
 
-import {
-  DataGrid,
-  GridColDef,
-  GridFilterModel,
-  GridPaginationModel,
-  GridRenderCellParams,
-  GridSortModel,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams, GridSortModel } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
-import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import AddIcon from "@mui/icons-material/Add";
+import Link from "next/link";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
@@ -22,6 +21,7 @@ import { esES } from "@mui/x-data-grid/locales";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProductos } from "@/features/dashboard/producto/hooks/useProductos";
+import { useCategorias } from "@/features/dashboard/categoria/hooks/useCategorias";
 import { ListarProducto, ListarProductosRequest } from "@/features/dashboard/producto/Producto.types";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
@@ -38,13 +38,6 @@ const sortFieldMap: Record<string, string> = {
   createdAt: "fecha",
 };
 
-const filterFieldMap: Record<string, string> = {
-  categoriaNombre: "categoriaId",
-  marcaNombre: "marcaId",
-  unidadMedidaNombre: "unidadMedidaId",
-  isActive: "isActive",
-};
-
 function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: ListarProducto) => void) {
   const columns: GridColDef<ListarProducto>[] = [
     { field: "codigoInterno", headerName: "Código interno", flex: 1, minWidth: 140 },
@@ -56,9 +49,19 @@ function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: Listar
       headerName: "Costo actual",
       flex: 1,
       minWidth: 120,
+      align: "center",
+      headerAlign: "center",
       valueGetter: (_value, row) => `S/ ${row.costoActual.toFixed(2)}`,
     },
-    { field: "stockMinimo", headerName: "Stock mín.", flex: 1, minWidth: 110, type: "number" },
+    {
+      field: "stockMinimo",
+      headerName: "Stock mín.",
+      flex: 1,
+      minWidth: 110,
+      type: "number",
+      align: "center",
+      headerAlign: "center",
+    },
     { field: "createdByUserName", headerName: "Creado por", flex: 1, minWidth: 180 },
     {
       field: "isActive",
@@ -67,14 +70,8 @@ function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: Listar
       minWidth: 120,
       type: "boolean",
       renderCell: (params: GridRenderCellParams<ListarProducto, boolean>) => (
-        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
-          <Switch checked={params.value ?? false} size="small" disabled />
-          <Chip
-            label={params.value ? "Activo" : "Inactivo"}
-            color={params.value ? "success" : "default"}
-            size="small"
-            sx={{ ml: 1 }}
-          />
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", width: "100%" }}>
+          <Switch checked={params.value ?? false} size="small" color={params.value ? "primary" : "error"} />
         </Box>
       ),
     },
@@ -83,19 +80,20 @@ function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: Listar
       headerName: "Acciones",
       flex: 1,
       minWidth: 120,
+      headerAlign: "center",
       sortable: false,
       filterable: false,
       renderCell: (params: GridRenderCellParams<ListarProducto>) => {
         const row = params.row;
         return (
-          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", width: "100%" }}>
             <Tooltip title="Ver detalle">
-              <IconButton size="small" color="info" onClick={() => onVer(row)}>
+              <IconButton size="small" color="primary" onClick={() => onVer(row)}>
                 <VisibilityOutlinedIcon fontSize="small" />
               </IconButton>
             </Tooltip>
             <Tooltip title="Editar">
-              <IconButton size="small" color="primary" onClick={() => onEditar(row)}>
+              <IconButton size="small" color="secondary" onClick={() => onEditar(row)}>
                 <ModeEditOutlineOutlinedIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -114,9 +112,14 @@ export default function ListarProductos() {
 
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarProductos) : false;
+  const canCreate = user ? hasPermission(user.rol, permissions.registrarProducto) : false;
+
+  const { categorias } = useCategorias(canAccess);
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [categoriaId, setCategoriaId] = useState<string>("");
+  const [estado, setEstado] = useState<string>("");
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
@@ -124,7 +127,6 @@ export default function ListarProductos() {
   });
 
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
-  const [filterModel, setFilterModel] = useState<GridFilterModel>({ items: [] });
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 400);
@@ -135,17 +137,10 @@ export default function ListarProductos() {
     pagina: paginationModel.page + 1,
     tamanoPagina: paginationModel.pageSize,
     busqueda: debouncedSearch || undefined,
+    categoriaId: categoriaId ? Number(categoriaId) : undefined,
+    isActive: estado === "" ? undefined : estado === "true",
     ordenarPor: sortModel[0] ? sortFieldMap[sortModel[0].field] || sortModel[0].field : undefined,
     ordenamiento: sortModel[0]?.sort || undefined,
-    ...filterModel.items.reduce<Partial<ListarProductosRequest>>((acc, item) => {
-      const backendField = filterFieldMap[item.field];
-      if (!backendField) return acc;
-      const key = backendField as keyof ListarProductosRequest;
-      if (item.value !== undefined && item.value !== null && item.value !== "") {
-        (acc as Record<string, unknown>)[key] = item.value;
-      }
-      return acc;
-    }, {}),
   };
 
   const { productos, paginacion, loading } = useProductos(params);
@@ -159,7 +154,7 @@ export default function ListarProductos() {
 
   const handleEditar = useCallback(
     (row: ListarProducto) => {
-      router.push(`/dashboard/productos/${row.id}/editar`);
+      router.push(`/dashboard/productos/editar/${row.id}`);
     },
     [router],
   );
@@ -171,20 +166,70 @@ export default function ListarProductos() {
   if (!mounted) return null;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
-      <Box sx={{ mb: 2 }}>
-        <TextField
-          placeholder="Buscar por nombre, código o código de barras"
-          size="small"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          slotProps={{
-            input: {
-              startAdornment: <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />,
-            },
-          }}
-          sx={{ maxWidth: 400, width: "100%" }}
-        />
+    <Box sx={{ width: "100%" }}>
+      <Box
+        sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, flexWrap: "wrap" }}
+      >
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", flex: 1 }}>
+          <TextField
+            placeholder="Buscar por nombre, código o código de barras"
+            size="small"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />,
+              },
+            }}
+            sx={{ minWidth: 280, flex: 1 }}
+          />
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel id="categoria-filter-label">Categoría</InputLabel>
+            <Select
+              labelId="categoria-filter-label"
+              label="Categoría"
+              value={categoriaId}
+              onChange={(e) => {
+                setCategoriaId(e.target.value);
+                setPaginationModel((prev) => ({ ...prev, page: 0 }));
+              }}
+            >
+              <MenuItem value="">Todas</MenuItem>
+              {categorias.map((cat) => (
+                <MenuItem key={cat.id} value={String(cat.id)}>
+                  {cat.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 140 }}>
+            <InputLabel id="estado-filter-label">Estado</InputLabel>
+            <Select
+              labelId="estado-filter-label"
+              label="Estado"
+              value={estado}
+              onChange={(e) => {
+                setEstado(e.target.value);
+                setPaginationModel((prev) => ({ ...prev, page: 0 }));
+              }}
+            >
+              <MenuItem value="">Todos</MenuItem>
+              <MenuItem value="true">Activo</MenuItem>
+              <MenuItem value="false">Inactivo</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        {canCreate && (
+          <Button
+            component={Link}
+            href="/dashboard/productos/registrar"
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ height: 40 }}
+          >
+            Agregar producto
+          </Button>
+        )}
       </Box>
       <Paper sx={{ height: "auto", width: "100%", p: 2 }}>
         <DataGrid
@@ -196,20 +241,22 @@ export default function ListarProductos() {
           pageSizeOptions={pageSizeOptions}
           paginationMode="server"
           sortingMode="server"
-          filterMode="server"
           sortModel={sortModel}
           onSortModelChange={setSortModel}
-          filterModel={filterModel}
-          onFilterModelChange={setFilterModel}
           rowCount={paginacion?.totalRegistros ?? 0}
           getRowId={(row) => row.id}
           disableRowSelectionOnClick
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           sx={{
             border: 0,
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "action.hover",
-              fontWeight: 600,
+            mx: 1,
+            "& .MuiDataGrid-columnHeader": {
+              backgroundColor: "#e4eaeb",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontWeight: 700,
+              color: "#006064",
+              textTransform: "uppercase",
             },
           }}
         />

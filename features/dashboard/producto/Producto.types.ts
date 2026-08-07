@@ -30,6 +30,37 @@ export interface CrearProductoRequest {
   precios: PrecioProducto[];
 }
 
+export interface EditarImagenProductoRequest {
+  id?: number;
+  url: string;
+  esPrincipal: boolean;
+  orden: number;
+  eliminar?: boolean;
+}
+
+export interface EditarPrecioProductoRequest {
+  id?: number;
+  listaPrecioId: number;
+  precio: number;
+  fechaInicio?: string;
+  eliminar?: boolean;
+}
+
+export interface EditarProductoRequest {
+  codigoBarras: string | null;
+  categoriaId: number;
+  marcaId: number;
+  unidadMedidaId: number;
+  nombre: string;
+  descripcion: string | null;
+  costoActual: number;
+  stockMinimo: number;
+  fechaVencimiento: string | null;
+  imagenes: EditarImagenProductoRequest[];
+  precios: EditarPrecioProductoRequest[];
+  isActive: boolean;
+}
+
 export interface ProductoBase {
   id: number;
   codigoInterno: string;

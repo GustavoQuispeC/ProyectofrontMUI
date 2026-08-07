@@ -1,6 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { crearProducto, subirImagenLogic, obtenerProductos, obtenerProductoPorId } from "../producto.logic";
-import { CrearProductoRequest, DetalleProducto, ProductosResponse, ListarProductosRequest } from "../Producto.types";
+import {
+  crearProducto,
+  subirImagenLogic,
+  obtenerProductos,
+  obtenerProductoPorId,
+  editarProducto,
+} from "../producto.logic";
+import {
+  CrearProductoRequest,
+  DetalleProducto,
+  EditarProductoRequest,
+  ProductosResponse,
+  ListarProductosRequest,
+} from "../Producto.types";
 
 //! Hook para listar productos
 export function useProductos(params: ListarProductosRequest) {
@@ -72,6 +84,29 @@ export function useSubirImagen() {
 
   return {
     subirImagen: subir,
+    loading,
+    error: error instanceof Error ? error.message : null,
+  };
+}
+
+//! Hook para editar producto
+export function useEditarProducto() {
+  const queryClient = useQueryClient();
+
+  const {
+    mutateAsync: editar,
+    isPending: loading,
+    error,
+  } = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: EditarProductoRequest }) => editarProducto(id, data),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["productos"] });
+      queryClient.invalidateQueries({ queryKey: ["producto", String(variables.id)] });
+    },
+  });
+
+  return {
+    editarProducto: editar,
     loading,
     error: error instanceof Error ? error.message : null,
   };

@@ -1,6 +1,12 @@
 import { getAuthUser } from "@/shared/auth/auth.service";
-import { crearProductoApi, subirImagenApi, obtenerProductosApi, obtenerProductoPorIdApi } from "./producto.service";
-import { CrearProductoRequest, ListarProductosRequest } from "./Producto.types";
+import {
+  crearProductoApi,
+  subirImagenApi,
+  obtenerProductosApi,
+  obtenerProductoPorIdApi,
+  editarProductoApi,
+} from "./producto.service";
+import { CrearProductoRequest, EditarProductoRequest, ListarProductosRequest } from "./Producto.types";
 
 //! Crear producto
 export async function crearProducto(data: CrearProductoRequest) {
@@ -45,4 +51,15 @@ export async function obtenerProductoPorId(id: string) {
   }
 
   return obtenerProductoPorIdApi(id);
+}
+
+//! Editar producto
+export async function editarProducto(id: number, data: EditarProductoRequest) {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  return editarProductoApi(id, data);
 }

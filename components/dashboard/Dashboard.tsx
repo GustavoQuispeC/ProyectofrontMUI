@@ -3,6 +3,7 @@ import type {} from "@mui/x-date-pickers/themeAugmentation";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import { usePathname } from "next/navigation";
 import AppNavbar from "./components/AppNavbar";
 import Header from "./components/Header";
 import SideMenu from "./components/SideMenu";
@@ -12,6 +13,8 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ children }: DashboardProps) {
+  const pathname = usePathname();
+  const isProductosListar = pathname?.startsWith("/dashboard/productos/listar");
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideMenu />
@@ -35,9 +38,9 @@ export default function Dashboard({ children }: DashboardProps) {
           spacing={3}
           sx={{
             alignItems: "stretch",
-            px: { xs: 2, md: 4 },
+            px: { xs: 2, md: isProductosListar ? 2 : 4 },
             py: { xs: 3, md: 4 },
-            maxWidth: "1400px",
+            maxWidth: isProductosListar ? "100%" : "1400px",
             mx: "auto",
             width: "100%",
             mt: { xs: "64px", md: 0 },
