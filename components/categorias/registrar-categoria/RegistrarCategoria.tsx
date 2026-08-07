@@ -130,6 +130,7 @@ export default function RegistrarCategoria() {
 
       const payload: RegistrarCategoriaRequest = {
         ...data,
+        descripcion: data.descripcion?.trim() || null,
         imagen: imagenUrl,
       };
 
@@ -198,6 +199,8 @@ export default function RegistrarCategoria() {
               render={({ field }) => (
                 <InputCard
                   {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value || null)}
                   label="Descripción"
                   multiline
                   minRows={3}

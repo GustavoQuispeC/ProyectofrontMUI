@@ -3,7 +3,7 @@ import { useCategorias } from "@/features/dashboard/categoria/hooks/useCategoria
 import { useMarcas } from "@/features/dashboard/marca/hooks/useMarcas";
 import { useUnidadesMedida } from "@/features/dashboard/unidadMedida/hooks/useUnidadesMedida";
 import { useListasPrecio } from "@/features/dashboard/listaPrecio/hooks/useListasPrecio";
-import { useCrearProducto, useSubirImagen } from "@/features/dashboard/producto/hooks/useCrearProducto";
+import { useCrearProducto, useSubirImagen } from "@/features/dashboard/producto/hooks/useProductos";
 import { ProductoForm, productoSchema } from "@/features/dashboard/producto/producto.schema";
 import { CrearProductoRequest } from "@/features/dashboard/producto/Producto.types";
 import { useRouter } from "next/navigation";

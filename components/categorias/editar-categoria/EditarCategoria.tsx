@@ -148,7 +148,7 @@ export default function EditarCategoria({ id }: EditarCategoriaProps) {
       const payload: EditarCategoriaRequest = {
         id,
         nombre: data.nombre,
-        descripcion: data.descripcion,
+        descripcion: data.descripcion?.trim() || null,
         imagen: imagenEliminada ? null : imagenUrl,
         orden: data.orden,
         isActive: data.isActive,
@@ -228,6 +228,8 @@ export default function EditarCategoria({ id }: EditarCategoriaProps) {
               render={({ field }) => (
                 <InputCard
                   {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value || null)}
                   label="Descripción"
                   multiline
                   minRows={3}

@@ -69,7 +69,7 @@ export default function Navbar() {
       >
         <TopBar
           isLoggedIn={isLoggedIn}
-          userName="Gustavo"
+          userName="Admin"
           openDropdown={openDropdown}
           onToggleDropdown={toggleDropdown}
           onOpenMenu={() => setMenuOpen(true)}
@@ -84,7 +84,7 @@ export default function Navbar() {
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         isLoggedIn={isLoggedIn}
-        userName="Gustavo"
+        userName="Admin"
         onLogin={handleLogin}
         onLogout={handleLogout}
       />

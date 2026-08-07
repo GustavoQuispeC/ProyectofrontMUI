@@ -34,6 +34,7 @@ export default function MostrarCategorias({
     propCategories ||
     (categorias.length > 0
       ? categorias
+          .filter((cat) => cat.isActive)
           .sort((a, b) => a.orden - b.orden)
           .map((cat) => ({
             label: cat.nombre,

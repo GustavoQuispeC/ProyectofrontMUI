@@ -89,9 +89,10 @@ export default function Carousel({
                   <div className="absolute bottom-8 right-8 md:bottom-12 md:right-12 z-20">
                     <Link
                       href={buttonHref}
-                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg shadow-lg transition active:scale-95"
+                      className="inline-flex items-center gap-1 bg-black/20 hover:bg-black/30 border border-white/30 text-white text-xs font-medium px-3 py-1.5 rounded-full transition active:scale-95 backdrop-blur-sm"
                     >
                       {buttonText}
+                      <ChevronRight fontSize="small" />
                     </Link>
                   </div>
                 </div>

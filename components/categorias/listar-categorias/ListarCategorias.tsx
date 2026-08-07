@@ -8,6 +8,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
+import AddIcon from "@mui/icons-material/Add";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import { esES } from "@mui/x-data-grid/locales";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -195,6 +198,7 @@ export default function ListarCategorias() {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarCategorias) : false;
   const canEdit = user ? hasPermission(user.rol, permissions.editarCategoria) : false;
+  const canCreate = user ? hasPermission(user.rol, permissions.registrarCategoria) : false;
 
   const handleEdit = useCallback(
     (row: ListarCategoria) => {
@@ -211,6 +215,26 @@ export default function ListarCategorias() {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          Categorías
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          disabled={!canCreate}
+          onClick={() => router.push("/dashboard/categorias/registrar")}
+        >
+          Agregar
+        </Button>
+      </Box>
       <Paper sx={{ height: "auto", width: "100%", p: 2 }}>
         <DataGrid
           rows={categorias}
