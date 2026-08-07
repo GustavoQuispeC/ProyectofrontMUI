@@ -1,12 +1,14 @@
 "use client";
-import { styled } from "@mui/material/styles";
-import Avatar from "@mui/material/Avatar";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import SelectContent from "./SelectContent";
 import MenuContent from "./MenuContent";
 import OptionsMenu from "./OptionsMenu";
@@ -14,22 +16,11 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import { IUserData } from "@/shared/auth/types/IAuth";
 import { useEffect, useState } from "react";
 
-const drawerWidth = 240;
-
-const Drawer = styled(MuiDrawer)({
-  width: drawerWidth,
-  flexShrink: 0,
-  boxSizing: "border-box",
-  [`& .${drawerClasses.paper}`]: {
-    width: drawerWidth,
-    boxSizing: "border-box",
-    // borde derecho más sutil
-    borderRight: "0.5px solid",
-    borderColor: "divider",
-  },
-});
+const collapsedWidth = 64;
+const expandedWidth = 240;
 
 export default function SideMenu() {
+  const [open, setOpen] = useState(false);
   const [usuario, setUsuario] = useState<IUserData | null>(null);
 
   useEffect(() => {
@@ -41,27 +32,49 @@ export default function SideMenu() {
     loadUser();
   }, []);
 
+  const drawerWidth = open ? expandedWidth : collapsedWidth;
+
   return (
-    <Drawer
+    <MuiDrawer
       variant="permanent"
       sx={{
         display: { xs: "none", md: "block" },
+        width: drawerWidth,
+        flexShrink: 0,
+        transition: (theme) => theme.transitions.create("width"),
         [`& .${drawerClasses.paper}`]: {
+          width: drawerWidth,
+          boxSizing: "border-box",
+          overflowX: "hidden",
           backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#0F172A" : "grey.50"),
           borderRight: "1px solid",
           borderColor: (theme) => (theme.palette.mode === "dark" ? "#1E293B" : "#E2E8F0"),
+          transition: (theme) => theme.transitions.create("width"),
         },
       }}
     >
-      {/* Header: selector de proyecto */}
+      {/* Header: selector de proyecto y toggle */}
       <Box
         sx={{
           display: "flex",
+          alignItems: "center",
+          justifyContent: open ? "space-between" : "center",
           mt: "calc(var(--template-frame-height, 0px) + 4px)",
           p: 1.25,
+          gap: 1,
         }}
       >
-        <SelectContent />
+        <SelectContent open={open} />
+        <IconButton
+          size="small"
+          onClick={() => setOpen((prev) => !prev)}
+          sx={{
+            flexShrink: 0,
+            color: "text.primary",
+          }}
+        >
+          {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </IconButton>
       </Box>
 
       <Divider />
@@ -76,7 +89,7 @@ export default function SideMenu() {
           py: 1,
         }}
       >
-        <MenuContent />
+        <MenuContent open={open} />
       </Box>
 
       <Divider />
@@ -88,6 +101,7 @@ export default function SideMenu() {
           p: 1.5,
           gap: 1,
           alignItems: "center",
+          justifyContent: open ? "flex-start" : "center",
         }}
       >
         <Tooltip title="Ver perfil" placement="top">
@@ -117,35 +131,37 @@ export default function SideMenu() {
           </Avatar>
         </Tooltip>
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 500,
-              lineHeight: "16px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {usuario?.nombreCompleto ?? "Usuario"}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              color: "text.secondary",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "block",
-            }}
-          >
-            {usuario?.email ?? "usuario@email.com"}
-          </Typography>
-        </Box>
+        {open && (
+          <Box sx={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 500,
+                lineHeight: "16px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {usuario?.nombreCompleto ?? "Usuario"}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "block",
+              }}
+            >
+              {usuario?.email ?? "usuario@email.com"}
+            </Typography>
+          </Box>
+        )}
 
         <OptionsMenu />
       </Stack>
-    </Drawer>
+    </MuiDrawer>
   );
 }

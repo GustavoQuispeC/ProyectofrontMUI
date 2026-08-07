@@ -1,6 +1,13 @@
 "use client";
 
-import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams, GridSortModel } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridPaginationModel,
+  GridRenderCellParams,
+  GridRowSelectionModel,
+  GridSortModel,
+} from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
@@ -12,6 +19,7 @@ import Avatar from "@mui/material/Avatar";
 import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import Link from "next/link";
+import Image from "next/image";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
@@ -61,14 +69,14 @@ function Thumbnail({ url, nombre }: { url: string | null; nombre: string }) {
           sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
         />
       )}
-      <img
+      <Image
         src={url!}
         alt={nombre}
+        width={40}
+        height={40}
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}
         style={{
-          width: 40,
-          height: 40,
           objectFit: "cover",
           borderRadius: 4,
           opacity: loaded ? 1 : 0,
@@ -99,7 +107,7 @@ function LoadingOverlay() {
 
 function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: ListarProducto) => void) {
   const columns: GridColDef<ListarProducto>[] = [
-    { field: "codigoInterno", headerName: "Código interno", flex: 1, minWidth: 140 },
+    { field: "codigoInterno", headerName: "Cód. interno", flex: 1, minWidth: 120 },
     {
       field: "imagen",
       headerName: "Imagen",
@@ -115,7 +123,7 @@ function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: Listar
       },
     },
     { field: "nombre", headerName: "Nombre", flex: 2, minWidth: 200 },
-    { field: "marcaNombre", headerName: "Marca", flex: 1, minWidth: 140 },
+    { field: "marcaNombre", headerName: "Marca", flex: 1, minWidth: 120 },
     { field: "categoriaNombre", headerName: "Categoría", flex: 1, minWidth: 160 },
     {
       field: "costoActual",
@@ -135,12 +143,12 @@ function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: Listar
       align: "center",
       headerAlign: "center",
     },
-    { field: "createdByUserName", headerName: "Creado por", flex: 1, minWidth: 180 },
+    { field: "createdByUserName", headerName: "Creado por:", flex: 1, minWidth: 180 },
     {
       field: "isActive",
       headerName: "Estado",
       flex: 1,
-      minWidth: 120,
+      minWidth: 100,
       type: "boolean",
       renderCell: (params: GridRenderCellParams<ListarProducto, boolean>) => (
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", width: "100%" }}>
@@ -152,7 +160,7 @@ function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: Listar
       field: "acciones",
       headerName: "Acciones",
       flex: 1,
-      minWidth: 120,
+      minWidth: 100,
       headerAlign: "center",
       sortable: false,
       filterable: false,
@@ -200,6 +208,10 @@ export default function ListarProductos() {
   });
 
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
+  const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({
+    type: "include",
+    ids: new Set(),
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 400);
@@ -319,7 +331,8 @@ export default function ListarProductos() {
           onSortModelChange={setSortModel}
           rowCount={paginacion?.totalRegistros ?? 0}
           getRowId={(row) => row.id}
-          disableRowSelectionOnClick
+          rowSelectionModel={rowSelectionModel}
+          onRowSelectionModelChange={setRowSelectionModel}
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           sx={{
             border: 0,

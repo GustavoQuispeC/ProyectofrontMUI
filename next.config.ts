@@ -33,6 +33,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "readymadeui.com",
       },
+      {
+        protocol: "https",
+        hostname: "ejemplo.com",
+      },
     ],
   },
 };

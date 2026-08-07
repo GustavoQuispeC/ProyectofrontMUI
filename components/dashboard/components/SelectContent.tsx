@@ -12,7 +12,7 @@ import DevicesRoundedIcon from "@mui/icons-material/DevicesRounded";
 import SmartphoneRoundedIcon from "@mui/icons-material/SmartphoneRounded";
 import ConstructionRoundedIcon from "@mui/icons-material/ConstructionRounded";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Tooltip } from "@mui/material";
 
 const Avatar = styled(MuiAvatar)(({ theme }) => ({
   width: 26,
@@ -36,11 +36,25 @@ const items = [
   { value: "30", label: "Sitemark-Admin", sub: "Web app", icon: <ConstructionRoundedIcon />, group: "dev" },
 ];
 
-export default function SelectContent() {
+interface SelectContentProps {
+  open?: boolean;
+}
+
+export default function SelectContent({ open = true }: SelectContentProps) {
   const [company, setCompany] = React.useState("");
 
   const handleChange = (event: SelectChangeEvent) => setCompany(event.target.value);
   const selected = items.find((i) => i.value === company) ?? items[0];
+
+  if (!open) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
+        <Tooltip title={selected.label} placement="right">
+          <Avatar>{selected.icon}</Avatar>
+        </Tooltip>
+      </Box>
+    );
+  }
 
   return (
     <Select
@@ -64,7 +78,8 @@ export default function SelectContent() {
       )}
       fullWidth
       sx={{
-        width: 240,
+        minWidth: 0,
+        flex: 1,
         [`& .${selectClasses.select}`]: { display: "flex", alignItems: "center", py: 1, pl: 1.5 },
       }}
     >

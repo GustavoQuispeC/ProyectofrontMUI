@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Collapse from "@mui/material/Collapse";
+import Tooltip from "@mui/material/Tooltip";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -190,7 +191,11 @@ const secondaryListItems = [
   },
 ];
 
-export default function MenuContent() {
+interface MenuContentProps {
+  open?: boolean;
+}
+
+export default function MenuContent({ open = true }: MenuContentProps) {
   const mounted = useMounted(); //? controla el estado de montaje
   const user = getAuthUser();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -231,14 +236,23 @@ export default function MenuContent() {
             return (
               <React.Fragment key={index}>
                 <ListItem disablePadding sx={{ display: "block" }}>
-                  <ListItemButton onClick={() => toggleGroup(item.text)}>
-                    <ListItemIcon
-                      sx={{ color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark") }}
-                    >
-                      {item.icon}
-                    </ListItemIcon>
-                    <ListItemText primary={item.text} />
-                    {isOpen ? <ExpandLess /> : <ExpandMore />}
+                  <ListItemButton
+                    onClick={() => toggleGroup(item.text)}
+                    sx={{ justifyContent: open ? "flex-start" : "center", px: open ? 2 : 1 }}
+                  >
+                    <Tooltip title={open ? "" : item.text} placement="right">
+                      <ListItemIcon
+                        sx={{
+                          minWidth: 0,
+                          mr: open ? 2 : 0,
+                          color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                    </Tooltip>
+                    {open && <ListItemText primary={item.text} sx={{ flex: 1 }} />}
+                    {open && (isOpen ? <ExpandLess /> : <ExpandMore />)}
                   </ListItemButton>
                 </ListItem>
                 <Collapse in={isOpen} timeout="auto" unmountOnExit>
@@ -246,16 +260,25 @@ export default function MenuContent() {
                     {visibleChildren.map((child, ci) => (
                       <ListItem key={ci} disablePadding sx={{ display: "block" }}>
                         <Link href={child.href} passHref>
-                          <ListItemButton sx={{ pl: 4 }}>
-                            <ListItemIcon
-                              sx={{
-                                minWidth: 36,
-                                color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
-                              }}
-                            >
-                              {child.icon}
-                            </ListItemIcon>
-                            <ListItemText primary={child.text} />
+                          <ListItemButton
+                            sx={{
+                              justifyContent: open ? "flex-start" : "center",
+                              pl: open ? 4 : 1,
+                              pr: open ? 2 : 1,
+                            }}
+                          >
+                            <Tooltip title={open ? "" : child.text} placement="right">
+                              <ListItemIcon
+                                sx={{
+                                  minWidth: 0,
+                                  mr: open ? 1.5 : 0,
+                                  color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                                }}
+                              >
+                                {child.icon}
+                              </ListItemIcon>
+                            </Tooltip>
+                            {open && <ListItemText primary={child.text} />}
                           </ListItemButton>
                         </Link>
                       </ListItem>
@@ -268,13 +291,19 @@ export default function MenuContent() {
           return (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <Link href={item.href!} passHref>
-                <ListItemButton>
-                  <ListItemIcon
-                    sx={{ color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark") }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={item.text} />
+                <ListItemButton sx={{ justifyContent: open ? "flex-start" : "center", px: open ? 2 : 1 }}>
+                  <Tooltip title={open ? "" : item.text} placement="right">
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 2 : 0,
+                        color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                  </Tooltip>
+                  {open && <ListItemText primary={item.text} />}
                 </ListItemButton>
               </Link>
             </ListItem>
@@ -286,14 +315,19 @@ export default function MenuContent() {
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <Link href={item.href} passHref>
-              <ListItemButton>
-                <ListItemIcon
-                  sx={{ color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark") }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-
-                <ListItemText primary={item.text} />
+              <ListItemButton sx={{ justifyContent: open ? "flex-start" : "center", px: open ? 2 : 1 }}>
+                <Tooltip title={open ? "" : item.text} placement="right">
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 2 : 0,
+                      color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                </Tooltip>
+                {open && <ListItemText primary={item.text} />}
               </ListItemButton>
             </Link>
           </ListItem>
