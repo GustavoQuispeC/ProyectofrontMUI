@@ -32,7 +32,7 @@ export function Dropdown({ id, openId, onToggle, trigger, children, align = "lef
       <button
         type="button"
         onClick={() => onToggle(id)}
-        className="inline-flex h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-white/90 transition-colors duration-150 hover:bg-white/10 whitespace-nowrap"
+        className="inline-flex h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-slate-900 transition-colors duration-150 hover:bg-slate-100 whitespace-nowrap"
       >
         {trigger}
       </button>

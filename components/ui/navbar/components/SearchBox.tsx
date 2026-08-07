@@ -54,7 +54,7 @@ export function SearchBox({ className = "", autoFocus, onNavigate }: SearchBoxPr
 
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
-      <div className="flex h-11 w-full items-center overflow-hidden rounded-lg border border-white/15 bg-white focus-within:border-orange-400">
+      <div className="flex h-11 w-full items-center overflow-hidden rounded-lg border border-slate-300 bg-white focus-within:border-orange-400">
         <input
           type="text"
           autoFocus={autoFocus}

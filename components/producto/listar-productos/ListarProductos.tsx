@@ -8,6 +8,8 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import Avatar from "@mui/material/Avatar";
+import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import Link from "next/link";
 import FormControl from "@mui/material/FormControl";
@@ -17,6 +19,7 @@ import MenuItem from "@mui/material/MenuItem";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import ImageIcon from "@mui/icons-material/Image";
 import { esES } from "@mui/x-data-grid/locales";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -38,9 +41,79 @@ const sortFieldMap: Record<string, string> = {
   createdAt: "fecha",
 };
 
+function Thumbnail({ url, nombre }: { url: string | null; nombre: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const hasImage = Boolean(url);
+
+  if (!hasImage) {
+    return (
+      <Avatar variant="rounded" sx={{ width: 40, height: 40, bgcolor: "grey.200" }}>
+        <ImageIcon sx={{ color: "grey.500" }} />
+      </Avatar>
+    );
+  }
+
+  return (
+    <Box sx={{ position: "relative", width: 40, height: 40 }}>
+      {!loaded && (
+        <CircularProgress
+          size={20}
+          sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+        />
+      )}
+      <img
+        src={url!}
+        alt={nombre}
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+        style={{
+          width: 40,
+          height: 40,
+          objectFit: "cover",
+          borderRadius: 4,
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.2s",
+        }}
+      />
+    </Box>
+  );
+}
+
+function LoadingOverlay() {
+  return (
+    <Box
+      sx={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(255, 255, 255, 0.6)",
+        zIndex: 1,
+      }}
+    >
+      <CircularProgress size={32} />
+    </Box>
+  );
+}
+
 function getColumns(onVer: (row: ListarProducto) => void, onEditar: (row: ListarProducto) => void) {
   const columns: GridColDef<ListarProducto>[] = [
     { field: "codigoInterno", headerName: "Código interno", flex: 1, minWidth: 140 },
+    {
+      field: "imagen",
+      headerName: "Imagen",
+      width: 80,
+      minWidth: 80,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+      filterable: false,
+      renderCell: (params: GridRenderCellParams<ListarProducto>) => {
+        const url = params.row.imagenes.find((img) => img.esPrincipal)?.url || params.row.imagenes[0]?.url || null;
+        return <Thumbnail url={url} nombre={params.row.nombre} />;
+      },
+    },
     { field: "nombre", headerName: "Nombre", flex: 2, minWidth: 200 },
     { field: "marcaNombre", headerName: "Marca", flex: 1, minWidth: 140 },
     { field: "categoriaNombre", headerName: "Categoría", flex: 1, minWidth: 160 },
@@ -236,6 +309,7 @@ export default function ListarProductos() {
           rows={productos}
           columns={getColumns(handleVer, handleEditar)}
           loading={loading}
+          slots={{ loadingOverlay: LoadingOverlay }}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={pageSizeOptions}

@@ -42,6 +42,8 @@ export interface EditarPrecioProductoRequest {
   id?: number;
   listaPrecioId: number;
   precio: number;
+  precioMinimo: number | null;
+  precioMaximo: number | null;
   fechaInicio?: string;
   eliminar?: boolean;
 }

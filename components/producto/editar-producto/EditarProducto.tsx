@@ -332,9 +332,14 @@ export default function EditarProducto({ id }: EditarProductoProps) {
           id: p.id,
           listaPrecioId: p.listaPrecioId,
           precio: p.precio,
+          precioMinimo: p.precioMinimo,
+          precioMaximo: p.precioMaximo,
           fechaInicio: p.fechaInicio,
         })),
       };
+
+      console.log("Payload a enviar:", payload);
+      console.log("Precios del formulario:", data.precios);
 
       await toastPromise(editarProductoMutation.editarProducto({ id, data: payload }), {
         loading: "Actualizando producto...",
@@ -447,7 +452,7 @@ export default function EditarProducto({ id }: EditarProductoProps) {
               <FormControl fullWidth size="small" error={!!errors.categoriaId}>
                 <InputLabel>Categoría *</InputLabel>
                 <Select
-                  value={field.value || ""}
+                  value={categorias.some((c) => c.id === field.value) ? field.value : ""}
                   label="Categoría *"
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 >
@@ -473,7 +478,7 @@ export default function EditarProducto({ id }: EditarProductoProps) {
               <FormControl fullWidth size="small" error={!!errors.marcaId}>
                 <InputLabel>Marca *</InputLabel>
                 <Select
-                  value={field.value || ""}
+                  value={marcas.some((m) => m.id === field.value) ? field.value : ""}
                   label="Marca *"
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 >
@@ -499,7 +504,7 @@ export default function EditarProducto({ id }: EditarProductoProps) {
               <FormControl fullWidth size="small" error={!!errors.unidadMedidaId}>
                 <InputLabel>Unidad de Medida *</InputLabel>
                 <Select
-                  value={field.value || ""}
+                  value={unidadesMedida.some((u) => u.id === field.value) ? field.value : ""}
                   label="Unidad de Medida *"
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 >
@@ -747,7 +752,7 @@ export default function EditarProducto({ id }: EditarProductoProps) {
                         <FormControl fullWidth size="small" error={!!errors.precios?.[index]?.listaPrecioId}>
                           <InputLabel>Lista de Precio *</InputLabel>
                           <Select
-                            value={field.value || ""}
+                            value={listasPrecio.some((l) => l.id === field.value) ? field.value : ""}
                             label="Lista de Precio *"
                             onChange={(e) => field.onChange(Number(e.target.value))}
                           >
