@@ -11,9 +11,12 @@ interface Props {
 export default function ProductCard({ product, onAdd }: Props) {
   return (
     <article className="rounded-2xl overflow-hidden border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:shadow-lg transition-all h-full flex flex-col">
-
       <div className="relative aspect-square overflow-hidden">
-        <ProductPlaceholder name={product.name} />
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+        ) : (
+          <ProductPlaceholder name={product.name} />
+        )}
 
         {product.hasDiscount && (
           <span className="absolute top-3 left-3 px-2 py-1 text-[10px] font-bold rounded-md bg-red-500 text-white">
@@ -23,10 +26,7 @@ export default function ProductCard({ product, onAdd }: Props) {
       </div>
 
       <div className="p-4 flex flex-col flex-1">
-
-        <p className="text-xs text-slate-400 uppercase tracking-widest">
-          {product.brand}
-        </p>
+        <p className="text-xs text-slate-400 uppercase tracking-widest">{product.brand}</p>
 
         <h3 className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-50 line-clamp-2 min-h-[3rem]">
           {product.name}

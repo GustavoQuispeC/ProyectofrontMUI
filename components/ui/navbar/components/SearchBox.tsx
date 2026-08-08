@@ -1,9 +1,11 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import { getSearchSuggestions, MENU_CATEGORIES, RELATED_BRANDS } from "../navbar.mock";
+import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
+import { useProductosPublicos } from "@/features/store/productos/useProductosPublicos";
+import { RELATED_BRANDS } from "./search.config";
 
 interface SearchBoxProps {
   className?: string;
@@ -14,10 +16,33 @@ interface SearchBoxProps {
 export function SearchBox({ className = "", autoFocus, onNavigate }: SearchBoxProps) {
   const [term, setTerm] = useState("");
   const [open, setOpen] = useState(false);
+  const [debouncedTerm, setDebouncedTerm] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const suggestions = getSearchSuggestions(term);
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedTerm(term), 300);
+    return () => clearTimeout(id);
+  }, [term]);
+
+  const { categorias } = useCategoriasPublicas();
+  const trimmed = debouncedTerm.trim();
+
+  const searchParams = useMemo(
+    () => ({
+      pagina: 1,
+      tamanoPagina: 6,
+      busqueda: trimmed || undefined,
+    }),
+    [trimmed],
+  );
+
+  const { productos } = useProductosPublicos(searchParams, trimmed.length > 0);
+
+  const productSuggestions = productos
+    .filter((p) => p.nombre.toLowerCase().includes(trimmed.toLowerCase()))
+    .map((p) => p.nombre);
+  const suggestions = productSuggestions.length > 0 ? productSuggestions : [];
   const showPanel = open && term.trim().length > 0;
 
   useEffect(() => {
@@ -33,8 +58,8 @@ export function SearchBox({ className = "", autoFocus, onNavigate }: SearchBoxPr
   const goToSearch = useCallback(
     (query: string) => {
       const trimmed = query.trim();
-      if (!trimmed) return;
-      router.push(`/productFilter?search=${encodeURIComponent(trimmed)}`);
+      const newUrl = trimmed ? `/productFilter?search=${encodeURIComponent(trimmed)}` : "/productFilter";
+      router.push(newUrl);
       setOpen(false);
       onNavigate?.();
     },
@@ -50,7 +75,16 @@ export function SearchBox({ className = "", autoFocus, onNavigate }: SearchBoxPr
     [router, onNavigate],
   );
 
-  const relatedCategories = MENU_CATEGORIES.slice(0, 9).map((c) => c.label);
+  const goToBrand = useCallback(
+    (brandLabel: string) => {
+      router.push(`/productFilter?brand=${encodeURIComponent(brandLabel)}`);
+      setOpen(false);
+      onNavigate?.();
+    },
+    [router, onNavigate],
+  );
+
+  const relatedCategories = categorias.slice(0, 9).map((c) => c.nombre);
 
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
@@ -94,17 +128,14 @@ export function SearchBox({ className = "", autoFocus, onNavigate }: SearchBoxPr
                 <p className="text-sm text-text-secondary">Sin coincidencias. Presiona Enter para buscar igual.</p>
               ) : (
                 <ul className="space-y-1.5">
-                  {suggestions.map((s) => (
-                    <li key={s.term}>
+                  {suggestions.map((suggestion) => (
+                    <li key={suggestion}>
                       <button
                         type="button"
-                        onClick={() => goToSearch(s.term)}
+                        onClick={() => goToSearch(suggestion)}
                         className="w-full text-left text-sm text-text-primary hover:text-orange-600"
                       >
-                        {s.term}
-                        {s.categoryHint && (
-                          <span className="ml-1.5 text-xs text-text-secondary">en {s.categoryHint}</span>
-                        )}
+                        {suggestion}
                       </button>
                     </li>
                   ))}
@@ -121,7 +152,7 @@ export function SearchBox({ className = "", autoFocus, onNavigate }: SearchBoxPr
                   <li key={brand}>
                     <button
                       type="button"
-                      onClick={() => goToSearch(brand)}
+                      onClick={() => goToBrand(brand)}
                       className="w-full text-left text-sm text-text-primary hover:text-orange-600"
                     >
                       {brand}

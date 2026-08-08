@@ -1,17 +1,35 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import CloseIcon from "@mui/icons-material/Close";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { MENU_CATEGORIES } from "../navbar.mock";
+import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
+import { MegaMenuCategory, MegaMenuGroup } from "../types";
 
 interface MegaMenuDrawerProps {
   open: boolean;
   onClose: () => void;
 }
 
+function buildMenuCategories(categorias: { id: number; nombre: string }[]): MegaMenuCategory[] {
+  return categorias.map((c) => ({
+    id: String(c.id),
+    label: c.nombre,
+    href: `/productFilter?category=${encodeURIComponent(c.nombre)}`,
+    groups: [
+      {
+        title: "Ver todo",
+        seeAllHref: `/productFilter?category=${encodeURIComponent(c.nombre)}`,
+        items: [],
+      },
+    ] as MegaMenuGroup[],
+  }));
+}
+
 export function MegaMenuDrawer({ open, onClose }: MegaMenuDrawerProps) {
-  const [activeId, setActiveId] = useState(MENU_CATEGORIES[0].id);
+  const { categorias, loading } = useCategoriasPublicas();
+  const menuCategories = useMemo(() => buildMenuCategories(categorias), [categorias]);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -28,7 +46,18 @@ export function MegaMenuDrawer({ open, onClose }: MegaMenuDrawerProps) {
 
   if (!open) return null;
 
-  const active = MENU_CATEGORIES.find((c) => c.id === activeId) ?? MENU_CATEGORIES[0];
+  const active = menuCategories.find((c) => c.id === activeId) ?? menuCategories[0];
+
+  if (loading || !active) {
+    return (
+      <div className="fixed inset-0 z-50 hidden md:block">
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+        <div className="absolute left-0 top-0 flex h-64 w-full max-w-4xl flex-col items-center justify-center bg-surface shadow-2xl">
+          <p className="text-text-secondary">Cargando categorías...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 hidden md:block">
@@ -50,14 +79,14 @@ export function MegaMenuDrawer({ open, onClose }: MegaMenuDrawerProps) {
         <div className="flex flex-1 overflow-hidden">
           {/* Columna de categorías */}
           <nav className="w-64 shrink-0 overflow-y-auto border-r border-border-base bg-surface-secondary py-2">
-            {MENU_CATEGORIES.map((category) => (
+            {menuCategories.map((category) => (
               <button
                 key={category.id}
                 type="button"
                 onMouseEnter={() => setActiveId(category.id)}
                 onClick={() => setActiveId(category.id)}
                 className={`flex w-full items-center justify-between px-5 py-3 text-left text-sm font-medium transition-colors ${
-                  activeId === category.id
+                  active.id === category.id
                     ? "bg-surface text-orange-600 border-l-4 border-orange-500"
                     : "text-text-primary border-l-4 border-transparent hover:bg-surface"
                 }`}

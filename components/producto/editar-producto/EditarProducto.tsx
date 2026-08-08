@@ -5,9 +5,9 @@ import { useUnidadesMedida } from "@/features/dashboard/unidadMedida/hooks/useUn
 import { useListasPrecio } from "@/features/dashboard/listaPrecio/hooks/useListasPrecio";
 import { useProducto, useEditarProducto, useSubirImagen } from "@/features/dashboard/producto/hooks/useProductos";
 import { ProductoForm, productoSchema } from "@/features/dashboard/producto/producto.schema";
-import { EditarProductoRequest } from "@/features/dashboard/producto/Producto.types";
+import { DetalleProducto, EditarProductoRequest } from "@/features/dashboard/producto/Producto.types";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { toastPromise } from "@/shared/utils/toast";
@@ -54,20 +54,6 @@ import { permissions } from "@/shared/auth/auth.permissions";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
 const MAX_IMAGENES = 5;
-
-const defaultValues: ProductoForm = {
-  codigoBarras: "",
-  categoriaId: 0,
-  marcaId: 0,
-  unidadMedidaId: 0,
-  nombre: "",
-  descripcion: "",
-  costoActual: 0,
-  stockMinimo: 0,
-  fechaVencimiento: null,
-  imagenes: [],
-  precios: [],
-};
 
 const hoy = dayjs();
 const defaultPrecio = {
@@ -147,86 +133,105 @@ interface ImagenLocal {
   esPrincipal: boolean;
 }
 
-interface EditarProductoProps {
+interface EditarProductoFormProps {
   id: number;
+  producto: DetalleProducto;
 }
 
-export default function EditarProducto({ id }: EditarProductoProps) {
-  const [imagenes, setImagenes] = useState<ImagenLocal[]>([]);
-  const [principalIndex, setPrincipalIndex] = useState(0);
+function mapProductoToDefaults(producto: DetalleProducto): ProductoForm {
+  return {
+    ...producto,
+    codigoBarras: producto.codigoBarras ?? "",
+    descripcion: producto.descripcion ?? "",
+    fechaVencimiento: producto.fechaVencimiento ?? null,
+    imagenes: producto.imagenes.map((img) => ({
+      id: img.id,
+      url: img.url ?? "",
+      esPrincipal: img.esPrincipal,
+      orden: img.orden,
+      eliminar: false,
+    })),
+    precios: producto.precios.map((p) => ({
+      id: p.id,
+      listaPrecioId: p.listaPrecioId,
+      precio: p.precio,
+      precioMinimo: p.precioMinimo ?? 0,
+      precioMaximo: p.precioMaximo ?? 0,
+      fechaInicio: p.fechaInicio,
+      fechaFin: p.fechaFin,
+      eliminar: false,
+    })),
+  };
+}
+
+function EditarProductoForm({ id, producto }: EditarProductoFormProps) {
+  const keyCounterRef = useRef(0);
+  const initialImagenes = useMemo<ImagenLocal[]>(() => {
+    return producto.imagenes.map((img, index) => ({
+      key: img.id !== undefined ? `img-${img.id}` : `new-${index}`,
+      id: img.id,
+      url: img.url ?? "",
+      esPrincipal: img.esPrincipal,
+    }));
+  }, [producto]);
+  const initialPrincipalIndex = useMemo(
+    () =>
+      Math.max(
+        0,
+        producto.imagenes.findIndex((img) => img.esPrincipal),
+      ),
+    [producto],
+  );
+  const defaultFormValues = useMemo(() => mapProductoToDefaults(producto), [producto]);
+
+  const [imagenes, setImagenes] = useState<ImagenLocal[]>(() => initialImagenes);
+  const [principalIndex, setPrincipalIndex] = useState(() => initialPrincipalIndex);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const user = getAuthUser();
-  const canAccess = user ? hasPermission(user.rol, permissions.editarProducto) : false;
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<ProductoForm>({
+    resolver: standardSchemaResolver(productoSchema),
+    defaultValues: defaultFormValues,
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    shouldFocusError: true,
+  });
+
+  const syncImagenesToForm = useCallback(
+    (nextImagenes: ImagenLocal[], nextPrincipal: number) => {
+      setValue(
+        "imagenes",
+        nextImagenes.map((img, i) => ({
+          id: img.id,
+          url: img.url,
+          esPrincipal: i === nextPrincipal,
+          orden: i + 1,
+          eliminar: false,
+        })),
+      );
+    },
+    [setValue],
+  );
 
   const { categorias } = useCategorias(true);
   const { marcas } = useMarcas(true);
   const { unidadesMedida } = useUnidadesMedida(true);
   const { listasPrecio } = useListasPrecio(true);
 
-  const { producto, loading: loadingProducto } = useProducto(String(id));
   const editarProductoMutation = useEditarProducto();
   const subirImagenMutation = useSubirImagen();
-  const isSubmitting = editarProductoMutation.loading || subirImagenMutation.loading || loadingProducto;
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ProductoForm>({
-    resolver: standardSchemaResolver(productoSchema),
-    defaultValues,
-    mode: "onSubmit",
-    reValidateMode: "onChange",
-    shouldFocusError: true,
-  });
+  const isSubmitting = editarProductoMutation.loading || subirImagenMutation.loading;
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "precios",
   });
-
-  //! Precargar datos del producto
-  useEffect(() => {
-    if (!producto) return;
-
-    reset({
-      ...producto,
-      codigoBarras: producto.codigoBarras ?? "",
-      descripcion: producto.descripcion ?? "",
-      fechaVencimiento: producto.fechaVencimiento ?? null,
-      imagenes: producto.imagenes.map((img) => ({
-        id: img.id,
-        url: img.url ?? "",
-        esPrincipal: img.esPrincipal,
-        orden: img.orden,
-        eliminar: false,
-      })),
-      precios: producto.precios.map((p) => ({
-        id: p.id,
-        listaPrecioId: p.listaPrecioId,
-        precio: p.precio,
-        precioMinimo: p.precioMinimo ?? 0,
-        precioMaximo: p.precioMaximo ?? 0,
-        fechaInicio: p.fechaInicio,
-        fechaFin: p.fechaFin,
-        eliminar: false,
-      })),
-    });
-
-    setImagenes(
-      producto.imagenes.map((img) => ({
-        key: `img-${img.id ?? Math.random().toString(36).slice(2)}`,
-        id: img.id,
-        url: img.url ?? "",
-        esPrincipal: img.esPrincipal,
-      })),
-    );
-    const principal = producto.imagenes.findIndex((img) => img.esPrincipal);
-    setPrincipalIndex(Math.max(0, principal));
-  }, [producto, reset]);
 
   //! Imágenes
   const handleAddImages = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +242,7 @@ export default function EditarProducto({ id }: EditarProductoProps) {
     const nuevos = Array.from(files)
       .slice(0, restantes)
       .map((file) => ({
-        key: Math.random().toString(36).slice(2),
+        key: `new-${keyCounterRef.current++}`,
         file,
         url: URL.createObjectURL(file),
         esPrincipal: false,
@@ -245,23 +250,34 @@ export default function EditarProducto({ id }: EditarProductoProps) {
 
     setImagenes((prev) => {
       const updated = [...prev, ...nuevos];
-      if (updated.length > 0 && principalIndex === -1) setPrincipalIndex(0);
+      const nextPrincipal = updated.length > 0 && principalIndex === -1 ? 0 : principalIndex;
+      setPrincipalIndex(nextPrincipal);
+      syncImagenesToForm(updated, nextPrincipal);
       return updated;
     });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleRemoveImage = (index: number) => {
-    setImagenes((prev) => prev.filter((_, i) => i !== index));
-    setPrincipalIndex((prev) => {
-      if (index === prev) return 0;
-      if (index < prev) return prev - 1;
-      return prev;
+    setImagenes((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      const nextPrincipal = (() => {
+        if (index === principalIndex) return updated.length > 0 ? 0 : -1;
+        if (index < principalIndex) return principalIndex - 1;
+        return principalIndex;
+      })();
+      setPrincipalIndex(nextPrincipal);
+      syncImagenesToForm(updated, nextPrincipal);
+      return updated;
     });
   };
 
   const handleSetPrincipal = (index: number) => {
-    setImagenes((prev) => prev.map((img, i) => ({ ...img, esPrincipal: i === index })));
+    setImagenes((prev) => {
+      const updated = prev.map((img, i) => ({ ...img, esPrincipal: i === index }));
+      syncImagenesToForm(updated, index);
+      return updated;
+    });
     setPrincipalIndex(index);
   };
 
@@ -291,16 +307,17 @@ export default function EditarProducto({ id }: EditarProductoProps) {
           eliminar: false,
         })),
       });
-      setImagenes(
-        producto.imagenes.map((img) => ({
-          key: `img-${img.id ?? Math.random().toString(36).slice(2)}`,
-          id: img.id,
-          url: img.url ?? "",
-          esPrincipal: img.esPrincipal,
-        })),
-      );
+      const resetImagenes = producto.imagenes.map((img) => ({
+        key: `img-${img.id ?? Math.random().toString(36).slice(2)}`,
+        id: img.id,
+        url: img.url ?? "",
+        esPrincipal: img.esPrincipal,
+      }));
+      setImagenes(resetImagenes);
       const principal = producto.imagenes.findIndex((img) => img.esPrincipal);
-      setPrincipalIndex(Math.max(0, principal));
+      const nextPrincipal = resetImagenes.length > 0 ? Math.max(0, principal) : -1;
+      setPrincipalIndex(nextPrincipal);
+      syncImagenesToForm(resetImagenes, nextPrincipal);
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -321,6 +338,14 @@ export default function EditarProducto({ id }: EditarProductoProps) {
           url,
           esPrincipal: i === principalIndex,
           orden: i + 1,
+        });
+      }
+
+      if (imagenesPayload.length === 0) {
+        imagenesPayload.push({
+          url: "/sinFoto.png",
+          esPrincipal: true,
+          orden: 1,
         });
       }
 
@@ -351,19 +376,6 @@ export default function EditarProducto({ id }: EditarProductoProps) {
       console.error(error);
     }
   };
-
-  //! Validación de acceso
-  if (!canAccess) {
-    return <AccessDenied />;
-  }
-
-  if (loadingProducto) {
-    return (
-      <Box sx={{ width: "100%", minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <Typography color="text.secondary">Cargando producto...</Typography>
-      </Box>
-    );
-  }
 
   return (
     <Box
@@ -939,4 +951,28 @@ export default function EditarProducto({ id }: EditarProductoProps) {
       </Stack>
     </Box>
   );
+}
+
+interface EditarProductoProps {
+  id: number;
+}
+
+export default function EditarProducto({ id }: EditarProductoProps) {
+  const user = getAuthUser();
+  const canAccess = user ? hasPermission(user.rol, permissions.editarProducto) : false;
+  const { producto, loading: loadingProducto } = useProducto(String(id));
+
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
+
+  if (loadingProducto || !producto) {
+    return (
+      <Box sx={{ width: "100%", minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Typography color="text.secondary">Cargando producto...</Typography>
+      </Box>
+    );
+  }
+
+  return <EditarProductoForm id={id} producto={producto} />;
 }

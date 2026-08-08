@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -8,8 +8,24 @@ import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import { MENU_CATEGORIES } from "../navbar.mock";
+import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
+import { MegaMenuCategory } from "../types";
 import { SearchBox } from "./SearchBox";
+
+function buildMenuCategories(categorias: { id: number; nombre: string }[]): MegaMenuCategory[] {
+  return categorias.map((c) => ({
+    id: String(c.id),
+    label: c.nombre,
+    href: `/productFilter?category=${encodeURIComponent(c.nombre)}`,
+    groups: [
+      {
+        title: "Ver todo",
+        seeAllHref: `/productFilter?category=${encodeURIComponent(c.nombre)}`,
+        items: [],
+      },
+    ],
+  }));
+}
 
 interface MobileDrawerProps {
   open: boolean;
@@ -21,6 +37,8 @@ interface MobileDrawerProps {
 }
 
 export function MobileDrawer({ open, onClose, isLoggedIn, userName, onLogin, onLogout }: MobileDrawerProps) {
+  const { categorias, loading } = useCategoriasPublicas();
+  const menuCategories = useMemo(() => buildMenuCategories(categorias), [categorias]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const handleClose = () => {
@@ -38,7 +56,7 @@ export function MobileDrawer({ open, onClose, isLoggedIn, userName, onLogin, onL
 
   if (!open) return null;
 
-  const active = MENU_CATEGORIES.find((c) => c.id === activeId);
+  const active = menuCategories.find((c) => c.id === activeId);
 
   return (
     <div className="fixed inset-0 z-50 md:hidden">
@@ -78,7 +96,7 @@ export function MobileDrawer({ open, onClose, isLoggedIn, userName, onLogin, onL
                 Inicio
               </Link>
 
-              {MENU_CATEGORIES.map((category) => (
+              {menuCategories.map((category) => (
                 <button
                   key={category.id}
                   type="button"

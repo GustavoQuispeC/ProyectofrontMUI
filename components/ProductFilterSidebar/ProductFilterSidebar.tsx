@@ -1,6 +1,6 @@
 "use client";
 import { ProductFilters } from "./filter.types";
-import { BRANDS, CATEGORIES, OFFERS, RATINGS, MAX_PRICE } from "./constants";
+import { OFFERS, RATINGS, MAX_PRICE } from "./constants";
 import FilterSection from "./FilterSection";
 
 function toggleItem<T>(items: T[], value: T) {
@@ -15,9 +15,18 @@ interface Props {
   onFiltersChange: (filters: ProductFilters) => void;
   onClear: () => void;
   className?: string;
+  categories?: string[];
+  brands?: string[];
 }
 
-export default function ProductFilterSidebar({ filters, onFiltersChange, onClear, className }: Props) {
+export default function ProductFilterSidebar({
+  filters,
+  onFiltersChange,
+  onClear,
+  className,
+  categories = [],
+  brands = [],
+}: Props) {
   const baseClass = "w-72 xl:w-80 shrink-0 border-r border-slate-200 dark:border-neutral-800 min-h-screen sticky top-0";
 
   return (
@@ -52,7 +61,7 @@ export default function ProductFilterSidebar({ filters, onFiltersChange, onClear
 
           <FilterSection title="Categorías">
             <div className="space-y-3">
-              {CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <label key={category} className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
@@ -73,7 +82,7 @@ export default function ProductFilterSidebar({ filters, onFiltersChange, onClear
 
           <FilterSection title="Marcas">
             <div className="space-y-3">
-              {BRANDS.map((brand) => (
+              {brands.map((brand) => (
                 <label key={brand} className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"

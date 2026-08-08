@@ -229,6 +229,14 @@ export default function RegistrarProducto() {
         });
       }
 
+      if (imagenesSubidas.length === 0) {
+        imagenesSubidas.push({
+          url: "/sinFoto.png",
+          esPrincipal: true,
+          orden: 1,
+        });
+      }
+
       const payload: CrearProductoRequest = {
         ...data,
         imagenes: imagenesSubidas,

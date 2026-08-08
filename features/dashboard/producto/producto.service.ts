@@ -12,7 +12,6 @@ import { getToken } from "@/shared/auth/auth.service";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 //! Obtener productos
 export async function obtenerProductosApi(params: ListarProductosRequest): Promise<ProductosResponse> {
-  const token = getToken();
   const query = new URLSearchParams();
 
   query.append("pagina", String(params.pagina));
@@ -26,19 +25,9 @@ export async function obtenerProductosApi(params: ListarProductosRequest): Promi
   if (params.ordenarPor) query.append("ordenarPor", params.ordenarPor);
   if (params.ordenamiento) query.append("ordenamiento", params.ordenamiento);
 
-  const response = await fetch(`${apiUrl}/productos?${query.toString()}`, {
+  return apiProducto(`${apiUrl}/productos?${query.toString()}`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Error al obtener productos: ${errorText}`);
-  }
-
-  return response.json();
 }
 
 //! Crear producto
