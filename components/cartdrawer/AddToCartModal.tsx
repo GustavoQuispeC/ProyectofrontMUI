@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Image from "next/image";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -16,10 +17,6 @@ interface AddToCartModalProps {
 
 export default function AddToCartModal({ isOpen, onClose, producto }: AddToCartModalProps) {
   const [cantidad, setCantidad] = useState(() => getCartItemQuantity(producto.id) ?? 1);
-
-  useEffect(() => {
-    setCantidad(getCartItemQuantity(producto.id) ?? 1);
-  }, [producto.id]);
 
   const syncStorage = (qty: number) => {
     if (qty <= 0) {
@@ -69,8 +66,15 @@ export default function AddToCartModal({ isOpen, onClose, producto }: AddToCartM
 
         <div className="p-6">
           <div className="flex items-start gap-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-            <div className="shrink-0 w-24 h-24 bg-white dark:bg-gray-700 rounded-lg p-2 flex items-center justify-center">
-              <img src={producto.imagen} alt={producto.nombre} className="w-full h-full object-contain" />
+            <div className="relative shrink-0 w-24 h-24 bg-white dark:bg-gray-700 rounded-lg p-2">
+              <Image
+                src={producto.imagen}
+                alt={producto.nombre}
+                fill
+                className="object-contain p-2"
+                sizes="96px"
+                unoptimized
+              />
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="font-bold text-blue-900 dark:text-white mb-1 line-clamp-2">{producto.nombre}</h4>

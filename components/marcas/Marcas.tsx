@@ -72,7 +72,7 @@ function BrandCard({ brand, onSelect }: BrandCardProps) {
       onClick={() => onSelect(brand)}
       aria-label={`Ver productos de ${brand}`}
       title={brand}
-      className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-border-base bg-surface text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-orange-400/60 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 dark:hover:border-orange-500/50"
+      className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-orange-400/60 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1 scale-x-0 bg-linear-to-r from-orange-500 to-orange-600 transition-transform duration-300 group-hover:scale-x-100" />
 
@@ -80,7 +80,7 @@ function BrandCard({ brand, onSelect }: BrandCardProps) {
         <div className="absolute inset-0 bg-linear-to-br from-orange-500/0 to-orange-600/0 transition-colors duration-300 group-hover:from-orange-500/5 group-hover:to-orange-600/10" />
 
         {imageError ? (
-          <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-image text-lg font-bold tracking-wide text-orange-600 dark:text-orange-400">
+          <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-lg font-bold tracking-wide text-orange-600">
             {getBrandInitials(brand)}
           </div>
         ) : (
@@ -97,8 +97,8 @@ function BrandCard({ brand, onSelect }: BrandCardProps) {
         )}
       </div>
 
-      <div className="border-t border-border-base bg-surface-secondary/70 px-3 py-2.5 transition-colors duration-300 group-hover:bg-orange-50/80 dark:group-hover:bg-orange-950/20">
-        <p className="truncate text-center text-[11px] font-semibold uppercase tracking-wide text-text-secondary transition-colors duration-300 group-hover:text-orange-700 dark:group-hover:text-orange-300">
+      <div className="border-t border-slate-200 bg-slate-50/70 px-3 py-2.5 transition-colors duration-300 group-hover:bg-orange-50/80">
+        <p className="truncate text-center text-[11px] font-semibold uppercase tracking-wide text-slate-500 transition-colors duration-300 group-hover:text-orange-700">
           {brand}
         </p>
       </div>
@@ -117,15 +117,12 @@ export default function Marcas() {
   );
 
   return (
-    <section className="relative w-full overflow-hidden bg-surface-secondary">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.08),transparent_55%)] dark:bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.12),transparent_55%)]"
-      />
+    <section className="relative w-full overflow-hidden bg-white">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0" />
 
       <div className="relative mx-auto w-full max-w-screen-2xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8 2xl:px-12">
         <div className="mx-auto mb-10 max-w-3xl text-center sm:mb-12">
-          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-600 dark:bg-orange-950 dark:text-orange-400">
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-600">
             <VerifiedOutlinedIcon sx={{ fontSize: 14 }} />
             Marcas de confianza
           </div>
@@ -133,7 +130,7 @@ export default function Marcas() {
           <h2 className="text-2xl font-bold tracking-tight text-blue-900 sm:text-3xl lg:text-4xl">
             Aliados estratégicos del sector
           </h2>
-          <p className="mx-auto mt-2 max-w-2xl text-sm text-text-secondary sm:text-base">
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500 sm:text-base">
             Trabajamos con marcas reconocidas en construcción para garantizar materiales de calidad, respaldo técnico y
             disponibilidad en cada proyecto.
           </p>
@@ -143,14 +140,14 @@ export default function Marcas() {
           {TRUST_STATS.map(({ icon: Icon, label, value }) => (
             <div
               key={label}
-              className="flex items-center gap-3 rounded-2xl border border-border-base bg-surface px-4 py-3.5 shadow-sm"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 shadow-sm"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-950/60 dark:text-orange-400">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
                 <Icon sx={{ fontSize: 22 }} />
               </div>
               <div className="min-w-0">
-                <p className="text-lg font-bold leading-none text-text-primary">{value}</p>
-                <p className="mt-1 text-xs text-text-secondary">{label}</p>
+                <p className="text-lg font-bold leading-none text-slate-900">{value}</p>
+                <p className="mt-1 text-xs text-slate-500">{label}</p>
               </div>
             </div>
           ))}
@@ -163,7 +160,7 @@ export default function Marcas() {
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:mt-12">
-          <p className="text-center text-sm text-text-secondary">
+          <p className="text-center text-sm text-slate-500">
             Y muchas marcas más disponibles en nuestra tienda física y online
           </p>
 

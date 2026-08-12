@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProductFilterSidebar } from "@/components/ProductFilterSidebar";
-import { Product, ProductGrid, ProductToolbar } from "@/components/product";
+import { Product, ProductGrid, ProductToolbar, mapProductoToStore } from "@/components/productos_home";
 import Pagination from "@/components/ui/Pagination";
 import type { ProductFilters } from "@/components/ProductFilterSidebar/filter.types";
 import { MAX_PRICE } from "@/components/ProductFilterSidebar/constants";
@@ -12,7 +12,6 @@ import { upsertCartItem } from "@/components/cartdrawer/cartService";
 import { useProductosPublicos } from "@/features/store/productos/useProductosPublicos";
 import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
 import { useMarcasPublicas } from "@/features/store/marcas/useMarcasPublicas";
-import { ListarProducto } from "@/features/dashboard/producto/Producto.types";
 
 const DEFAULT_FILTERS: ProductFilters = {
   search: "",
@@ -23,7 +22,7 @@ const DEFAULT_FILTERS: ProductFilters = {
   priceMax: MAX_PRICE,
 };
 
-const SORT_OPTIONS = ["Destacados", "Precio menor", "Precio mayor", "Mejor valorados"] as const;
+const SORT_OPTIONS = ["Mayor a menor", "Menor a mayor", "Ascendente", "Descendente"] as const;
 export type SortOption = (typeof SORT_OPTIONS)[number];
 
 function parseList(value: string | null) {
@@ -36,7 +35,30 @@ function parseNumberList(value: string | null) {
     .filter((value) => Number.isFinite(value));
 }
 
-function buildSearchParams(filters: ProductFilters, sortBy: SortOption) {
+function parseFiltersFromParams(searchParams: URLSearchParams | null): ProductFilters {
+  if (!searchParams) return DEFAULT_FILTERS;
+
+  return {
+    search: searchParams.get("search") ?? "",
+    categories: parseList(searchParams.get("category")),
+    brands: parseList(searchParams.get("brand")),
+    offers: parseList(searchParams.get("offer")),
+    ratings: parseNumberList(searchParams.get("rating")),
+    priceMax: Number(searchParams.get("priceMax")) || MAX_PRICE,
+  };
+}
+
+function parseSortBy(searchParams: URLSearchParams | null): SortOption {
+  const value = searchParams?.get("sortBy");
+  return value && SORT_OPTIONS.includes(value as SortOption) ? (value as SortOption) : "Mayor a menor";
+}
+
+function parsePage(searchParams: URLSearchParams | null): number {
+  const value = Number(searchParams?.get("page"));
+  return Number.isFinite(value) && value > 0 ? value : 1;
+}
+
+function buildSearchParams(filters: ProductFilters, sortBy: SortOption, page: number) {
   const params = new URLSearchParams();
 
   if (filters.search) params.set("search", filters.search);
@@ -45,88 +67,70 @@ function buildSearchParams(filters: ProductFilters, sortBy: SortOption) {
   if (filters.offers.length) params.set("offer", filters.offers.join(","));
   if (filters.ratings.length) params.set("rating", filters.ratings.join(","));
   if (filters.priceMax !== MAX_PRICE) params.set("priceMax", String(filters.priceMax));
-  if (sortBy !== "Destacados") params.set("sortBy", sortBy);
+  params.set("sortBy", sortBy);
+  if (page > 1) params.set("page", String(page));
 
   return params.toString();
 }
 
 function mapSortBy(sortBy: SortOption): { ordenarPor?: string; ordenamiento?: "asc" | "desc" } {
-  if (sortBy === "Precio menor") return { ordenarPor: "precio", ordenamiento: "asc" };
-  if (sortBy === "Precio mayor") return { ordenarPor: "precio", ordenamiento: "desc" };
-  return {};
-}
-
-function mapProductoToStore(producto: ListarProducto): Product {
-  const principal = producto.imagenes.find((img) => img.esPrincipal) ?? producto.imagenes[0];
-  const precio = producto.precios[0]?.precio ?? producto.costoActual ?? 0;
-
-  return {
-    id: producto.id,
-    name: producto.nombre,
-    brand: producto.marcaNombre,
-    category: producto.categoriaNombre,
-    price: precio,
-    image: principal?.url ?? null,
-    rating: 0,
-    inStock: true,
-    hasDiscount: false,
-    freeShipping: false,
-  };
+  switch (sortBy) {
+    case "Mayor a menor":
+      return { ordenarPor: "precio", ordenamiento: "desc" };
+    case "Menor a mayor":
+      return { ordenarPor: "precio", ordenamiento: "asc" };
+    case "Ascendente":
+      return { ordenarPor: "nombre", ordenamiento: "asc" };
+    case "Descendente":
+      return { ordenarPor: "nombre", ordenamiento: "desc" };
+    default:
+      return { ordenarPor: "precio", ordenamiento: "desc" };
+  }
 }
 
 export default function Page() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [filters, setFilters] = useState<ProductFilters>(DEFAULT_FILTERS);
-  const [sortBy, setSortBy] = useState<SortOption>("Destacados");
-  const [readyToSync, setReadyToSync] = useState(false);
-  const [page, setPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAddModalOpen, setAddModalOpen] = useState(false);
-  const lastUrlRef = useRef<string>("");
+
+  const filters = useMemo(() => parseFiltersFromParams(searchParams), [searchParams]);
+  const sortBy = useMemo(() => parseSortBy(searchParams), [searchParams]);
+  const page = useMemo(() => parsePage(searchParams), [searchParams]);
+
+  const updateUrl = useCallback(
+    (nextFilters: ProductFilters, nextSortBy: SortOption, nextPage: number) => {
+      const queryString = buildSearchParams(nextFilters, nextSortBy, nextPage);
+      router.replace(`/productFilter${queryString ? `?${queryString}` : ""}`);
+    },
+    [router],
+  );
+
+  const handleFiltersChange = useCallback(
+    (nextFilters: ProductFilters) => updateUrl(nextFilters, sortBy, 1),
+    [updateUrl, sortBy],
+  );
+
+  const handleSortChange = useCallback(
+    (value: string) => {
+      const nextSortBy = SORT_OPTIONS.includes(value as SortOption) ? (value as SortOption) : "Mayor a menor";
+      updateUrl(filters, nextSortBy, 1);
+    },
+    [updateUrl, filters],
+  );
+
+  const handlePageChange = useCallback(
+    (nextPage: number) => updateUrl(filters, sortBy, nextPage),
+    [updateUrl, filters, sortBy],
+  );
+
+  const handleClear = useCallback(() => {
+    router.replace("/productFilter");
+  }, [router]);
 
   const { categorias } = useCategoriasPublicas();
   const { marcas } = useMarcasPublicas();
-
-  useEffect(() => {
-    if (!searchParams) return;
-
-    setFilters({
-      search: searchParams.get("search") ?? "",
-      categories: parseList(searchParams.get("category")),
-      brands: parseList(searchParams.get("brand")),
-      offers: parseList(searchParams.get("offer")),
-      ratings: parseNumberList(searchParams.get("rating")),
-      priceMax: Number(searchParams.get("priceMax")) || MAX_PRICE,
-    });
-
-    const paramSort = searchParams.get("sortBy");
-    if (paramSort && SORT_OPTIONS.includes(paramSort as SortOption)) {
-      setSortBy(paramSort as SortOption);
-    } else {
-      setSortBy("Destacados");
-    }
-
-    setReadyToSync(true);
-  }, [searchParams]);
-
-  // Sincronizar filtros a URL solo cuando cambien, evitando renders innecesarios
-  useEffect(() => {
-    if (!readyToSync) return;
-
-    const queryString = buildSearchParams(filters, sortBy);
-    const newUrl = `/productFilter${queryString ? `?${queryString}` : ""}`;
-
-    if (lastUrlRef.current !== newUrl) {
-      lastUrlRef.current = newUrl;
-      router.replace(newUrl);
-    }
-  }, [filters, sortBy, readyToSync, router]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [filters, sortBy]);
 
   const categoriaId = useMemo(() => {
     if (filters.categories.length !== 1) return undefined;
@@ -177,11 +181,11 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950">
-      <div className="max-w-400 mx-auto flex">
+      <div className="max-w-7xl mx-auto flex">
         <ProductFilterSidebar
           filters={filters}
-          onFiltersChange={setFilters}
-          onClear={() => setFilters(DEFAULT_FILTERS)}
+          onFiltersChange={handleFiltersChange}
+          onClear={handleClear}
           categories={availableCategories}
           brands={availableBrands}
         />
@@ -191,7 +195,7 @@ export default function Page() {
             <ProductToolbar
               total={paginacion?.totalRegistros ?? storeProducts.length}
               sortBy={sortBy}
-              onSortChange={(value) => setSortBy(value as SortOption)}
+              onSortChange={handleSortChange}
               onOpenFilters={() => setMobileFiltersOpen(true)}
             />
 
@@ -202,7 +206,7 @@ export default function Page() {
             ) : storeProducts.length > 0 ? (
               <>
                 <ProductGrid products={storeProducts} onAdd={handleAddToCart} />
-                <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+                <Pagination page={page} totalPages={totalPages} onChange={handlePageChange} />
               </>
             ) : (
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-slate-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-slate-300">
@@ -216,6 +220,7 @@ export default function Page() {
 
       {isAddModalOpen && selectedProduct && (
         <AddToCartModal
+          key={selectedProduct.id}
           isOpen={isAddModalOpen}
           onClose={() => setAddModalOpen(false)}
           producto={{
@@ -243,10 +248,8 @@ export default function Page() {
             </div>
             <ProductFilterSidebar
               filters={filters}
-              onFiltersChange={(f) => {
-                setFilters(f);
-              }}
-              onClear={() => setFilters(DEFAULT_FILTERS)}
+              onFiltersChange={handleFiltersChange}
+              onClear={handleClear}
               categories={availableCategories}
               brands={availableBrands}
               className="w-full min-h-full"
