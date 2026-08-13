@@ -1,5 +1,9 @@
 "use client";
-import { useCategorias } from "@/features/dashboard/categoria/hooks/useCategorias";
+import {
+  useCategoriasPadres,
+  useSubcategorias,
+  useCategoria,
+} from "@/features/dashboard/categoria/hooks/useCategorias";
 import { useMarcas } from "@/features/dashboard/marca/hooks/useMarcas";
 import { useUnidadesMedida } from "@/features/dashboard/unidadMedida/hooks/useUnidadesMedida";
 import { useListasPrecio } from "@/features/dashboard/listaPrecio/hooks/useListasPrecio";
@@ -59,8 +63,8 @@ const hoy = dayjs();
 const defaultPrecio = {
   listaPrecioId: 0,
   precio: 0,
-  precioMinimo: 0,
-  precioMaximo: 0,
+  precioMinimo: null as number | null,
+  precioMaximo: null as number | null,
   fechaInicio: toDotNetDateTime({ year: hoy.year(), month: hoy.month() + 1, day: hoy.date() }),
   fechaFin: null as string | null,
 };
@@ -155,8 +159,8 @@ function mapProductoToDefaults(producto: DetalleProducto): ProductoForm {
       id: p.id,
       listaPrecioId: p.listaPrecioId,
       precio: p.precio,
-      precioMinimo: p.precioMinimo ?? 0,
-      precioMaximo: p.precioMaximo ?? 0,
+      precioMinimo: p.precioMinimo ?? null,
+      precioMaximo: p.precioMaximo ?? null,
       fechaInicio: p.fechaInicio,
       fechaFin: p.fechaFin,
       eliminar: false,
@@ -186,8 +190,12 @@ function EditarProductoForm({ id, producto }: EditarProductoFormProps) {
 
   const [imagenes, setImagenes] = useState<ImagenLocal[]>(() => initialImagenes);
   const [principalIndex, setPrincipalIndex] = useState(() => initialPrincipalIndex);
+  const [categoriaPadreId, setCategoriaPadreId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const { categoria: categoriaDetalle } = useCategoria(producto?.categoriaId ?? null);
+  const padreSeleccionado = categoriaPadreId ?? categoriaDetalle?.categoriaPadreId ?? null;
 
   const {
     control,
@@ -219,7 +227,8 @@ function EditarProductoForm({ id, producto }: EditarProductoFormProps) {
     [setValue],
   );
 
-  const { categorias } = useCategorias(true);
+  const { categorias: categoriasPadre, loading: loadingPadres } = useCategoriasPadres();
+  const { categorias: subcategorias, loading: loadingSubcategorias } = useSubcategorias(padreSeleccionado);
   const { marcas } = useMarcas(true);
   const { unidadesMedida } = useUnidadesMedida(true);
   const { listasPrecio } = useListasPrecio(true);
@@ -300,8 +309,8 @@ function EditarProductoForm({ id, producto }: EditarProductoFormProps) {
           id: p.id,
           listaPrecioId: p.listaPrecioId,
           precio: p.precio,
-          precioMinimo: p.precioMinimo ?? 0,
-          precioMaximo: p.precioMaximo ?? 0,
+          precioMinimo: p.precioMinimo ?? null,
+          precioMaximo: p.precioMaximo ?? null,
           fechaInicio: p.fechaInicio,
           fechaFin: p.fechaFin,
           eliminar: false,
@@ -457,21 +466,47 @@ function EditarProductoForm({ id, producto }: EditarProductoFormProps) {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel id="categoria-padre-label">Categoría padre</InputLabel>
+            <Select
+              labelId="categoria-padre-label"
+              label="Categoría padre"
+              value={padreSeleccionado === null ? "" : String(padreSeleccionado)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setCategoriaPadreId(value === "" ? null : Number(value));
+                setValue("categoriaId", 0);
+              }}
+              disabled={loadingPadres}
+            >
+              <MenuItem value="">
+                <em>Seleccione una categoría padre</em>
+              </MenuItem>
+              {categoriasPadre.map((item) => (
+                <MenuItem key={item.id} value={String(item.id)}>
+                  {item.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Controller
             name="categoriaId"
             control={control}
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.categoriaId}>
-                <InputLabel>Categoría *</InputLabel>
+                <InputLabel>Subcategoría *</InputLabel>
                 <Select
-                  value={categorias.some((c) => c.id === field.value) ? field.value : ""}
-                  label="Categoría *"
+                  value={subcategorias.some((c) => c.id === field.value) ? field.value : ""}
+                  label="Subcategoría *"
                   onChange={(e) => field.onChange(Number(e.target.value))}
+                  disabled={!padreSeleccionado || loadingSubcategorias}
                 >
                   <MenuItem value="">
-                    <em>Seleccione</em>
+                    <em>Seleccione una subcategoría</em>
                   </MenuItem>
-                  {categorias.map((item) => (
+                  {subcategorias.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
@@ -816,7 +851,7 @@ function EditarProductoForm({ id, producto }: EditarProductoFormProps) {
                           error={!!errors.precios?.[index]?.precioMinimo}
                           helperText={errors.precios?.[index]?.precioMinimo?.message}
                           onFocus={(e) => e.target.select()}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
                         />
                       )}
                     />
@@ -834,7 +869,7 @@ function EditarProductoForm({ id, producto }: EditarProductoFormProps) {
                           error={!!errors.precios?.[index]?.precioMaximo}
                           helperText={errors.precios?.[index]?.precioMaximo?.message}
                           onFocus={(e) => e.target.select()}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
                         />
                       )}
                     />

@@ -136,6 +136,18 @@ const getColumns = (onEdit: (row: ListarCategoria) => void, canEdit: boolean): G
     minWidth: 200,
   },
   {
+    field: "categoriaPadreNombre",
+    headerName: "CATEGORÍA PADRE",
+    flex: 1,
+    minWidth: 160,
+    valueGetter: (_value, row) => row.categoriaPadreNombre,
+    renderCell: (params) => {
+      const parentName = params.value as string | null;
+      return parentName ? <Chip label={parentName} size="small" color="info" /> : <span>—</span>;
+    },
+  },
+
+  {
     field: "isActive",
     headerName: "ESTADO",
     width: 120,
@@ -214,7 +226,7 @@ export default function ListarCategorias() {
   if (!mounted) return null;
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
+    <Box sx={{ p: 3, maxWidth: "100%", mx: "auto" }}>
       <Box
         sx={{
           display: "flex",
@@ -235,18 +247,19 @@ export default function ListarCategorias() {
           Agregar
         </Button>
       </Box>
-      <Paper sx={{ height: "auto", width: "100%", p: 2 }}>
+      <Paper sx={{ height: 1100, width: "100%", p: 2 }}>
         <DataGrid
           rows={categorias}
           columns={getColumns(handleEdit, canEdit)}
           loading={loading}
           initialState={gridInitialState}
-          pageSizeOptions={[20, 50, 100]}
+          pageSizeOptions={[20, 50, 100, 200]}
           getRowId={(row) => row.id}
           disableRowSelectionOnClick
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           sx={{
             border: 0,
+            height: "100%",
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "action.hover",
               fontWeight: 600,

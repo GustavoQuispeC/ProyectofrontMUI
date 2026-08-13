@@ -29,6 +29,20 @@ export function listarCategoriasPublicasApi(): Promise<ListarCategoria[]> {
   });
 }
 
+//! Listar categorias padre
+export function listarCategoriasPadresApi(): Promise<ListarCategoria[]> {
+  return apiCategoria(`${apiUrl}/categorias/padres`, {
+    method: "GET",
+  });
+}
+
+//! Listar subcategorias de una categoria padre
+export function listarSubcategoriasApi(categoriaPadreId: number): Promise<ListarCategoria[]> {
+  return apiCategoria(`${apiUrl}/categorias/${categoriaPadreId}/subcategorias`, {
+    method: "GET",
+  });
+}
+
 //! Obtener categoria por id
 export function obtenerCategoriaApi(id: number): Promise<DetalleCategoria> {
   return apiCategoria(`${apiUrl}/categorias/${id}`, {

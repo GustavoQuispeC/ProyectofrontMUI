@@ -1,6 +1,11 @@
 "use client";
 
-import { useEditarCategoria, useCategoria, useSubirImagen } from "@/features/dashboard/categoria/hooks/useCategorias";
+import {
+  useEditarCategoria,
+  useCategoria,
+  useSubirImagen,
+  useCategoriasPadres,
+} from "@/features/dashboard/categoria/hooks/useCategorias";
 import { CategoriaForm, categoriaSchema } from "@/features/dashboard/categoria/categoria.schema";
 import { EditarCategoriaRequest } from "@/features/dashboard/categoria/Categoria.types";
 import { useRouter } from "next/navigation";
@@ -16,6 +21,10 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ImageIcon from "@mui/icons-material/Image";
 import CloseIcon from "@mui/icons-material/Close";
@@ -86,6 +95,7 @@ export default function EditarCategoria({ id }: EditarCategoriaProps) {
   const { categoria, loading: loadingCategoria } = useCategoria(id);
   const editarCategoriaMutation = useEditarCategoria(id);
   const subirImagenMutation = useSubirImagen();
+  const { categorias: categoriasPadre, loading: loadingPadres } = useCategoriasPadres();
   const isSubmitting = editarCategoriaMutation.loading || subirImagenMutation.loading;
 
   const {
@@ -101,6 +111,7 @@ export default function EditarCategoria({ id }: EditarCategoriaProps) {
       imagen: null,
       orden: 0,
       isActive: true,
+      categoriaPadreId: null,
     },
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -115,6 +126,7 @@ export default function EditarCategoria({ id }: EditarCategoriaProps) {
         imagen: categoria.imagen ?? null,
         orden: categoria.orden ?? 0,
         isActive: categoria.isActive ?? true,
+        categoriaPadreId: categoria.categoriaPadreId ?? null,
       });
     }
   }, [categoria, reset]);
@@ -152,6 +164,7 @@ export default function EditarCategoria({ id }: EditarCategoriaProps) {
         imagen: imagenEliminada ? null : imagenUrl,
         orden: data.orden,
         isActive: data.isActive,
+        categoriaPadreId: data.categoriaPadreId ?? undefined,
       };
 
       await toastPromise(editarCategoriaMutation.editarCategoria(payload), {
@@ -218,6 +231,39 @@ export default function EditarCategoria({ id }: EditarCategoriaProps) {
                   onFocus={(e) => e.target.select()}
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
+              )}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Controller
+              name="categoriaPadreId"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth size="small">
+                  <InputLabel id="categoria-padre-label-edit">Categoría padre (opcional)</InputLabel>
+                  <Select
+                    labelId="categoria-padre-label-edit"
+                    id="categoria-padre-edit"
+                    label="Categoría padre (opcional)"
+                    value={field.value === null ? "" : String(field.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === "" ? null : Number(value));
+                    }}
+                    disabled={loadingPadres}
+                  >
+                    <MenuItem value="">
+                      <em>Sin categoría padre</em>
+                    </MenuItem>
+                    {categoriasPadre
+                      .filter((cat) => cat.id !== id)
+                      .map((cat) => (
+                        <MenuItem key={cat.id} value={String(cat.id)}>
+                          {cat.nombre}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
               )}
             />
           </Grid>

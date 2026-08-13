@@ -7,6 +7,8 @@ export interface ListarCategoria {
   createdAt: string;
   createdByUserName: string;
   isActive: boolean;
+  categoriaPadreId: number | null;
+  categoriaPadreNombre: string | null;
 }
 
 export interface RegistrarCategoriaRequest {
@@ -14,6 +16,8 @@ export interface RegistrarCategoriaRequest {
   descripcion: string | null;
   imagen: string | null;
   orden: number;
+  categoriaPadreId?: number | null;
+  categoriaPadreNombre?: string | null;
 }
 
 export interface CategoriaRegistrada {
@@ -22,6 +26,8 @@ export interface CategoriaRegistrada {
   descripcion: string | null;
   imagen: string | null;
   orden: number;
+  categoriaPadreId: number | null;
+  categoriaPadreNombre: string | null;
 }
 
 export interface DetalleCategoria {
@@ -35,6 +41,8 @@ export interface DetalleCategoria {
   createdByUserName: string;
   updatedAt: string | null;
   updatedByUserName: string | null;
+  categoriaPadreId: number | null;
+  categoriaPadreNombre: string | null;
 }
 
 export interface EditarCategoriaRequest {
@@ -44,4 +52,6 @@ export interface EditarCategoriaRequest {
   imagen: string | null;
   orden: number;
   isActive: boolean;
+  categoriaPadreId?: number | null;
+  categoriaPadreNombre?: string | null;
 }

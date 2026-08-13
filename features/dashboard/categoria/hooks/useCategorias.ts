@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   listarCategorias,
   listarCategoriasPublicas,
+  listarCategoriasPadres,
+  listarSubcategorias,
   obtenerCategoria,
   registrarCategoria,
   editarCategoria,
@@ -50,6 +52,56 @@ export function useCategoriasPublicas() {
     queryKey: ["categorias-publicas"],
 
     queryFn: listarCategoriasPublicas,
+
+    staleTime: 1000 * 60 * 5,
+
+    retry: 1,
+  });
+
+  return {
+    categorias,
+    loading,
+    error: error instanceof Error ? error.message : null,
+    refetch,
+  };
+}
+
+export function useCategoriasPadres() {
+  const {
+    data: categorias = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<ListarCategoria[]>({
+    queryKey: ["categorias-padres"],
+
+    queryFn: listarCategoriasPadres,
+
+    staleTime: 1000 * 60 * 5,
+
+    retry: 1,
+  });
+
+  return {
+    categorias,
+    loading,
+    error: error instanceof Error ? error.message : null,
+    refetch,
+  };
+}
+
+export function useSubcategorias(categoriaPadreId: number | null) {
+  const {
+    data: categorias = [],
+    isLoading: loading,
+    error,
+    refetch,
+  } = useQuery<ListarCategoria[]>({
+    queryKey: ["subcategorias", categoriaPadreId],
+
+    queryFn: () => listarSubcategorias(categoriaPadreId!),
+
+    enabled: !!categoriaPadreId,
 
     staleTime: 1000 * 60 * 5,
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import CloseIcon from "@mui/icons-material/Close";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
+import { ListarCategoria } from "@/features/dashboard/categoria/Categoria.types";
 import { MegaMenuCategory, MegaMenuGroup } from "../types";
 
 interface MegaMenuDrawerProps {
@@ -11,19 +12,28 @@ interface MegaMenuDrawerProps {
   onClose: () => void;
 }
 
-function buildMenuCategories(categorias: { id: number; nombre: string }[]): MegaMenuCategory[] {
-  return categorias.map((c) => ({
-    id: String(c.id),
-    label: c.nombre,
-    href: `/productFilter?category=${encodeURIComponent(c.nombre)}`,
-    groups: [
-      {
-        title: "Ver todo",
-        seeAllHref: `/productFilter?category=${encodeURIComponent(c.nombre)}`,
-        items: [],
-      },
-    ] as MegaMenuGroup[],
-  }));
+function buildMenuCategories(categorias: ListarCategoria[]): MegaMenuCategory[] {
+  const padres = categorias.filter((c) => c.categoriaPadreId === null).sort((a, b) => a.orden - b.orden);
+
+  return padres.map((padre) => {
+    const subcategorias = categorias
+      .filter((c) => c.categoriaPadreId === padre.id)
+      .sort((a, b) => a.orden - b.orden)
+      .map((c) => c.nombre);
+
+    return {
+      id: String(padre.id),
+      label: padre.nombre,
+      href: `/productFilter?category=${encodeURIComponent(padre.nombre)}`,
+      groups: [
+        {
+          title: subcategorias.length > 0 ? "Subcategorías" : "Ver todo",
+          seeAllHref: `/productFilter?category=${encodeURIComponent(padre.nombre)}`,
+          items: subcategorias,
+        },
+      ] as MegaMenuGroup[],
+    };
+  });
 }
 
 export function MegaMenuDrawer({ open, onClose }: MegaMenuDrawerProps) {
@@ -125,7 +135,7 @@ export function MegaMenuDrawer({ open, onClose }: MegaMenuDrawerProps) {
                     {group.items.map((item) => (
                       <li key={item}>
                         <Link
-                          href={`${active.href}&item=${encodeURIComponent(item)}`}
+                          href={`/productFilter?category=${encodeURIComponent(item)}`}
                           onClick={onClose}
                           className="text-sm text-text-secondary hover:text-orange-600"
                         >

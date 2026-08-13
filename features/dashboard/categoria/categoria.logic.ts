@@ -2,6 +2,8 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import {
   listarCategoriasApi,
   listarCategoriasPublicasApi,
+  listarCategoriasPadresApi,
+  listarSubcategoriasApi,
   obtenerCategoriaApi,
   registrarCategoriaApi,
   editarCategoriaApi,
@@ -28,6 +30,34 @@ export async function listarCategorias() {
 //! Listar categorias publicas
 export async function listarCategoriasPublicas() {
   return listarCategoriasPublicasApi();
+}
+
+//! Listar categorias padre
+export async function listarCategoriasPadres() {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+  if (!hasPermission(user.rol, permissions.listarCategorias)) {
+    throw new Error("No tienes privilegios para listar categorias");
+  }
+
+  return listarCategoriasPadresApi();
+}
+
+//! Listar subcategorias de una categoria padre
+export async function listarSubcategorias(categoriaPadreId: number) {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+  if (!hasPermission(user.rol, permissions.listarCategorias)) {
+    throw new Error("No tienes privilegios para listar categorias");
+  }
+
+  return listarSubcategoriasApi(categoriaPadreId);
 }
 
 //! Obtener categoria por id

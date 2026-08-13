@@ -1,5 +1,5 @@
 "use client";
-import { useCategorias } from "@/features/dashboard/categoria/hooks/useCategorias";
+import { useCategoriasPadres, useSubcategorias } from "@/features/dashboard/categoria/hooks/useCategorias";
 import { useMarcas } from "@/features/dashboard/marca/hooks/useMarcas";
 import { useUnidadesMedida } from "@/features/dashboard/unidadMedida/hooks/useUnidadesMedida";
 import { useListasPrecio } from "@/features/dashboard/listaPrecio/hooks/useListasPrecio";
@@ -73,8 +73,8 @@ const hoy = dayjs();
 const defaultPrecio = {
   listaPrecioId: 0,
   precio: 0,
-  precioMinimo: 0,
-  precioMaximo: 0,
+  precioMinimo: null as number | null,
+  precioMaximo: null as number | null,
   fechaInicio: toDotNetDateTime({ year: hoy.year(), month: hoy.month() + 1, day: hoy.date() }),
   fechaFin: null as string | null,
 };
@@ -147,13 +147,15 @@ interface ImagenLocal {
 export default function RegistrarProducto() {
   const [imagenes, setImagenes] = useState<ImagenLocal[]>([]);
   const [principalIndex, setPrincipalIndex] = useState(0);
+  const [categoriaPadreId, setCategoriaPadreId] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.registrarProducto) : false;
 
-  const { categorias } = useCategorias(true);
+  const { categorias: categoriasPadre, loading: loadingPadres } = useCategoriasPadres();
+  const { categorias: subcategorias, loading: loadingSubcategorias } = useSubcategorias(categoriaPadreId);
   const { marcas } = useMarcas(true);
   const { unidadesMedida } = useUnidadesMedida(true);
   const { listasPrecio } = useListasPrecio(true);
@@ -166,6 +168,7 @@ export default function RegistrarProducto() {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ProductoForm>({
     resolver: standardSchemaResolver(productoSchema),
@@ -338,21 +341,47 @@ export default function RegistrarProducto() {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <FormControl fullWidth size="small">
+            <InputLabel id="categoria-padre-label">Categoría padre</InputLabel>
+            <Select
+              labelId="categoria-padre-label"
+              label="Categoría padre"
+              value={categoriaPadreId === null ? "" : String(categoriaPadreId)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setCategoriaPadreId(value === "" ? null : Number(value));
+                setValue("categoriaId", 0);
+              }}
+              disabled={loadingPadres}
+            >
+              <MenuItem value="">
+                <em>Seleccione una categoría padre</em>
+              </MenuItem>
+              {categoriasPadre.map((item) => (
+                <MenuItem key={item.id} value={String(item.id)}>
+                  {item.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Controller
             name="categoriaId"
             control={control}
             render={({ field }) => (
               <FormControl fullWidth size="small" error={!!errors.categoriaId}>
-                <InputLabel>Categoría *</InputLabel>
+                <InputLabel>Subcategoría *</InputLabel>
                 <Select
                   value={field.value || ""}
-                  label="Categoría *"
+                  label="Subcategoría *"
                   onChange={(e) => field.onChange(Number(e.target.value))}
+                  disabled={!categoriaPadreId || loadingSubcategorias}
                 >
                   <MenuItem value="">
-                    <em>Seleccione</em>
+                    <em>Seleccione una subcategoría</em>
                   </MenuItem>
-                  {categorias.map((item) => (
+                  {subcategorias.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
                       {item.nombre}
                     </MenuItem>
@@ -697,7 +726,7 @@ export default function RegistrarProducto() {
                           error={!!errors.precios?.[index]?.precioMinimo}
                           helperText={errors.precios?.[index]?.precioMinimo?.message}
                           onFocus={(e) => e.target.select()}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
                         />
                       )}
                     />
@@ -715,7 +744,7 @@ export default function RegistrarProducto() {
                           error={!!errors.precios?.[index]?.precioMaximo}
                           helperText={errors.precios?.[index]?.precioMaximo?.message}
                           onFocus={(e) => e.target.select()}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
                         />
                       )}
                     />

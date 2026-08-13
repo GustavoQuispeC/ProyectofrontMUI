@@ -33,7 +33,7 @@ export const precioProductoSchema = z
 export const productoSchema = z
   .object({
     codigoBarras: z.string().trim().default(""),
-    categoriaId: z.coerce.number().min(1, "Seleccione una categoría"),
+    categoriaId: z.coerce.number().min(1, "Seleccione una subcategoría"),
     marcaId: z.coerce.number().min(1, "Seleccione una marca"),
     unidadMedidaId: z.coerce.number().min(1, "Seleccione una unidad de medida"),
     nombre: z.string().trim().min(1, "El nombre del producto es obligatorio"),
@@ -57,6 +57,49 @@ export const productoSchema = z
         message: "Debe marcar exactamente una imagen como principal",
       });
     }
+  })
+  .superRefine((data, ctx) => {
+    data.precios.forEach((precio, index) => {
+      if (precio.precio <= data.costoActual) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["precios", index, "precio"],
+          message: "El precio debe ser mayor al costo actual",
+        });
+      }
+
+      if (precio.precioMinimo !== null && precio.precioMinimo !== undefined && precio.precioMinimo < data.costoActual) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["precios", index, "precioMinimo"],
+          message: "El precio mínimo debe ser mayor o igual al costo actual",
+        });
+      }
+
+      if (precio.precioMinimo !== null && precio.precioMinimo !== undefined && precio.precioMinimo > precio.precio) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["precios", index, "precioMinimo"],
+          message: "El precio mínimo no puede ser mayor al precio",
+        });
+      }
+
+      if (precio.precioMaximo !== null && precio.precioMaximo !== undefined && precio.precioMaximo < precio.precio) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["precios", index, "precioMaximo"],
+          message: "El precio máximo debe ser mayor o igual al precio",
+        });
+      }
+
+      if (precio.fechaFin && precio.fechaInicio && precio.fechaFin <= precio.fechaInicio) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["precios", index, "fechaFin"],
+          message: "La fecha de fin debe ser posterior a la fecha de inicio",
+        });
+      }
+    });
   });
 
 export type ProductoForm = z.infer<typeof productoSchema>;

@@ -1,5 +1,9 @@
 "use client";
-import { useRegistrarCategoria, useSubirImagen } from "@/features/dashboard/categoria/hooks/useCategorias";
+import {
+  useRegistrarCategoria,
+  useSubirImagen,
+  useCategoriasPadres,
+} from "@/features/dashboard/categoria/hooks/useCategorias";
 import { CategoriaForm, categoriaSchema } from "@/features/dashboard/categoria/categoria.schema";
 import { RegistrarCategoriaRequest } from "@/features/dashboard/categoria/Categoria.types";
 import { useRouter } from "next/navigation";
@@ -13,6 +17,10 @@ import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ImageIcon from "@mui/icons-material/Image";
 import CloseIcon from "@mui/icons-material/Close";
@@ -31,6 +39,7 @@ const defaultValues: CategoriaForm = {
   imagen: null,
   orden: 0,
   isActive: true,
+  categoriaPadreId: null,
 };
 
 type InputCardProps = React.ComponentProps<typeof TextField>;
@@ -84,6 +93,7 @@ export default function RegistrarCategoria() {
 
   const registrarCategoriaMutation = useRegistrarCategoria();
   const subirImagenMutation = useSubirImagen();
+  const { categorias: categoriasPadre, loading: loadingPadres } = useCategoriasPadres();
   const isSubmitting = registrarCategoriaMutation.loading || subirImagenMutation.loading;
 
   const {
@@ -132,6 +142,7 @@ export default function RegistrarCategoria() {
         ...data,
         descripcion: data.descripcion?.trim() || null,
         imagen: imagenUrl,
+        categoriaPadreId: data.categoriaPadreId ?? undefined,
       };
 
       await toastPromise(registrarCategoriaMutation.registrarCategoria(payload), {
@@ -189,6 +200,37 @@ export default function RegistrarCategoria() {
                   onFocus={(e) => e.target.select()}
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
+              )}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Controller
+              name="categoriaPadreId"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth size="small">
+                  <InputLabel id="categoria-padre-label">Categoría padre (opcional)</InputLabel>
+                  <Select
+                    labelId="categoria-padre-label"
+                    id="categoria-padre"
+                    label="Categoría padre (opcional)"
+                    value={field.value === null ? "" : String(field.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === "" ? null : Number(value));
+                    }}
+                    disabled={loadingPadres}
+                  >
+                    <MenuItem value="">
+                      <em>Sin categoría padre</em>
+                    </MenuItem>
+                    {categoriasPadre.map((cat) => (
+                      <MenuItem key={cat.id} value={String(cat.id)}>
+                        {cat.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
             />
           </Grid>

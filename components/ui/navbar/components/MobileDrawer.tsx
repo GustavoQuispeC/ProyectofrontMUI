@@ -9,22 +9,32 @@ import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
+import { ListarCategoria } from "@/features/dashboard/categoria/Categoria.types";
 import { MegaMenuCategory } from "../types";
 import { SearchBox } from "./SearchBox";
 
-function buildMenuCategories(categorias: { id: number; nombre: string }[]): MegaMenuCategory[] {
-  return categorias.map((c) => ({
-    id: String(c.id),
-    label: c.nombre,
-    href: `/productFilter?category=${encodeURIComponent(c.nombre)}`,
-    groups: [
-      {
-        title: "Ver todo",
-        seeAllHref: `/productFilter?category=${encodeURIComponent(c.nombre)}`,
-        items: [],
-      },
-    ],
-  }));
+function buildMenuCategories(categorias: ListarCategoria[]): MegaMenuCategory[] {
+  const padres = categorias.filter((c) => c.categoriaPadreId === null).sort((a, b) => a.orden - b.orden);
+
+  return padres.map((padre) => {
+    const subcategorias = categorias
+      .filter((c) => c.categoriaPadreId === padre.id)
+      .sort((a, b) => a.orden - b.orden)
+      .map((c) => c.nombre);
+
+    return {
+      id: String(padre.id),
+      label: padre.nombre,
+      href: `/productFilter?category=${encodeURIComponent(padre.nombre)}`,
+      groups: [
+        {
+          title: subcategorias.length > 0 ? "Subcategorías" : "Ver todo",
+          seeAllHref: `/productFilter?category=${encodeURIComponent(padre.nombre)}`,
+          items: subcategorias,
+        },
+      ],
+    };
+  });
 }
 
 interface MobileDrawerProps {
@@ -159,7 +169,7 @@ export function MobileDrawer({ open, onClose, isLoggedIn, userName, onLogin, onL
                     {group.items.map((item) => (
                       <li key={item}>
                         <Link
-                          href={`${active.href}&item=${encodeURIComponent(item)}`}
+                          href={`/productFilter?category=${encodeURIComponent(item)}`}
                           onClick={handleClose}
                           className="block py-1.5 text-sm text-text-primary hover:text-orange-600"
                         >
