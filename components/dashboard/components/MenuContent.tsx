@@ -24,6 +24,8 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SummarizeIcon from "@mui/icons-material/Summarize";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
+import CategoryIcon from "@mui/icons-material/Category";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 
 import React from "react";
 import Link from "next/link";
@@ -62,13 +64,13 @@ const mainListItems: MenuItemType[] = [
     children: [
       {
         text: "Listar",
-        icon: <SummarizeIcon />,
+        icon: <FormatListNumberedIcon />,
         href: "/dashboard/productos/listar",
         allowedRoles: [...permissions.registrarProducto],
       },
       {
         text: "Categorias",
-        icon: <SummarizeIcon />,
+        icon: <CategoryIcon />,
         href: "/dashboard/categorias/listar",
         allowedRoles: [...permissions.registrarProducto],
       },

@@ -117,7 +117,7 @@ export default function Marcas() {
   );
 
   return (
-    <section className="relative w-full overflow-hidden bg-white">
+    <section id="marcas" className="relative w-full overflow-hidden bg-white scroll-mt-20">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0" />
 
       <div className="relative mx-auto w-full max-w-screen-2xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8 2xl:px-12">

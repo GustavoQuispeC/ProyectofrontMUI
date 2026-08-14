@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
+import { useCategoriasPadres } from "@/features/dashboard/categoria/hooks/useCategorias";
 
 export interface Category {
   label: string;
@@ -28,7 +28,7 @@ export default function MostrarCategorias({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const { categorias } = useCategoriasPublicas();
+  const { categorias } = useCategoriasPadres();
 
   const categories =
     propCategories ||
@@ -120,7 +120,7 @@ export default function MostrarCategorias({
               type="button"
               data-card
               onClick={() => handleCategoryClick(cat)}
-              className="group relative shrink-0 snap-start w-40 sm:w-48 md:w-64 lg:w-72 h-64 md:h-75
+              className="group relative shrink-0 snap-start w-40 sm:w-48 md:w-64 lg:w-72 h-64 md:h-80
                  overflow-hidden focus:outline-none focus:ring-2
                 focus:ring-offset-2 cursor-pointer"
             >

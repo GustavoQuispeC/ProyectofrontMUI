@@ -2,7 +2,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import MenuIcon from "@mui/icons-material/Menu";
-import RoomOutlinedIcon from "@mui/icons-material/RoomOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
@@ -33,7 +32,7 @@ export function TopBar({
   onLogout,
 }: TopBarProps) {
   return (
-    <div className="bg-white border-b border-slate-200 shadow-sm">
+    <div className="bg-slate-950 border-b border-white/10 shadow-sm">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center gap-y-2 py-2.5 md:h-16 md:flex-nowrap md:py-0">
           {/* Logo */}
@@ -44,7 +43,7 @@ export function TopBar({
               width={96}
               height={12}
               priority
-              className="h-10 w-auto object-contain md:h-12"
+              className="h-10 w-auto object-contain md:h-12 brightness-110  drop-shadow-md"
             />
           </Link>
 
@@ -52,7 +51,7 @@ export function TopBar({
           <button
             type="button"
             onClick={onOpenMenu}
-            className="inline-flex h-10 items-center gap-1.5 rounded-lg px-2.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100 md:px-3"
+            className="inline-flex h-10 items-center gap-1.5 rounded-lg px-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 md:px-3"
           >
             <MenuIcon fontSize="medium" />
             <span className="hidden sm:inline">Menú</span>
@@ -86,18 +85,19 @@ export function TopBar({
               onToggle={onToggleDropdown}
               align="right"
               width="w-60"
+              triggerClassName="hover:bg-white/10"
               trigger={
                 <span className="flex items-center gap-1">
-                  <PersonOutlineOutlinedIcon fontSize="small" className="text-slate-700" />
+                  <PersonOutlineOutlinedIcon fontSize="small" className="text-slate-300" />
                   <span className="hidden text-left leading-tight sm:block">
-                    <span className="block text-[11px] text-slate-500">¡Hola!</span>
-                    <span className="block font-semibold">
+                    <span className="block text-[11px] text-slate-400">¡Hola!</span>
+                    <span className="block font-semibold text-white">
                       {isLoggedIn ? (userName ?? "Mi cuenta") : "Inicia sesión"}
                     </span>
                   </span>
                   <KeyboardArrowDownIcon
                     fontSize="small"
-                    className={`text-slate-700 transition-transform duration-200 ${
+                    className={`text-slate-300 transition-transform duration-200 ${
                       openDropdown === "user" ? "rotate-180" : ""
                     }`}
                   />
@@ -116,7 +116,7 @@ export function TopBar({
                     label="Configuración"
                     href="/configuracion"
                   />
-                  <div className="my-1 border-t border-border-base" />
+                  <div className="my-1 border-t border-slate-200/10" />
                   <DropdownItem
                     icon={<LogoutOutlinedIcon fontSize="small" />}
                     label="Salir"
@@ -128,7 +128,7 @@ export function TopBar({
                 <>
                   <DropdownItem
                     icon={<LoginOutlinedIcon fontSize="small" />}
-                    label="Iniciar sesión"
+                    label="Iniciar sesión - Cliente"
                     onClick={onLogin}
                   />
                   <DropdownItem

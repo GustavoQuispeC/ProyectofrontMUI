@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import FmdGoodOutlinedIcon from "@mui/icons-material/FmdGoodOutlined";
 import NavigationOutlinedIcon from "@mui/icons-material/NavigationOutlined";
 import Phone from "@mui/icons-material/Phone";
@@ -45,43 +45,39 @@ export default function Contactenos() {
 
   const email = "grupo.fametsac@gmail.com";
 
-  const tiendaActivaLabel = useMemo(() => {
-    return `${tiendaActiva.nombre} — ${tiendaActiva.direccion}`;
-  }, [tiendaActiva]);
-
   return (
-    <section id="contacto" className="bg-white dark:bg-gray-900">
+    <section id="contacto" className="bg-slate-50">
       <div className="py-16 sm:py-20">
         <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 2xl:px-12">
           {/* Header mejorado */}
           <div className="mx-auto max-w-3xl text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
+            <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
               <FmdGoodOutlinedIcon className="w-4 h-4" />
               Nuestras ubicaciones
             </div>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-blue-900 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-blue-950 mb-4">
               Visítanos o contáctanos
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
               Elige una sede para ver el mapa y obtener indicaciones. Estamos listos para ayudarte con tu compra.
             </p>
           </div>
 
           {/* Content */}
-          <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+          <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             {/* MAPA mejorado */}
-            <div className="overflow-hidden rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl">
-              <div className="px-6 py-7 bg-linear-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-750 border-b-2 border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+              <div className="px-6 py-5 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <FmdGoodOutlinedIcon className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
-                    <p className="text-xs uppercase tracking-wide font-semibold text-gray-600 dark:text-gray-400">
+                    <FmdGoodOutlinedIcon className="w-4 h-4 text-orange-600 shrink-0" />
+                    <p className="text-xs uppercase tracking-wide font-semibold text-slate-500">
                       Ubicación seleccionada
                     </p>
                   </div>
-                  <p className="font-bold text-lg text-blue-900 dark:text-white line-clamp-1">{tiendaActiva.nombre}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{tiendaActiva.direccion}</p>
+                  <p className="font-bold text-lg text-blue-950 line-clamp-1">{tiendaActiva.nombre}</p>
+                  <p className="text-sm text-slate-600">{tiendaActiva.direccion}</p>
                 </div>
 
                 <a
@@ -106,32 +102,30 @@ export default function Contactenos() {
                 </a>
               </div>
 
-              <div className="relative">
+              <div className="relative flex-1 min-h-0">
                 <iframe
                   key={tiendaActiva.id}
                   title={tiendaActiva.nombre}
                   src={tiendaActiva.mapSrc}
                   width="100%"
-                  height="480"
+                  height="100%"
                   style={{ border: 0 }}
                   loading="lazy"
                   allowFullScreen
-                  className="w-full"
+                  className="h-full w-full"
                 />
               </div>
             </div>
 
             {/* PANEL DERECHA mejorado */}
-            <div className="rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl overflow-hidden">
+            <div className="flex flex-col h-full rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden">
               {/* Top: contacto rápido */}
-              <div className="p-6 bg-linear-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-b-2 border-gray-200 dark:border-gray-700">
+              <div className="p-6 bg-orange-50 border-b border-slate-200">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-600 text-white">
                     <Phone sx={{ fontSize: 16 }} />
                   </div>
-                  <p className="text-sm font-bold uppercase tracking-wide text-gray-700 dark:text-gray-300">
-                    Atención al cliente
-                  </p>
+                  <p className="text-sm font-bold uppercase tracking-wide text-slate-700">Atención al cliente</p>
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -141,24 +135,21 @@ export default function Contactenos() {
                       group
                       flex items-center gap-3 
                       rounded-xl 
-                      border-2 border-gray-200 dark:border-gray-600
-                      bg-white dark:bg-gray-700
+                      border border-slate-200
+                      bg-white
                       px-4 py-2 
-                      text-sm font-medium text-gray-800 dark:text-white
-                      hover:border-orange-200 dark:hover:border-orange-400
-                      hover:bg-orange-50 dark:hover:bg-orange-900/20
+                      text-sm font-medium text-slate-800
+                      hover:border-orange-300
+                      hover:bg-orange-50
                       transition-all duration-300
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400
                     "
                   >
-                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-600 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 transition-colors">
-                      <Mail
-                        sx={{ fontSize: 18 }}
-                        className="text-gray-600 dark:text-gray-300 group-hover:text-orange-600 dark:group-hover:text-orange-400"
-                      />
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-orange-100 transition-colors">
+                      <Mail sx={{ fontSize: 18 }} className="text-slate-600 group-hover:text-orange-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Correo electrónico</p>
+                      <p className="text-xs text-slate-500 mb-0.5">Correo electrónico</p>
                       <p className="font-semibold truncate">{email}</p>
                     </div>
                   </a>
@@ -169,24 +160,21 @@ export default function Contactenos() {
                       group
                       flex items-center gap-3 
                       rounded-xl 
-                      border-2 border-gray-200 dark:border-gray-600
-                      bg-white dark:bg-gray-700
+                      border border-slate-200
+                      bg-white
                       px-4 py-2 
-                      text-sm font-medium text-gray-800 dark:text-white
-                      hover:border-orange-200 dark:hover:border-orange-400
-                      hover:bg-orange-50 dark:hover:bg-orange-900/20
+                      text-sm font-medium text-slate-800
+                      hover:border-orange-300
+                      hover:bg-orange-50
                       transition-all duration-300
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400
                     "
                   >
-                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-600 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 transition-colors">
-                      <Phone
-                        sx={{ fontSize: 18 }}
-                        className="text-gray-600 dark:text-gray-300 group-hover:text-orange-600 dark:group-hover:text-orange-400"
-                      />
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-orange-100 transition-colors">
+                      <Phone sx={{ fontSize: 18 }} className="text-slate-600 group-hover:text-orange-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Teléfono</p>
+                      <p className="text-xs text-slate-500 mb-0.5">Teléfono</p>
                       <p className="font-semibold">{tiendaActiva.telefono}</p>
                     </div>
                   </a>
@@ -195,11 +183,11 @@ export default function Contactenos() {
 
               {/* Lista de tiendas */}
               <div className="p-3">
-                <p className="px-3 py-1 text-xs uppercase tracking-wide font-bold text-gray-600 dark:text-gray-400">
+                <p className="px-3 py-1 text-xs uppercase tracking-wide font-bold text-slate-500">
                   Selecciona una tienda
                 </p>
 
-                <div className="space-y-1 mt-2">
+                <div className="space-y-2 mt-2">
                   {tiendas.map((tienda) => {
                     const activa = tienda.id === tiendaActiva.id;
 
@@ -208,11 +196,11 @@ export default function Contactenos() {
                         key={tienda.id}
                         onClick={() => setTiendaActiva(tienda)}
                         className={[
-                          "w-full text-left rounded-xl px-4 py-2 transition-all duration-300",
+                          "w-full text-left rounded-xl px-4 py-3 transition-all duration-300",
                           "focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400",
                           activa
-                            ? "bg-linear-to-r from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 border-2 border-orange-200 dark:border-orange-500 shadow-md"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-700 border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-600",
+                            ? "bg-orange-50 border border-orange-200 shadow-sm"
+                            : "hover:bg-slate-50 border border-transparent hover:border-slate-200",
                         ].join(" ")}
                       >
                         <div className="flex items-start gap-3">
@@ -221,7 +209,7 @@ export default function Contactenos() {
                               "mt-0.5 flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300",
                               activa
                                 ? "bg-linear-to-br from-orange-500 to-orange-600 text-white shadow-lg"
-                                : "bg-gray-100 text-gray-500 dark:bg-gray-600 dark:text-gray-300",
+                                : "bg-slate-100 text-slate-500",
                             ].join(" ")}
                           >
                             <FmdGoodOutlinedIcon sx={{ fontSize: 20 }} />
@@ -229,7 +217,7 @@ export default function Contactenos() {
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-bold text-base text-gray-900 dark:text-white">{tienda.nombre}</h3>
+                              <h3 className="font-bold text-base text-slate-900">{tienda.nombre}</h3>
                               {activa && (
                                 <span className="shrink-0 rounded-full bg-orange-600 text-white px-2.5 py-0.5 text-xs font-bold">
                                   Activa
@@ -237,9 +225,9 @@ export default function Contactenos() {
                               )}
                             </div>
 
-                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">{tienda.direccion}</p>
+                            <p className="text-sm text-slate-600 mb-1">{tienda.direccion}</p>
 
-                            <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
+                            <div className="flex flex-wrap gap-3 text-xs text-slate-500">
                               <span className="flex items-center gap-1">
                                 <Phone sx={{ fontSize: 12 }} />
                                 {tienda.telefono}
@@ -258,16 +246,14 @@ export default function Contactenos() {
               </div>
 
               {/* Footer mejorado */}
-              <div className="px-6 py-2 bg-blue-50 dark:bg-blue-900/20 border-t-2 border-gray-200 dark:border-gray-700">
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
                 <div className="flex items-start gap-3">
                   <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-900 text-white shrink-0">
                     <Mail sx={{ fontSize: 18 }} />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white mb-1">¿Necesitas ayuda con tu pedido?</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Escríbenos y te asesoramos en todo lo que necesites.
-                    </p>
+                    <p className="font-semibold text-slate-900 mb-1">¿Necesitas ayuda con tu pedido?</p>
+                    <p className="text-sm text-slate-600">Escríbenos y te asesoramos en todo lo que necesites.</p>
                   </div>
                 </div>
               </div>

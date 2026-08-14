@@ -10,9 +10,19 @@ interface DropdownProps {
   children: React.ReactNode;
   align?: "left" | "right";
   width?: string;
+  triggerClassName?: string;
 }
 
-export function Dropdown({ id, openId, onToggle, trigger, children, align = "left", width = "w-52" }: DropdownProps) {
+export function Dropdown({
+  id,
+  openId,
+  onToggle,
+  trigger,
+  children,
+  align = "left",
+  width = "w-52",
+  triggerClassName = "",
+}: DropdownProps) {
   const isOpen = openId === id;
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +42,7 @@ export function Dropdown({ id, openId, onToggle, trigger, children, align = "lef
       <button
         type="button"
         onClick={() => onToggle(id)}
-        className="inline-flex h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-slate-900 transition-colors duration-150 hover:bg-slate-100 whitespace-nowrap"
+        className={`inline-flex h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-slate-900 transition-colors duration-150 whitespace-nowrap ${triggerClassName}`}
       >
         {trigger}
       </button>

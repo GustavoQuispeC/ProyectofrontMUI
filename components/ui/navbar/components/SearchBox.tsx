@@ -113,7 +113,7 @@ export function SearchBox({ className = "", autoFocus, onNavigate }: SearchBoxPr
           type="button"
           aria-label="Buscar"
           onClick={() => goToSearch(term)}
-          className="flex h-full w-11 shrink-0 items-center justify-center bg-gray-900 text-white transition-colors hover:bg-orange-600"
+          className="flex h-full w-11 shrink-0 items-center justify-center bg-orange-600 text-white transition-colors hover:bg-orange-700"
         >
           <SearchIcon fontSize="small" />
         </button>
