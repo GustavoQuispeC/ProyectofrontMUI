@@ -20,7 +20,7 @@ const collapsedWidth = 64;
 const expandedWidth = 240;
 
 export default function SideMenu() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [usuario, setUsuario] = useState<IUserData | null>(null);
 
   useEffect(() => {
