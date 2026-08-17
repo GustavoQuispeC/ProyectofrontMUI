@@ -14,6 +14,7 @@ export async function obtenerProductosPublicosApi(params: ListarProductosRequest
   if (params.marcaId) query.append("marcaId", String(params.marcaId));
   if (params.unidadMedidaId) query.append("unidadMedidaId", String(params.unidadMedidaId));
   if (params.isActive !== undefined) query.append("isActive", String(params.isActive));
+  if (params.precioMax !== undefined) query.append("precioMax", String(params.precioMax));
   if (params.ordenarPor) query.append("ordenarPor", params.ordenarPor);
   if (params.ordenamiento) query.append("ordenamiento", params.ordenamiento);
 

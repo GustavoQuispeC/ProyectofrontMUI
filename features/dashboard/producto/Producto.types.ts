@@ -113,6 +113,7 @@ export interface ListarProductosRequest {
   marcaId?: number;
   unidadMedidaId?: number;
   isActive?: boolean;
+  precioMax?: number;
   ordenarPor?: string;
   ordenamiento?: "asc" | "desc";
 }

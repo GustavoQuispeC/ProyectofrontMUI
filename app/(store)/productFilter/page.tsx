@@ -148,10 +148,16 @@ export default function Page() {
     return found?.id;
   }, [filters.brands, marcas]);
 
-  // La API pública solo admite un único categoriaId/marcaId y no busca por marca.
-  // Cuando hay búsqueda de texto o más de una categoría/marca seleccionada,
-  // traemos un lote amplio y filtramos/paginamos en el cliente.
-  const clientMode = Boolean(filters.search) || filters.categories.length > 1 || filters.brands.length > 1;
+  // La API pública solo admite un único categoriaId/marcaId, no busca por marca
+  // y no garantiza filtrado por precio. Cuando se usan esos filtros traemos
+  // un lote amplio y filtramos/paginamos/sorteamos en el cliente.
+  const priceSort = sortBy === "Mayor a menor" || sortBy === "Menor a mayor";
+  const clientMode =
+    Boolean(filters.search) ||
+    filters.categories.length > 1 ||
+    filters.brands.length > 1 ||
+    filters.priceMax !== MAX_PRICE ||
+    priceSort;
 
   const requestParams = useMemo(
     () => ({
@@ -160,9 +166,10 @@ export default function Page() {
       busqueda: clientMode ? undefined : filters.search || undefined,
       categoriaId,
       marcaId,
+      precioMax: clientMode ? undefined : filters.priceMax === MAX_PRICE ? undefined : filters.priceMax,
       ...mapSortBy(sortBy),
     }),
-    [clientMode, page, filters.search, categoriaId, marcaId, sortBy],
+    [clientMode, page, filters.search, categoriaId, marcaId, filters.priceMax, sortBy],
   );
 
   const { productos, paginacion, loading } = useProductosPublicos(requestParams);
@@ -194,11 +201,29 @@ export default function Page() {
     });
   }, [clientMode, storeProducts, searchTerm, filters.categories, filters.brands, filters.priceMax]);
 
+  const sortedProducts = useMemo(() => {
+    if (!clientMode) return storeProducts;
+    return [...filteredProducts].sort((a, b) => {
+      switch (sortBy) {
+        case "Mayor a menor":
+          return b.price - a.price;
+        case "Menor a mayor":
+          return a.price - b.price;
+        case "Ascendente":
+          return a.name.localeCompare(b.name);
+        case "Descendente":
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
+  }, [clientMode, filteredProducts, sortBy, storeProducts]);
+
   const displayedProducts = useMemo(() => {
     if (!clientMode) return storeProducts;
     const start = (page - 1) * PAGE_SIZE;
-    return filteredProducts.slice(start, start + PAGE_SIZE);
-  }, [clientMode, storeProducts, filteredProducts, page]);
+    return sortedProducts.slice(start, start + PAGE_SIZE);
+  }, [clientMode, storeProducts, sortedProducts, page]);
 
   const totalPages = useMemo(() => {
     if (clientMode) return Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
