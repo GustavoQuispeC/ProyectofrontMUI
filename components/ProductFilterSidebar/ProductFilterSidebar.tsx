@@ -27,7 +27,7 @@ export default function ProductFilterSidebar({
   categories = [],
   brands = [],
 }: Props) {
-  const baseClass = "w-72 xl:w-80 shrink-0 border-r border-slate-200 dark:border-neutral-800 min-h-screen sticky top-0";
+  const baseClass = "w-72 xl:w-80 shrink-0 border-r border-slate-200 min-h-screen sticky top-0";
 
   const handleToggle = <K extends keyof ProductFilters>(
     key: K,
@@ -43,15 +43,13 @@ export default function ProductFilterSidebar({
       <div className="p-6">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Filtros</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Refina los resultados por categoría, marca o precio.
-            </p>
+            <h2 className="text-lg font-bold text-blue-900">Filtros</h2>
+            <p className="text-sm text-slate-500 mt-1">Refina los resultados por categoría, marca o precio.</p>
           </div>
           <button
             type="button"
             onClick={onClear}
-            className="text-xs font-semibold uppercase tracking-widest text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100"
+            className="text-xs font-semibold uppercase tracking-widest text-blue-900 hover:text-blue-700"
           >
             Limpiar
           </button>
@@ -78,7 +76,7 @@ export default function ProductFilterSidebar({
                 value={filters.search}
                 onChange={(event) => onFiltersChange({ ...filters, search: event.target.value })}
                 placeholder="Buscar producto, marca o categoría"
-                className="w-full rounded-2xl border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 pl-9 pr-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-shadow"
+                className="w-full rounded-2xl border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-950 focus:ring-2 focus:ring-slate-200 transition-shadow"
               />
             </div>
           </FilterSection>
@@ -94,16 +92,12 @@ export default function ProductFilterSidebar({
                       type="button"
                       onClick={() => handleToggle("categories", category)}
                       className={`w-full text-left flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${
-                        active
-                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
-                          : "hover:bg-slate-50 dark:hover:bg-neutral-800 text-slate-700 dark:text-slate-300"
+                        active ? "bg-slate-50 text-blue-900 font-medium" : "hover:bg-slate-50 text-slate-700"
                       }`}
                     >
                       <span
                         className={`flex h-4 w-4 items-center justify-center rounded border ${
-                          active
-                            ? "border-blue-600 bg-blue-600 text-white"
-                            : "border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-900"
+                          active ? "border-blue-900 bg-blue-900 text-white" : "border-slate-300 bg-white"
                         }`}
                       >
                         {active && (
@@ -137,16 +131,12 @@ export default function ProductFilterSidebar({
                       type="button"
                       onClick={() => handleToggle("brands", brand)}
                       className={`w-full text-left flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${
-                        active
-                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium"
-                          : "hover:bg-slate-50 dark:hover:bg-neutral-800 text-slate-700 dark:text-slate-300"
+                        active ? "bg-slate-50 text-blue-900 font-medium" : "hover:bg-slate-50 text-slate-700"
                       }`}
                     >
                       <span
                         className={`flex h-4 w-4 items-center justify-center rounded border ${
-                          active
-                            ? "border-blue-600 bg-blue-600 text-white"
-                            : "border-slate-300 dark:border-neutral-600 bg-white dark:bg-neutral-900"
+                          active ? "border-blue-900 bg-blue-900 text-white" : "border-slate-300 bg-white"
                         }`}
                       >
                         {active && (
@@ -197,7 +187,7 @@ export default function ProductFilterSidebar({
                     className={`rounded-full px-3 py-1.5 text-xs font-medium border transition-colors ${
                       active
                         ? "bg-amber-400 border-amber-400 text-slate-900"
-                        : "bg-white dark:bg-neutral-900 border-slate-200 dark:border-neutral-700 text-slate-700 dark:text-slate-300 hover:border-amber-400"
+                        : "bg-white border-slate-200 text-slate-700 hover:border-amber-400"
                     }`}
                   >
                     {"★".repeat(rating)}
@@ -220,11 +210,11 @@ export default function ProductFilterSidebar({
                     priceMax: Number(event.target.value),
                   })
                 }
-                className="w-full accent-blue-600"
+                className="w-full accent-slate-950"
               />
-              <div className="flex justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
+              <div className="flex justify-between text-xs font-medium text-slate-500">
                 <span>S/ 0</span>
-                <span className="text-blue-600 dark:text-blue-300">S/ {filters.priceMax.toLocaleString()}</span>
+                <span className="text-blue-900">S/ {filters.priceMax.toLocaleString()}</span>
               </div>
             </div>
           </FilterSection>

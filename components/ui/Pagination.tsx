@@ -18,7 +18,7 @@ export default function Pagination({ page, totalPages, onChange }: Props) {
         type="button"
         onClick={() => onChange(Math.max(1, page - 1))}
         disabled={page === 1}
-        className="px-3 py-1 rounded-xl border bg-white dark:bg-neutral-900 border-slate-200 disabled:opacity-50"
+        className="px-3 py-1 rounded-xl border bg-white border-slate-200 disabled:opacity-50"
       >
         Anterior
       </button>
@@ -27,7 +27,7 @@ export default function Pagination({ page, totalPages, onChange }: Props) {
         <button
           type="button"
           onClick={() => onChange(1)}
-          className="px-3 py-1 rounded-xl border bg-white dark:bg-neutral-900 border-slate-200"
+          className="px-3 py-1 rounded-xl border bg-white border-slate-200"
         >
           1
         </button>
@@ -40,7 +40,7 @@ export default function Pagination({ page, totalPages, onChange }: Props) {
           key={p}
           type="button"
           onClick={() => onChange(p)}
-          className={`px-3 py-1 rounded-xl border border-slate-200 ${p === page ? "bg-blue-600 text-white" : "bg-white dark:bg-neutral-900"}`}
+          className={`px-3 py-1 rounded-xl border border-slate-200 ${p === page ? "bg-blue-900 text-white" : "bg-white"}`}
         >
           {p}
         </button>
@@ -52,7 +52,7 @@ export default function Pagination({ page, totalPages, onChange }: Props) {
         <button
           type="button"
           onClick={() => onChange(totalPages)}
-          className="px-3 py-1 rounded-xl border bg-white dark:bg-neutral-900 border-slate-200"
+          className="px-3 py-1 rounded-xl border bg-white border-slate-200"
         >
           {totalPages}
         </button>
@@ -62,7 +62,7 @@ export default function Pagination({ page, totalPages, onChange }: Props) {
         type="button"
         onClick={() => onChange(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
-        className="px-3 py-1 rounded-xl border bg-white dark:bg-neutral-900 border-slate-200 disabled:opacity-50"
+        className="px-3 py-1 rounded-xl border bg-white border-slate-200 disabled:opacity-50"
       >
         Siguiente
       </button>

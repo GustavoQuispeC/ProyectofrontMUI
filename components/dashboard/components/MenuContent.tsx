@@ -26,6 +26,7 @@ import SummarizeIcon from "@mui/icons-material/Summarize";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CategoryIcon from "@mui/icons-material/Category";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 
 import React from "react";
 import Link from "next/link";
@@ -73,6 +74,12 @@ const mainListItems: MenuItemType[] = [
         icon: <CategoryIcon />,
         href: "/dashboard/categorias/listar",
         allowedRoles: [...permissions.registrarProducto],
+      },
+      {
+        text: "Marcas",
+        icon: <StorefrontOutlinedIcon />,
+        href: "/dashboard/marcas/listar",
+        allowedRoles: [...permissions.listarMarcas],
       },
     ],
   },
