@@ -210,11 +210,11 @@ export default function ProductFilterSidebar({
                     priceMax: Number(event.target.value),
                   })
                 }
-                className="w-full accent-slate-950"
+                className="w-full accent-blue-900"
               />
               <div className="flex justify-between text-xs font-medium text-slate-500">
                 <span>S/ 0</span>
-                <span className="text-blue-900">S/ {filters.priceMax.toLocaleString()}</span>
+                <span className="text-blue-900">S/ {filters.priceMax}</span>
               </div>
             </div>
           </FilterSection>

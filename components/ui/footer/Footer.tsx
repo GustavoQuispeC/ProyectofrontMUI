@@ -5,10 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const WHATSAPP_NUMBER = "51904193374";
-const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  "Hola, quiero cotizar materiales. ¿Me pueden ayudar?",
-)}`;
+function buildWaLink(phone: string, storeName: string) {
+  return `https://wa.me/${phone}?text=${encodeURIComponent(
+    `Hola Grupo Famet, deseo cotizar materiales desde ${storeName}. ¿Me pueden ayudar?`,
+  )}`;
+}
 
 const quickLinks = [
   { label: "Inicio", href: "/" },
@@ -57,20 +58,6 @@ export default function Footer() {
               Materiales de construcción con atención cercana para proyectos que necesitan calidad, seguridad y
               confianza desde la compra hasta la entrega.
             </p>
-
-            {/* <a
-              href={WA_LINK}
-              target="_blank"
-              rel="noreferrer"
-              className="group mt-6 inline-flex items-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-blue-950 dark:focus:ring-offset-blue-950"
-            >
-              Cotizar por WhatsApp
-              <ArrowForward
-                fontSize="small"
-                className="transition-transform duration-200 group-hover:translate-x-0.5"
-              />
-            </a> */}
-
             <ul className="mt-6 flex items-center gap-2" aria-label="Redes sociales">
               {socialLinks.map((social) => (
                 <li key={social.name}>
@@ -115,29 +102,29 @@ export default function Footer() {
             <ul className="space-y-1">
               <FooterContactItem
                 label="Tienda Libertad"
-                value="904 193 374"
-                href={WA_LINK}
+                value="970 253 391"
+                href={buildWaLink("51970253391", "Tienda Libertad")}
                 icon={<StorefrontOutlined fontSize="small" />}
                 variant="whatsapp"
               />
               <FooterContactItem
                 label="Tienda Salamanca"
-                value="904 193 374"
-                href={WA_LINK}
+                value="970 232 330"
+                href={buildWaLink("51970232330", "Tienda Salamanca")}
                 icon={<StorefrontOutlined fontSize="small" />}
                 variant="whatsapp"
               />
               <FooterContactItem
                 label="Almacén principal"
                 value="904 193 374"
-                href={WA_LINK}
+                href={buildWaLink("51904193374", "Almacén Principal")}
                 icon={<StorefrontOutlined fontSize="small" />}
                 variant="whatsapp"
               />
               <FooterContactItem
                 label="Correo electrónico"
-                value="grupo.fametsac@gmail.com"
-                href="mailto:grupo.fametsac@gmail.com"
+                value="administrador@grupofamet.com"
+                href="mailto:administrador@grupofamet.com"
                 icon={<Mail fontSize="small" />}
               />
             </ul>
@@ -150,7 +137,7 @@ export default function Footer() {
                 <div>
                   <h4 className="text-sm font-semibold text-white">Horario de atención</h4>
                   <p className="mt-1 text-sm text-slate-300">Lun - Vie: 8:00 AM - 6:30 PM</p>
-                  <p className="text-sm text-slate-300">Sáb: 8:00 AM - 2:00 PM</p>
+                  <p className="text-sm text-slate-300">Sáb: 8:00 AM - 1:00 PM</p>
                 </div>
               </div>
             </div>

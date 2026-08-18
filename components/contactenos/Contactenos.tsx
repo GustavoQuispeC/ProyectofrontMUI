@@ -12,8 +12,8 @@ const tiendas = [
     id: 1,
     nombre: "Tienda Libertad",
     direccion: "Jr. Libertad 824",
-    telefono: "+1 23494 34993",
-    horario: "Lun - Sáb: 8:00 AM - 6:00 PM",
+    telefono: "970253391",
+    horario: "Lun - Vie: 8:00 AM - 7:00 PM | Sáb: 8:00 AM - 1:00 PM",
     mapSrc:
       "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.2707623661913!2d-77.87393042323248!3d-6.227988993760102!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91b6ab302a2a09a7%3A0x71faab90638d4838!2sGrupo%20Famet!5e0!3m2!1ses!2spe!4v1770703752465!5m2!1ses!2spe",
     gmapsLink: "https://www.google.com/maps?q=Grupo%20Famet",
@@ -22,8 +22,8 @@ const tiendas = [
     id: 2,
     nombre: "Tienda Salamanca",
     direccion: "Jr. Salamanca 858",
-    telefono: "+1 23494 34993",
-    horario: "Lun - Sáb: 8:00 AM - 6:00 PM",
+    telefono: "970232330",
+    horario: "Lun - Vie: 8:00 AM - 6:00 PM | Sáb: 8:00 AM - 1:00 PM",
     mapSrc:
       "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1983.140116959124!2d-77.87222178117379!3d-6.226735088928205!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91b6ab3d0ad44f01%3A0x554e80bc9ed5e677!2sNEGOCIOS%20FAMET!5e0!3m2!1ses!2spe!4v1770704383965!5m2!1ses!2spe",
     gmapsLink: "https://www.google.com/maps?q=NEGOCIOS%20FAMET",
@@ -32,8 +32,8 @@ const tiendas = [
     id: 3,
     nombre: "Almacén Principal",
     direccion: "Cruce Pucacruz",
-    telefono: "+1 23494 34993",
-    horario: "Lun - Sáb: 8:00 AM - 6:00 PM",
+    telefono: "904193374",
+    horario: "Lun - Vie: 8:00 AM - 6:00 PM | Sáb: 8:00 AM - 1:00 PM",
     mapSrc:
       "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15864.590983710019!2d-77.89342045783998!3d-6.24425191674977!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91b6aba3605476b9%3A0x24e39c6024492983!2sGrupo%20Famet%20sac!5e0!3m2!1ses!2spe!4v1770704463430!5m2!1ses!2spe",
     gmapsLink: "https://www.google.com/maps?q=Grupo%20Famet%20sac",
@@ -43,7 +43,7 @@ const tiendas = [
 export default function Contactenos() {
   const [tiendaActiva, setTiendaActiva] = useState(tiendas[0]);
 
-  const email = "grupo.fametsac@gmail.com";
+  const email = "administrador@grupofamet.com";
 
   return (
     <section id="contacto" className="bg-slate-50">

@@ -5,6 +5,7 @@ import Image from "next/image";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import CloseIcon from "@mui/icons-material/Close";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { DRAWER_OPEN_EVENT } from "@/components/cartdrawer/Cartdrawer";
 import { CartProduct, getCartItemQuantity, removeCartItem, upsertCartItem } from "@/components/cartdrawer/cartService";
@@ -50,23 +51,29 @@ export default function AddToCartModal({ isOpen, onClose, producto }: AddToCartM
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity">
-      <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all">
-        <div className="flex items-center gap-3 p-6 pb-2">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+      <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar"
+          className="absolute right-4 top-4 w-8 h-8 rounded-lg border border-black/8 flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+        >
+          <CloseIcon sx={{ fontSize: 18 }} />
+        </button>
+
+        <div className="flex items-center gap-3 p-6 pb-2 pr-14">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600">
             <CheckCircleIcon />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">¡Producto agregado!</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Se añadió al carrito correctamente</p>
+            <h3 className="text-lg font-bold text-slate-900">¡Producto agregado!</h3>
+            <p className="text-sm text-slate-500">Se añadió al carrito correctamente</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-white">
-            <RemoveIcon className="rotate-45" />
-          </button>
         </div>
 
         <div className="p-6">
-          <div className="flex items-start gap-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-            <div className="relative shrink-0 w-24 h-24 bg-white dark:bg-gray-700 rounded-lg p-2">
+          <div className="flex items-start gap-6 p-4 bg-slate-50 rounded-xl border border-black/5">
+            <div className="relative shrink-0 w-24 h-24 bg-white rounded-lg border border-black/5 p-2">
               <Image
                 src={producto.imagen}
                 alt={producto.nombre}
@@ -77,37 +84,29 @@ export default function AddToCartModal({ isOpen, onClose, producto }: AddToCartM
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-blue-900 dark:text-white mb-1 line-clamp-2">{producto.nombre}</h4>
+              <h4 className="font-bold text-blue-900 mb-1 line-clamp-2">{producto.nombre}</h4>
               <p className="text-2xl font-extrabold text-orange-500 mb-3">S/ {producto.precio.toFixed(2)}</p>
 
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Cantidad:</span>
-                <div className="flex items-center border-2 border-gray-200 dark:border-gray-600 rounded-xl overflow-hidden bg-white dark:bg-gray-700">
-                  <button
-                    onClick={disminuir}
-                    className="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <RemoveIcon sx={{ fontSize: 16 }} className="text-gray-700 dark:text-gray-300" />
+                <span className="text-sm font-medium text-slate-600">Cantidad:</span>
+                <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white">
+                  <button onClick={disminuir} className="px-3 py-1.5 hover:bg-slate-100 transition-colors">
+                    <RemoveIcon sx={{ fontSize: 16 }} className="text-slate-700" />
                   </button>
                   <input
                     type="number"
                     value={cantidad}
                     onChange={(e) => handleChange(e.target.value)}
-                    className="w-12 text-center outline-none bg-transparent font-semibold text-gray-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-12 text-center outline-none bg-transparent font-semibold text-slate-900 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
-                  <button
-                    onClick={incrementar}
-                    className="px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <AddIcon sx={{ fontSize: 16 }} className="text-gray-700 dark:text-gray-300" />
+                  <button onClick={incrementar} className="px-3 py-1.5 hover:bg-slate-100 transition-colors">
+                    <AddIcon sx={{ fontSize: 16 }} className="text-slate-700" />
                   </button>
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Subtotal:</span>
-                <span className="text-xl font-bold text-blue-900 dark:text-white">
-                  S/ {(producto.precio * cantidad).toFixed(2)}
-                </span>
+              <div className="mt-3 pt-3 border-t border-slate-200 flex justify-between items-center">
+                <span className="text-sm font-medium text-slate-600">Subtotal:</span>
+                <span className="text-xl font-bold text-blue-900">S/ {(producto.precio * cantidad).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -116,7 +115,7 @@ export default function AddToCartModal({ isOpen, onClose, producto }: AddToCartM
         <div className="p-6 pt-0 flex flex-col sm:flex-row justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+            className="px-6 py-2.5 font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
           >
             Seguir comprando
           </button>

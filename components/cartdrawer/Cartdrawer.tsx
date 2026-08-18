@@ -1,11 +1,44 @@
 "use client";
-import { Add, DeleteOutlined, Inventory2Outlined, Receipt, Remove, ShoppingCart, X } from "@mui/icons-material";
+import {
+  Add,
+  DeleteOutlined,
+  Inventory2Outlined,
+  LockOutlined,
+  Receipt,
+  Remove,
+  ShoppingCart,
+} from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import CloseIcon from "@mui/icons-material/Close";
 
 const CART_KEY = "shopping_cart";
 const CART_EVENT = "cart:updated";
 export const DRAWER_OPEN_EVENT = "drawer:open";
+
+const BANCOS = [
+  {
+    id: "bcp",
+    nombre: "BCP",
+    logo: "/bancos/banco-de-credito-logo.png",
+    cuenta: "191-1234567-0-89",
+    cci: "002-191-001234567089-14",
+  },
+  {
+    id: "bbva",
+    nombre: "BBVA",
+    logo: "/bancos/bbva-logo.png",
+    cuenta: "0011-0567-0200123456",
+    cci: "011-567-000200123456-78",
+  },
+  {
+    id: "bn",
+    nombre: "Banco de la Nación",
+    logo: "/bancos/banco-de-la-nacion-logo.png",
+    cuenta: "04-123-456789",
+    cci: "018-123-004123456789-45",
+  },
+];
 
 type CartItem = {
   id: number;
@@ -84,7 +117,7 @@ export function CartButton() {
       type="button"
       aria-label="Carrito"
       onClick={() => window.dispatchEvent(new Event(DRAWER_OPEN_EVENT))}
-      className="relative flex h-12 w-12 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+      className="relative flex h-12 w-12 items-center justify-center rounded-full hover:bg-black/5 transition-colors"
     >
       <ShoppingCart className="h-6 w-6 text-orange-500" />
       {badgeQty > 0 && (
@@ -221,24 +254,24 @@ export default function DrawerComponent() {
         aria-label="Carrito de compras"
         className={[
           "fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col",
-          "bg-white dark:bg-slate-900",
+          "bg-white",
           "shadow-2xl transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
       >
-        <div className="flex items-center justify-between px-5 py-4.5 border-b border-black/5 dark:border-white/10">
+        <div className="flex items-center justify-between px-5 py-4.5 border-b border-black/5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl border border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center justify-center">
-              <ShoppingCart className="w-4.5 h-4.5 text-slate-700 dark:text-white/80" />
+            <div className="w-9 h-9 rounded-xl border border-black/5 bg-slate-50 flex items-center justify-center">
+              <ShoppingCart className="w-4.5 h-4.5 text-slate-700" />
             </div>
             <div>
-              <p className="text-[15px] font-medium text-slate-900 dark:text-white flex items-center gap-2">
+              <p className="text-[15px] font-medium text-slate-900 flex items-center gap-2">
                 Tu carrito
-                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[11px] font-medium">
+                <span className="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-blue-900 text-white text-[11px] font-medium">
                   {badgeQty}
                 </span>
               </p>
-              <p className="text-xs text-slate-500 dark:text-white/50 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 {badgeQty} {badgeQty === 1 ? "producto seleccionado" : "productos seleccionados"}
               </p>
             </div>
@@ -247,17 +280,17 @@ export default function DrawerComponent() {
             type="button"
             onClick={onClose}
             aria-label="Cerrar carrito"
-            className="w-8 h-8 rounded-lg border border-black/8 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-white/60 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+            className="w-8 h-8 rounded-lg border border-black/8 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <CloseIcon className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="flex-1 overflow-y-auto px-5 py-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
           {items.length === 0 ? (
-            <div className="rounded-2xl border border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-6 text-center">
-              <p className="font-semibold text-slate-800 dark:text-white/80">Tu carrito está vacío</p>
+            <div className="rounded-2xl border border-black/5 bg-slate-50 p-6 text-center">
+              <p className="font-semibold text-slate-800">Tu carrito está vacío</p>
               <button
                 type="button"
                 onClick={onClose}
@@ -271,26 +304,24 @@ export default function DrawerComponent() {
               {items.map((it) => (
                 <li
                   key={it.id}
-                  className="rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-white/5 p-3.5 flex gap-3 hover:border-black/10 dark:hover:border-white/20 transition-colors"
+                  className="rounded-xl border border-black/5 bg-white p-3.5 flex gap-3 hover:border-black/10 transition-colors"
                 >
-                  <div className="w-14 h-14 shrink-0 rounded-lg border border-black/5 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center justify-center overflow-hidden relative">
+                  <div className="w-14 h-14 shrink-0 rounded-lg border border-black/5 bg-slate-50 flex items-center justify-center overflow-hidden relative">
                     <Image src={it.imagen} alt={it.nombre} fill className="object-contain p-1.5" sizes="56px" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-slate-900 dark:text-white truncate">{it.nombre}</p>
-                    <p className="text-xs text-slate-500 dark:text-white/50 mt-0.5">
-                      S/ {it.precio.toFixed(2)} por unidad
-                    </p>
+                    <p className="text-[13px] font-medium text-slate-900 truncate">{it.nombre}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">S/ {it.precio.toFixed(2)} por unidad</p>
 
                     <div className="flex items-center gap-2 mt-2.5">
                       {/* Qty control */}
-                      <div className="inline-flex items-center h-7.5 rounded-lg border border-black/8 dark:border-white/10 bg-slate-50 dark:bg-white/5 overflow-hidden">
+                      <div className="inline-flex items-center h-7.5 rounded-lg border border-black/8 bg-slate-50 overflow-hidden">
                         <button
                           type="button"
                           onClick={() => dec(it.id)}
                           aria-label="Disminuir"
-                          className="w-7 h-full flex items-center justify-center text-slate-500 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-base leading-none"
+                          className="w-7 h-full flex items-center justify-center text-slate-500 hover:bg-black/5 transition-colors text-base leading-none"
                         >
                           <Remove sx={{ fontSize: 14 }} />
                         </button>
@@ -301,13 +332,13 @@ export default function DrawerComponent() {
                           min={0}
                           value={it.cantidad}
                           onChange={(e) => onManualQty(it.id, e.target.value.replace(/\D/g, ""))}
-                          className="bg-transparent text-center text-[13px] font-medium text-slate-900 dark:text-white outline-none px-1 min-w-8 max-w-20 w-full"
+                          className="bg-transparent text-center text-[13px] font-medium text-slate-900 outline-none px-1 min-w-8 max-w-20 w-full"
                         />
                         <button
                           type="button"
                           onClick={() => inc(it.id)}
                           aria-label="Aumentar"
-                          className="w-7 h-full flex items-center justify-center text-slate-500 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                          className="w-7 h-full flex items-center justify-center text-slate-500 hover:bg-black/5 transition-colors"
                         >
                           <Add sx={{ fontSize: 14 }} />
                         </button>
@@ -317,7 +348,7 @@ export default function DrawerComponent() {
                       <button
                         type="button"
                         onClick={() => setQty(it.id, 0)}
-                        className="inline-flex items-center gap-1 text-xs text-slate-400 dark:text-white/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 px-2 py-1 rounded-lg transition-all"
+                        className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 hover:bg-red-50 px-2 py-1 rounded-lg transition-all"
                       >
                         <DeleteOutlined sx={{ fontSize: 14 }} />
                         Eliminar
@@ -326,8 +357,8 @@ export default function DrawerComponent() {
                   </div>
 
                   <div className="text-right shrink-0 flex flex-col justify-between items-end">
-                    <span className="text-[11px] text-slate-400 dark:text-white/40">Subtotal</span>
-                    <span className="text-[15px] font-medium text-slate-900 dark:text-white tabular-nums">
+                    <span className="text-[11px] text-slate-400">Subtotal</span>
+                    <span className="text-[15px] font-medium text-slate-900 tabular-nums">
                       S/ {(it.precio * it.cantidad).toFixed(2)}
                     </span>
                   </div>
@@ -337,20 +368,62 @@ export default function DrawerComponent() {
           )}
         </div>
 
+        {/* Métodos de pago */}
+        <div className="border-t border-black/5 px-4 pt-3 pb-2 space-y-3">
+          {/* Bancos (pequeña) */}
+          <div>
+            <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
+              <LockOutlined sx={{ fontSize: 12 }} className="text-yellow-600" />
+              Pago con transferencia bancaria
+            </p>
+            <div className="grid grid-cols-1 gap-1.5">
+              {BANCOS.map((banco) => (
+                <div
+                  key={banco.id}
+                  className="flex items-center gap-2 rounded-lg border border-black/8 bg-slate-50 px-2 py-1.5"
+                >
+                  <div className="relative w-12 h-9 shrink-0 rounded bg-white border border-black/5 overflow-hidden">
+                    <Image src={banco.logo} alt={banco.nombre} fill className="object-contain p-1" sizes="48px" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-semibold text-slate-700 leading-tight">{banco.nombre}</p>
+                    <p className="text-[10px] text-slate-500 leading-tight truncate">Cta: {banco.cuenta}</p>
+                    <p className="text-[10px] text-slate-500 leading-tight truncate">CCI: {banco.cci}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Yape / QR (grande) */}
+          <div className="rounded-xl border border-black/8 bg-[#7620ff]/5 p-3 flex items-center gap-3">
+            <div className="relative w-28 h-28 shrink-0 rounded-lg bg-white border border-black/5 overflow-hidden">
+              <Image src="/bancos/QR-Yape.jpg" alt="QR Yape" fill className="object-contain p-1" sizes="112px" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="relative w-20 h-8 mb-1.5">
+                <Image src="/bancos/yape-app.png" alt="Yape" fill className="object-contain object-left" sizes="80px" />
+              </div>
+              <p className="text-xs font-semibold text-slate-700">Escanea el código QR</p>
+              <p className="text-[11px] text-slate-500">o yapea al 904 193 374</p>
+            </div>
+          </div>
+        </div>
+
         {/* Footer */}
-        <div className="border-t border-black/5 dark:border-white/10 px-4 py-3.5 space-y-3">
+        <div className="border-t border-black/5 px-4 py-3.5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
-              <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-white/50">
+              <span className="flex items-center gap-1.5 text-xs text-slate-500">
                 <Receipt sx={{ fontSize: 14 }} />
                 Total a pagar
               </span>
-              <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-white/40 bg-slate-50 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-full px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 bg-slate-50 border border-black/5 rounded-full px-2 py-0.5">
                 <Inventory2Outlined sx={{ fontSize: 11 }} />
                 {items.reduce((a, i) => a + i.cantidad, 0)} unidades · {items.length} productos
               </span>
             </div>
-            <span className="text-[22px] font-medium text-slate-900 dark:text-white tabular-nums tracking-tight">
+            <span className="text-[22px] font-medium text-blue-900 tabular-nums tracking-tight">
               S/ {subtotal.toFixed(2)}
             </span>
           </div>
@@ -360,7 +433,7 @@ export default function DrawerComponent() {
               type="button"
               disabled={items.length === 0}
               onClick={() => clearCart()}
-              className="flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg border border-black/8 dark:border-white/10 text-[13px] font-medium text-slate-600 dark:text-white/60 hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:text-red-400 dark:hover:border-red-500/30 dark:hover:bg-red-500/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              className="flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg border border-black/8 text-[13px] font-medium text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
               <DeleteOutlined sx={{ fontSize: 16 }} />
               Vaciar
@@ -378,7 +451,7 @@ export default function DrawerComponent() {
                 <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.856L.054 23.447a.5.5 0 0 0 .612.612l5.595-1.479A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.656-.51-5.184-1.4l-.371-.22-3.85 1.017 1.018-3.737-.242-.386A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
               </svg>
               <span className="flex flex-col items-start leading-tight">
-                <span className="text-[13px] font-medium">Enviar cotización</span>
+                <span className="text-[13px] font-medium">Enviar pedido</span>
                 <span className="text-[10px] opacity-75">Abrir WhatsApp</span>
               </span>
             </button>
