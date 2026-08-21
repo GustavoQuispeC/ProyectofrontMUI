@@ -4,6 +4,7 @@ export interface Product {
   brand: string;
   category: string;
   price: number;
+  unit: string;
   image: string | null;
   rating: number;
   inStock: boolean;

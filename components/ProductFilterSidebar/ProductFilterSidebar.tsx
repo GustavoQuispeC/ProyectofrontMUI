@@ -16,6 +16,7 @@ interface Props {
   onClear: () => void;
   className?: string;
   categories?: string[];
+  parentCategories?: string[];
   brands?: string[];
 }
 
@@ -25,6 +26,7 @@ export default function ProductFilterSidebar({
   onClear,
   className,
   categories = [],
+  parentCategories = [],
   brands = [],
 }: Props) {
   const baseClass = "w-72 xl:w-80 shrink-0 border-r border-slate-200 min-h-screen sticky top-0";
@@ -86,17 +88,18 @@ export default function ProductFilterSidebar({
               <div className="space-y-1">
                 {categories.map((category) => {
                   const active = filters.categories.includes(category);
+                  const isParent = parentCategories.includes(category);
                   return (
                     <button
                       key={category}
                       type="button"
                       onClick={() => handleToggle("categories", category)}
-                      className={`w-full text-left flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${
-                        active ? "bg-slate-50 text-blue-900 font-medium" : "hover:bg-slate-50 text-slate-700"
-                      }`}
+                      className={`w-full text-left flex items-center gap-3 rounded-xl py-2 text-sm transition-colors ${
+                        isParent ? "px-3 font-semibold" : "px-6"
+                      } ${active ? "bg-slate-50 text-blue-900 font-medium" : "hover:bg-slate-50 text-slate-700"}`}
                     >
                       <span
-                        className={`flex h-4 w-4 items-center justify-center rounded border ${
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
                           active ? "border-blue-900 bg-blue-900 text-white" : "border-slate-300 bg-white"
                         }`}
                       >

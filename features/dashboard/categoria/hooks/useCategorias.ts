@@ -151,7 +151,15 @@ export function useRegistrarCategoria() {
     mutationFn: (data: RegistrarCategoriaRequest) => registrarCategoria(data),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categorias"] });
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            ["categorias", "categorias-padres", "categorias-publicas", "subcategorias"].includes(key[0] as string)
+          );
+        },
+      });
     },
   });
 
@@ -173,7 +181,15 @@ export function useEditarCategoria(id: number) {
     mutationFn: (data: EditarCategoriaRequest) => editarCategoria(data),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categorias"] });
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            ["categorias", "categorias-padres", "categorias-publicas", "subcategorias"].includes(key[0] as string)
+          );
+        },
+      });
       queryClient.invalidateQueries({ queryKey: ["categoria", id] });
     },
   });

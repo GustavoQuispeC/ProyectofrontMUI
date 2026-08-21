@@ -136,11 +136,43 @@ export default function Page() {
   const { categorias } = useCategoriasPublicas();
   const { marcas } = useMarcasPublicas();
 
+  // Categorías padre e hijas
+  const padres = useMemo(() => categorias.filter((c) => c.categoriaPadreId === null), [categorias]);
+  const hijas = useMemo(() => categorias.filter((c) => c.categoriaPadreId !== null), [categorias]);
+
+  // Resolver categorías seleccionadas: si se selecciona un padre, incluir sus hijas
+  const resolvedCategoryNames = useMemo(() => {
+    const result = new Set<string>();
+    for (const name of filters.categories) {
+      const cat = categorias.find((c) => c.nombre === name);
+      if (!cat) continue;
+      if (cat.categoriaPadreId === null) {
+        // Es padre: agregar todas sus subcategorías
+        const children = hijas.filter((h) => h.categoriaPadreId === cat.id);
+        for (const child of children) result.add(child.nombre);
+        // También agregar el padre por si hay productos directamente en él
+        result.add(cat.nombre);
+      } else {
+        result.add(cat.nombre);
+      }
+    }
+    return Array.from(result);
+  }, [filters.categories, categorias, hijas]);
+
+  // Determinar si alguna categoría seleccionada es padre (necesita client mode)
+  const hasParentCategory = useMemo(() => {
+    return filters.categories.some((name) => {
+      const cat = categorias.find((c) => c.nombre === name);
+      return cat && cat.categoriaPadreId === null;
+    });
+  }, [filters.categories, categorias]);
+
   const categoriaId = useMemo(() => {
     if (filters.categories.length !== 1) return undefined;
+    if (hasParentCategory) return undefined;
     const found = categorias.find((c) => c.nombre === filters.categories[0]);
     return found?.id;
-  }, [filters.categories, categorias]);
+  }, [filters.categories, categorias, hasParentCategory]);
 
   const marcaId = useMemo(() => {
     if (filters.brands.length !== 1) return undefined;
@@ -157,7 +189,8 @@ export default function Page() {
     filters.categories.length > 1 ||
     filters.brands.length > 1 ||
     filters.priceMax !== MAX_PRICE ||
-    priceSort;
+    priceSort ||
+    hasParentCategory;
 
   const requestParams = useMemo(
     () => ({
@@ -176,7 +209,20 @@ export default function Page() {
 
   const storeProducts = useMemo(() => productos.map(mapProductoToStore), [productos]);
 
-  const availableCategories = useMemo(() => categorias.map((c) => c.nombre), [categorias]);
+  const availableCategories = useMemo(() => {
+    const result: string[] = [];
+    for (const padre of padres) {
+      result.push(padre.nombre);
+      const children = hijas.filter((h) => h.categoriaPadreId === padre.id);
+      for (const child of children) result.push(child.nombre);
+    }
+    // Agregar categorías sin padre que no estén ya (por si acaso)
+    for (const cat of categorias) {
+      if (!result.includes(cat.nombre)) result.push(cat.nombre);
+    }
+    return result;
+  }, [categorias, padres, hijas]);
+  const parentCategoryNames = useMemo(() => padres.map((p) => p.nombre), [padres]);
   const availableBrands = useMemo(() => marcas.map((m) => m.nombre), [marcas]);
 
   const searchTerm = filters.search.trim().toLowerCase();
@@ -193,13 +239,13 @@ export default function Page() {
         if (!matchesSearch) return false;
       }
 
-      if (filters.categories.length > 0 && !filters.categories.includes(product.category)) return false;
+      if (resolvedCategoryNames.length > 0 && !resolvedCategoryNames.includes(product.category)) return false;
       if (filters.brands.length > 0 && !filters.brands.includes(product.brand)) return false;
       if (product.price > filters.priceMax) return false;
 
       return true;
     });
-  }, [clientMode, storeProducts, searchTerm, filters.categories, filters.brands, filters.priceMax]);
+  }, [clientMode, storeProducts, searchTerm, resolvedCategoryNames, filters.brands, filters.priceMax]);
 
   const sortedProducts = useMemo(() => {
     if (!clientMode) return storeProducts;
@@ -256,6 +302,7 @@ export default function Page() {
           onFiltersChange={handleFiltersChange}
           onClear={handleClear}
           categories={availableCategories}
+          parentCategories={parentCategoryNames}
           brands={availableBrands}
         />
 
@@ -320,6 +367,7 @@ export default function Page() {
               onFiltersChange={handleFiltersChange}
               onClear={handleClear}
               categories={availableCategories}
+              parentCategories={parentCategoryNames}
               brands={availableBrands}
               className="w-full min-h-full"
             />

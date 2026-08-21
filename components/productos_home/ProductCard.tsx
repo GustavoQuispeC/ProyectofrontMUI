@@ -41,7 +41,9 @@ export default function ProductCard({ product, onAdd }: Props) {
 
         <div className="mt-auto pt-4">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-lg font-bold">S/ {product.price.toFixed(2)}</span>
+            <span className="text-lg font-bold text-slate-900">
+              S/ {product.price.toFixed(2)} <span className="text-sm font-normal text-slate-500">/{product.unit}</span>
+            </span>
             {product.inStock ? (
               <span className="text-xs text-green-600">Stock</span>
             ) : (

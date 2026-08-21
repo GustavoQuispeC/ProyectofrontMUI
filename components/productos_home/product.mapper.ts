@@ -11,6 +11,7 @@ export function mapProductoToStore(producto: ListarProducto): Product {
     brand: producto.marcaNombre,
     category: producto.categoriaNombre,
     price: precio,
+    unit: producto.unidadMedidaNombre,
     image: principal?.url ?? null,
     rating: 0,
     inStock: true,
