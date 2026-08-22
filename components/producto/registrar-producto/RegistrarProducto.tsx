@@ -373,20 +373,20 @@ export default function RegistrarProducto() {
               <FormControl fullWidth size="small" error={!!errors.categoriaId}>
                 <InputLabel>Subcategoría *</InputLabel>
                 <Select
-                  value={field.value || ""}
-                  label="Subcategoría *"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  disabled={!categoriaPadreId || loadingSubcategorias}
-                >
-                  <MenuItem value="">
-                    <em>Seleccione una subcategoría</em>
-                  </MenuItem>
-                  {subcategorias.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.nombre}
+                    value={field.value || ""}
+                    label="Subcategoría *"
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    disabled={!categoriaPadreId || loadingSubcategorias}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccione una subcategoría</em>
                     </MenuItem>
-                  ))}
-                </Select>
+                    {subcategorias.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 <FormHelperText>{errors.categoriaId?.message}</FormHelperText>
               </FormControl>
             )}
@@ -400,19 +400,19 @@ export default function RegistrarProducto() {
               <FormControl fullWidth size="small" error={!!errors.marcaId}>
                 <InputLabel>Marca *</InputLabel>
                 <Select
-                  value={field.value || ""}
-                  label="Marca *"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                >
-                  <MenuItem value="">
-                    <em>Seleccione</em>
-                  </MenuItem>
-                  {marcas.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.nombre}
+                    value={field.value || ""}
+                    label="Marca *"
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccione</em>
                     </MenuItem>
-                  ))}
-                </Select>
+                    {marcas.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
                 <FormHelperText>{errors.marcaId?.message}</FormHelperText>
               </FormControl>
             )}
