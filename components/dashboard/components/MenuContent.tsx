@@ -27,6 +27,7 @@ import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CategoryIcon from "@mui/icons-material/Category";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
 import React from "react";
 import Link from "next/link";
@@ -177,6 +178,12 @@ const mainListItems: MenuItemType[] = [
       ...permissions.cancelarFalta,
       ...permissions.listarFaltaMensual,
     ],
+  },
+  {
+    text: "Proveedores",
+    icon: <LocalShippingIcon />,
+    href: "/dashboard/proveedores/listar",
+    allowedRoles: [...permissions.listarProveedores, ...permissions.registrarProveedor],
   },
 ];
 
