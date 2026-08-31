@@ -133,7 +133,7 @@ export default function ListarProveedores() {
   const handleToggleEstado = useCallback(
     async (row: ListarProveedor) => {
       const action = row.isActive ? "desactivar" : "activar";
-      await toastPromise(cambiarEstadoProveedor(row.id), {
+      await toastPromise(cambiarEstadoProveedor(row), {
         loading: `Procesando...`,
         success: `Proveedor ${action === "activar" ? "activado" : "desactivado"} correctamente.`,
         error: (err) => err.message,

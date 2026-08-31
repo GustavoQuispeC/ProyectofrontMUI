@@ -1,5 +1,6 @@
 "use client";
 import { Carousel, HeroSection, Marcas, Productos, Contactenos, Categorias } from "@/components";
+
 export default function Home() {
   //Móvil (16:9): 640x360px o 1280x720px
   const imagenesBannerMobile = [
@@ -11,10 +12,10 @@ export default function Home() {
 
   //Desktop (25:9): 1920x691px o 2560x922px
   const imagenesBannerDesktop = [
-     "https://firebasestorage.googleapis.com/v0/b/grupofamet-frontend.firebasestorage.app/o/carousel%2FBANNER_1.webp?alt=media&token=ecbaa358-ac43-4024-906f-4a002597e992",
+    "https://firebasestorage.googleapis.com/v0/b/grupofamet-frontend.firebasestorage.app/o/carousel%2FBANNER_1.webp?alt=media&token=ecbaa358-ac43-4024-906f-4a002597e992",
     "https://firebasestorage.googleapis.com/v0/b/grupofamet-frontend.firebasestorage.app/o/carousel%2FBANNER_2.webp?alt=media&token=e83aeec2-e556-47e2-816b-adf12996a7ea",
     "https://firebasestorage.googleapis.com/v0/b/grupofamet-frontend.firebasestorage.app/o/carousel%2FBANNER_3.webp?alt=media&token=e27d14ea-942b-43e9-b6bb-d7723a2dbc71",
-    "https://firebasestorage.googleapis.com/v0/b/grupofamet-frontend.firebasestorage.app/o/carousel%2FBANNER_4.webp?alt=media&token=61dde4da-3b0a-4654-a3d0-121a1f66a1c6"
+    "https://firebasestorage.googleapis.com/v0/b/grupofamet-frontend.firebasestorage.app/o/carousel%2FBANNER_4.webp?alt=media&token=61dde4da-3b0a-4654-a3d0-121a1f66a1c6",
   ];
 
   return (

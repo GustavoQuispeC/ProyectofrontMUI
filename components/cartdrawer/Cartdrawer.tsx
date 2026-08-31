@@ -1,6 +1,8 @@
 "use client";
 import {
   Add,
+  Check,
+  ContentCopy,
   DeleteOutlined,
   Inventory2Outlined,
   LockOutlined,
@@ -21,24 +23,27 @@ const BANCOS = [
     id: "bcp",
     nombre: "BCP",
     logo: "/bancos/banco-de-credito-logo.png",
-    cuenta: "191-1234567-0-89",
-    cci: "002-191-001234567089-14",
+    cuenta: "2902066737021",
+    cci: "002-29000206673702155",
   },
   {
     id: "bbva",
     nombre: "BBVA",
     logo: "/bancos/bbva-logo.png",
-    cuenta: "0011-0567-0200123456",
-    cci: "011-567-000200123456-78",
+    cuenta: "0011-0347-0100056132",
+    cci: "011-347-000100056132-22",
   },
   {
     id: "bn",
     nombre: "Banco de la Nación",
     logo: "/bancos/banco-de-la-nacion-logo.png",
-    cuenta: "04-123-456789",
-    cci: "018-123-004123456789-45",
+    cuenta: "00-261-038021",
+    cci: "01826100026103802180",
   },
 ];
+
+const YAPE_NUMERO = "979394237";
+const YAPE_NUMERO_FORMATEADO = "979 394 237";
 
 type CartItem = {
   id: number;
@@ -56,6 +61,40 @@ function safeParseJSON<T>(value: string | null, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+function CopyField({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Ignorar errores de portapapeles (ej. permisos denegados)
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title={copied ? "Copiado" : "Copiar"}
+      className="inline-flex shrink-0 items-center justify-center rounded p-0.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
+    >
+      {copied ? <Check sx={{ fontSize: 12 }} /> : <ContentCopy sx={{ fontSize: 12 }} />}
+      <span className="sr-only">{label}</span>
+    </button>
+  );
+}
+
+function formatMoney(amount: number): string {
+  return new Intl.NumberFormat("es-PE", {
+    style: "currency",
+    currency: "PEN",
+    minimumFractionDigits: 2,
+  }).format(amount);
 }
 
 function readCart(): CartMap {
@@ -186,31 +225,36 @@ export default function DrawerComponent() {
   const handleSendWhatsApp = () => {
     if (items.length === 0) return;
 
+    const EMOJI_WAVE = "\u{1F44B}";
+    const EMOJI_CALENDAR = "\u{1F4C5}";
+    const EMOJI_CART = "\u{1F6D2}";
+    const EMOJI_MONEY = "\u{1F4B0}";
+    const EMOJI_NOTE = "\u{1F4DD}";
+
     const date = new Date().toLocaleDateString("es-PE", {
       day: "2-digit",
       month: "long",
       year: "numeric",
     });
 
-    let message = `*PEDIDO DE MATERIALES*\n`;
-    message += `Fecha: ${date}\n`;
-    message += `${"─".repeat(20)}\n\n`;
+    let message = `${EMOJI_WAVE} Hola, quiero realizar el siguiente pedido:\n\n`;
+    message += `${EMOJI_CALENDAR} *Fecha:* ${date}\n\n`;
+    message += `${EMOJI_CART} *Productos:*\n`;
 
-    items.forEach((item) => {
+    items.forEach((item, index) => {
       const total = item.precio * item.cantidad;
-      message += `*>> ${item.nombre} <<*\n`;
-      message += `  - Cantidad: ${item.cantidad} unid.\n`;
-      message += `  - Precio unitario: ${item.precio.toFixed(2)}\n`;
-      message += `  - Subtotal: ${total.toFixed(2)}\n\n`;
+      message += `${index + 1}. *${item.nombre}*\n`;
+      message += `   Cantidad: ${item.cantidad} unid.\n`;
+      message += `   Precio unitario: ${formatMoney(item.precio)}\n`;
+      message += `   Subtotal: ${formatMoney(total)}\n\n`;
     });
 
-    message += `${"─".repeat(20)}\n`;
-    message += `*TOTAL A PAGAR: S/ ${subtotal.toFixed(2)}*\n\n`;
-    message += `_Pedido generado automáticamente_...\n`;
-    message += `_Gracias por confiar en Grupo Famet S.A.C._`;
+    message += `${EMOJI_MONEY} *Total a pagar:* ${formatMoney(subtotal)}\n\n`;
+    message += `${EMOJI_NOTE} Pedido generado desde la web de *Grupo Famet S.A.C.*\n`;
+    message += `¡Gracias por su preferencia!`;
 
     const phone = "51904193374";
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   };
 
@@ -387,8 +431,14 @@ export default function DrawerComponent() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[11px] font-semibold text-slate-700 leading-tight">{banco.nombre}</p>
-                    <p className="text-[10px] text-slate-500 leading-tight truncate">Cta: {banco.cuenta}</p>
-                    <p className="text-[10px] text-slate-500 leading-tight truncate">CCI: {banco.cci}</p>
+                    <div className="flex items-center justify-between gap-1">
+                      <p className="text-[10px] text-slate-500 leading-tight truncate">Cta: {banco.cuenta}</p>
+                      <CopyField text={banco.cuenta} label="Copiar número de cuenta" />
+                    </div>
+                    <div className="flex items-center justify-between gap-1">
+                      <p className="text-[10px] text-slate-500 leading-tight truncate">CCI: {banco.cci}</p>
+                      <CopyField text={banco.cci} label="Copiar CCI" />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -398,14 +448,17 @@ export default function DrawerComponent() {
           {/* Yape / QR (grande) */}
           <div className="rounded-xl border border-black/8 bg-[#7620ff]/5 p-3 flex items-center gap-3">
             <div className="relative w-28 h-28 shrink-0 rounded-lg bg-white border border-black/5 overflow-hidden">
-              <Image src="/bancos/QR-Yape.jpg" alt="QR Yape" fill className="object-contain p-1" sizes="112px" />
+              <Image src="/bancos/qr_yape_gf.png" alt="QR Yape" fill className="object-contain p-1" sizes="112px" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="relative w-20 h-8 mb-1.5">
                 <Image src="/bancos/yape-app.png" alt="Yape" fill className="object-contain object-left" sizes="80px" />
               </div>
               <p className="text-xs font-semibold text-slate-700">Escanea el código QR</p>
-              <p className="text-[11px] text-slate-500">o yapea al 904 193 374</p>
+              <div className="flex items-center gap-1">
+                <p className="text-[11px] text-slate-500">o yapea al {YAPE_NUMERO_FORMATEADO}</p>
+                <CopyField text={YAPE_NUMERO} label="Copiar número de Yape" />
+              </div>
             </div>
           </div>
         </div>

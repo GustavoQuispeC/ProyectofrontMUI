@@ -32,3 +32,12 @@ export interface ProveedorRegistrado {
   telefono: string | null;
   correo: string | null;
 }
+
+export interface ActualizarProveedorRequest {
+  razonSocial: string;
+  ruc: string;
+  contacto: string | null;
+  telefono: string | null;
+  correo: string | null;
+  isActive: boolean;
+}

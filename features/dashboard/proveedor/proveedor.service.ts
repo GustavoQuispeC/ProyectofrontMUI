@@ -1,4 +1,9 @@
-import { ListarProveedor, RegistrarProveedorRequest, ProveedorRegistrado } from "./proveedor.type";
+import {
+  ListarProveedor,
+  RegistrarProveedorRequest,
+  ProveedorRegistrado,
+  ActualizarProveedorRequest,
+} from "./proveedor.type";
 import { apiProveedor } from "@/lib/api-proveedor";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -10,10 +15,18 @@ export function listarProveedoresApi(): Promise<ListarProveedor[]> {
   });
 }
 
-//! Cambiar estado proveedor (eliminado lógico)
+//! Desactivar proveedor (eliminado lógico)
 export function cambiarEstadoProveedorApi(id: number): Promise<void> {
   return apiProveedor(`${apiUrl}/proveedores/${id}`, {
     method: "DELETE",
+  });
+}
+
+//! Activar proveedor (actualización parcial del estado)
+export function activarProveedorApi(id: number, data: ActualizarProveedorRequest): Promise<void> {
+  return apiProveedor(`${apiUrl}/proveedores/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
   });
 }
 
