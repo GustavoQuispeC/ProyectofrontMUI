@@ -2,9 +2,10 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { useCategoriasPadres } from "@/features/dashboard/categoria/hooks/useCategorias";
+import { useCategoriasPublicas } from "@/features/dashboard/categoria/hooks/useCategorias";
 
 export interface Category {
   label: string;
@@ -27,13 +28,13 @@ export default function MostrarCategorias({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const { categorias } = useCategoriasPadres();
+  const { categorias } = useCategoriasPublicas();
 
   const categories =
     propCategories ||
     (categorias.length > 0
       ? categorias
-          .filter((cat) => cat.isActive)
+          .filter((cat) => cat.isActive && cat.categoriaPadreId === null)
           .sort((a, b) => a.orden - b.orden)
           .map((cat) => ({
             label: cat.nombre,
@@ -123,11 +124,13 @@ export default function MostrarCategorias({
                  overflow-hidden focus:outline-none focus:ring-2
                 focus:ring-offset-2 cursor-pointer"
             >
-              <img
+              <Image
                 src={cat.image}
                 alt={cat.label}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
+                fill
+                sizes="(max-width: 640px) 40vw, (max-width: 768px) 33vw, 25vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-102"
+                unoptimized
               />
               <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent transition-colors duration-300 group-hover:from-black/85" />
               <span className="absolute bottom-4 left-4 text-white font-extrabold text-lg sm:text-xl tracking-tight uppercase">

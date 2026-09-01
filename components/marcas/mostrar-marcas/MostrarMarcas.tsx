@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMarcasPublicas } from "@/features/store/marcas/useMarcasPublicas";
@@ -83,11 +84,13 @@ function BrandCard({ marca, onSelect }: BrandCardProps) {
           </div>
         ) : (
           <div className="relative z-10 h-14 w-full opacity-75 grayscale transition-all duration-300 group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0 sm:h-16 lg:h-18">
-            <img
+            <Image
               src={marca.logo}
               alt={`Logo de ${marca.nombre}`}
-              loading="lazy"
-              className="h-full w-full object-contain"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+              className="object-contain"
+              unoptimized
               onError={() => setImageError(true)}
             />
           </div>
