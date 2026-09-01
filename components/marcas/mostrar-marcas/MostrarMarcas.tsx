@@ -1,29 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import Image from "next/image";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMarcasPublicas } from "@/features/store/marcas/useMarcasPublicas";
+import type { ListarMarca } from "@/features/dashboard/marca/Marca.types";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-
-const BRANDS = [
-  "ACEROS AREQUIPA",
-  "PACASMAYO",
-  "ETERNIT",
-  "SIDERPERU",
-  "LARK",
-  "NICOLL",
-  "FIBRAFORTE",
-  "UYUSTOOLS",
-  "ANYPSA",
-  "SIKA",
-  "CPP",
-  "PRODAC",
-] as const;
 
 const TRUST_STATS = [
   {
@@ -43,13 +29,6 @@ const TRUST_STATS = [
   },
 ] as const;
 
-const FIREBASE_BRAND_BASE =
-  "https://firebasestorage.googleapis.com/v0/b/grupofamet-456604.firebasestorage.app/o/Marcas%2F";
-
-function getBrandLogoUrl(brand: string) {
-  return `${FIREBASE_BRAND_BASE}${encodeURIComponent(brand)}.png?alt=media`;
-}
-
 function getBrandInitials(brand: string) {
   return brand
     .split(" ")
@@ -58,20 +37,39 @@ function getBrandInitials(brand: string) {
     .join("");
 }
 
+function mulberry32(seed: number) {
+  return function () {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seededShuffle<T>(items: T[], seed: number): T[] {
+  const rng = mulberry32(seed);
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 interface BrandCardProps {
-  brand: string;
+  marca: ListarMarca;
   onSelect: (brand: string) => void;
 }
 
-function BrandCard({ brand, onSelect }: BrandCardProps) {
+function BrandCard({ marca, onSelect }: BrandCardProps) {
   const [imageError, setImageError] = useState(false);
 
   return (
     <button
       type="button"
-      onClick={() => onSelect(brand)}
-      aria-label={`Ver productos de ${brand}`}
-      title={brand}
+      onClick={() => onSelect(marca.nombre)}
+      aria-label={`Ver productos de ${marca.nombre}`}
+      title={marca.nombre}
       className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-orange-400/60 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1 scale-x-0 bg-linear-to-r from-orange-500 to-orange-600 transition-transform duration-300 group-hover:scale-x-100" />
@@ -79,18 +77,17 @@ function BrandCard({ brand, onSelect }: BrandCardProps) {
       <div className="relative flex min-h-30 flex-1 items-center justify-center px-4 py-8 sm:min-h-33 sm:px-5 sm:py-9">
         <div className="absolute inset-0 bg-linear-to-br from-orange-500/0 to-orange-600/0 transition-colors duration-300 group-hover:from-orange-500/5 group-hover:to-orange-600/10" />
 
-        {imageError ? (
+        {!marca.logo || imageError ? (
           <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-lg font-bold tracking-wide text-orange-600">
-            {getBrandInitials(brand)}
+            {getBrandInitials(marca.nombre)}
           </div>
         ) : (
           <div className="relative z-10 h-14 w-full opacity-75 grayscale transition-all duration-300 group-hover:scale-105 group-hover:opacity-100 group-hover:grayscale-0 sm:h-16 lg:h-18">
-            <Image
-              src={getBrandLogoUrl(brand)}
-              alt={`Logo de ${brand}`}
-              fill
-              sizes="(max-width: 640px) 40vw, (max-width: 1024px) 20vw, 12vw"
-              className="object-contain"
+            <img
+              src={marca.logo}
+              alt={`Logo de ${marca.nombre}`}
+              loading="lazy"
+              className="h-full w-full object-contain"
               onError={() => setImageError(true)}
             />
           </div>
@@ -99,15 +96,17 @@ function BrandCard({ brand, onSelect }: BrandCardProps) {
 
       <div className="border-t border-slate-200 bg-slate-50/70 px-3 py-2.5 transition-colors duration-300 group-hover:bg-orange-50/80">
         <p className="truncate text-center text-[11px] font-semibold uppercase tracking-wide text-slate-500 transition-colors duration-300 group-hover:text-orange-700">
-          {brand}
+          {marca.nombre}
         </p>
       </div>
     </button>
   );
 }
 
-export default function Marcas() {
+export default function MostrarMarcas() {
   const router = useRouter();
+  const { marcas, loading } = useMarcasPublicas();
+  const [seed] = useState(() => Math.floor(Math.random() * 1_000_000));
 
   const handleBrandSelect = useCallback(
     (brand: string) => {
@@ -115,6 +114,15 @@ export default function Marcas() {
     },
     [router],
   );
+
+  const randomBrands = useMemo(() => {
+    const active = marcas.filter((m) => m.isActive);
+    return seededShuffle(active, seed).slice(0, 12);
+  }, [marcas, seed]);
+
+  if (loading || randomBrands.length === 0) {
+    return null;
+  }
 
   return (
     <section id="marcas" className="relative w-full overflow-hidden bg-white scroll-mt-20">
@@ -154,8 +162,8 @@ export default function Marcas() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6">
-          {BRANDS.map((brand) => (
-            <BrandCard key={brand} brand={brand} onSelect={handleBrandSelect} />
+          {randomBrands.map((marca) => (
+            <BrandCard key={marca.id} marca={marca} onSelect={handleBrandSelect} />
           ))}
         </div>
 

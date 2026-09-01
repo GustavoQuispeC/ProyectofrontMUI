@@ -1,5 +1,6 @@
 "use client";
-import { Carousel, HeroSection, Marcas, Productos, Contactenos, Categorias } from "@/components";
+import { Carousel, HeroSection, Productos, Contactenos, Categorias } from "@/components";
+import MostrarMarcas from "@/components/marcas/mostrar-marcas/MostrarMarcas";
 
 export default function Home() {
   //Móvil (16:9): 640x360px o 1280x720px
@@ -26,7 +27,7 @@ export default function Home() {
 
         <Productos />
         <HeroSection />
-        <Marcas />
+        <MostrarMarcas />
         <Contactenos />
       </main>
     </div>

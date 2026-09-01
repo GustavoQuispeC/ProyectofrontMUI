@@ -87,11 +87,11 @@ export default function AddToCartModal({ isOpen, onClose, producto }: AddToCartM
               <h4 className="font-bold text-blue-900 mb-1 line-clamp-2">{producto.nombre}</h4>
               <p className="text-2xl font-extrabold text-orange-500 mb-3">S/ {producto.precio.toFixed(2)}</p>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <span className="text-sm font-medium text-slate-600">Cantidad:</span>
-                <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white">
-                  <button onClick={disminuir} className="px-3 py-1.5 hover:bg-slate-100 transition-colors">
-                    <RemoveIcon sx={{ fontSize: 16 }} className="text-slate-700" />
+                <div className="flex shrink-0 items-center border border-slate-200 rounded-xl overflow-hidden bg-white">
+                  <button onClick={disminuir} className="shrink-0 px-3 py-1.5 hover:bg-slate-100 transition-colors">
+                    <RemoveIcon sx={{ fontSize: 16 }} className="shrink-0 text-slate-700" />
                   </button>
                   <input
                     type="number"
@@ -99,8 +99,8 @@ export default function AddToCartModal({ isOpen, onClose, producto }: AddToCartM
                     onChange={(e) => handleChange(e.target.value)}
                     className="w-12 text-center outline-none bg-transparent font-semibold text-slate-900 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
-                  <button onClick={incrementar} className="px-3 py-1.5 hover:bg-slate-100 transition-colors">
-                    <AddIcon sx={{ fontSize: 16 }} className="text-slate-700" />
+                  <button onClick={incrementar} className="shrink-0 px-3 py-1.5 hover:bg-slate-100 transition-colors">
+                    <AddIcon sx={{ fontSize: 16 }} className="shrink-0 text-slate-700" />
                   </button>
                 </div>
               </div>

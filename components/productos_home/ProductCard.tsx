@@ -53,7 +53,7 @@ export default function ProductCard({ product, onAdd }: Props) {
 
           <button
             onClick={() => onAdd?.(product)}
-            className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300"
+            className="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold opacity-100 translate-y-0 transition-all duration-300 sm:opacity-0 sm:translate-y-2 sm:group-hover:opacity-100 sm:group-hover:translate-y-0"
           >
             <ShoppingCartIcon sx={{ fontSize: 16 }} />
             Agregar

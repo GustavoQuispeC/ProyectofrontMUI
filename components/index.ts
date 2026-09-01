@@ -1,7 +1,7 @@
 export { default as Carousel } from "./ui/carousel/Carousel";
 export { default as Categorias } from "./categorias/mostrar-categorias/MostrarCategorias";
 export { default as HeroSection } from "./HeroSection/HeroSection";
-export { default as Marcas } from "./marcas/Marcas";
+export { default as Marcas } from "./marcas/mostrar-marcas/MostrarMarcas";
 export { default as Productos } from "./productos_home/Productos";
 export { default as CartDrawer } from "./cartdrawer/Cartdrawer";
 export { default as Contactenos } from "./contactenos/Contactenos";
