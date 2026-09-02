@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
-import { useMemo, useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { getTheme } from "./Theme";
 
 type ThemeContextType = {
@@ -48,7 +48,7 @@ export default function ThemeRegistry({ children, initialMode }: ThemeRegistryPr
     }
   }, [mode, hydrated]);
 
-  const theme = useMemo(() => getTheme(mode), [mode]);
+  //const theme = useMemo(() => getTheme(mode), [mode]);
 
   const toggleTheme = () => {
     setMode((prev) => (prev === "light" ? "dark" : "light"));

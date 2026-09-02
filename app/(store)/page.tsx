@@ -24,7 +24,6 @@ export default function Home() {
       <main className="grow">
         <Carousel mobileImages={imagenesBannerMobile} desktopImages={imagenesBannerDesktop} />
         <Categorias />
-
         <Productos />
         <HeroSection />
         <MostrarMarcas />
