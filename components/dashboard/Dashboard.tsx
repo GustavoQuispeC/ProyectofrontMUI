@@ -14,7 +14,8 @@ interface DashboardProps {
 
 export default function Dashboard({ children }: DashboardProps) {
   const pathname = usePathname();
-  const isProductosListar = pathname?.startsWith("/dashboard/productos/listar");
+  const isFullWidthList =
+    pathname?.startsWith("/dashboard/productos/listar") || pathname?.startsWith("/dashboard/proveedores/listar");
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideMenu />
@@ -38,9 +39,9 @@ export default function Dashboard({ children }: DashboardProps) {
           spacing={3}
           sx={{
             alignItems: "stretch",
-            px: { xs: 2, md: isProductosListar ? 2 : 4 },
+            px: { xs: 2, md: isFullWidthList ? 2 : 4 },
             py: { xs: 3, md: 4 },
-            maxWidth: isProductosListar ? "100%" : "1400px",
+            maxWidth: isFullWidthList ? "100%" : "1400px",
             mx: "auto",
             width: "100%",
             mt: { xs: "64px", md: 0 },

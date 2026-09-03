@@ -206,7 +206,7 @@ export default function RegistrarProveedor() {
             variant="outlined"
             color="inherit"
             startIcon={<KeyboardBackspaceIcon />}
-            onClick={() => router.push("/dashboard/inicio")}
+            onClick={() => router.push("/dashboard/proveedores/listar")}
             sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
           >
             Volver

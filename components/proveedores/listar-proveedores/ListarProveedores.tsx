@@ -156,7 +156,7 @@ export default function ListarProveedores() {
   if (!mounted) return null;
 
   return (
-    <Box sx={{ p: 3, maxWidth: "100%", mx: "auto" }}>
+    <Box sx={{ width: "100%" }}>
       <Box
         sx={{
           display: "flex",
@@ -177,7 +177,7 @@ export default function ListarProveedores() {
           Agregar
         </Button>
       </Box>
-      <Paper sx={{ height: 1100, width: "100%", p: 2 }}>
+      <Paper sx={{ height: "auto", width: "100%", p: 2 }}>
         <DataGrid
           rows={proveedores}
           columns={getColumns(handleToggleEstado, handleEdit, toggling, canEdit)}
@@ -189,10 +189,14 @@ export default function ListarProveedores() {
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           sx={{
             border: 0,
-            height: "100%",
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "action.hover",
-              fontWeight: 600,
+            mx: 1,
+            "& .MuiDataGrid-columnHeader": {
+              backgroundColor: "#e4eaeb",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontWeight: 700,
+              color: "#006064",
+              textTransform: "uppercase",
             },
           }}
         />

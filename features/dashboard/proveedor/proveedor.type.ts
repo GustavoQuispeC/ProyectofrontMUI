@@ -12,9 +12,9 @@ export interface Proveedor {
   updatedByUserName: string | null;
 }
 
-export interface ListarProveedor extends Proveedor {}
+export type ListarProveedor = Proveedor;
 
-export interface DetalleProveedor extends Proveedor {}
+export type DetalleProveedor = Proveedor;
 
 export interface RegistrarProveedorRequest {
   razonSocial: string;
