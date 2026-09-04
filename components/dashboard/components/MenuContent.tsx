@@ -28,6 +28,7 @@ import CategoryIcon from "@mui/icons-material/Category";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import InventoryIcon from "@mui/icons-material/Inventory";
 
 import React from "react";
 import Link from "next/link";
@@ -184,6 +185,19 @@ const mainListItems: MenuItemType[] = [
     icon: <LocalShippingIcon />,
     href: "/dashboard/proveedores/listar",
     allowedRoles: [...permissions.listarProveedores, ...permissions.registrarProveedor],
+  },
+  {
+    text: "Kardex",
+    icon: <InventoryIcon />,
+    allowedRoles: [...permissions.listarIngresos, ...permissions.registrarIngreso],
+    children: [
+      {
+        text: "Ingresos",
+        icon: <FormatListNumberedIcon />,
+        href: "/dashboard/ingresos/listar",
+        allowedRoles: [...permissions.listarIngresos, ...permissions.registrarIngreso],
+      },
+    ],
   },
 ];
 

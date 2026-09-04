@@ -15,7 +15,9 @@ interface DashboardProps {
 export default function Dashboard({ children }: DashboardProps) {
   const pathname = usePathname();
   const isFullWidthList =
-    pathname?.startsWith("/dashboard/productos/listar") || pathname?.startsWith("/dashboard/proveedores/listar");
+    pathname?.startsWith("/dashboard/productos/listar") ||
+    pathname?.startsWith("/dashboard/proveedores/listar") ||
+    pathname?.startsWith("/dashboard/ingresos/listar");
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideMenu />
