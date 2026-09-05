@@ -32,6 +32,7 @@ export function useRegistrarTransferencia() {
     mutationFn: (payload: RegistrarTransferencia) => registrarTransferencia(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transferencias"] });
+      queryClient.invalidateQueries({ queryKey: ["inventario-autocomplete"] });
     },
   });
 

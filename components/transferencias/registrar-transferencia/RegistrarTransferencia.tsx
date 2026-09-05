@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
@@ -34,7 +34,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
 import { useTiendas } from "@/features/dashboard/tienda/hooks/useTiendas";
-import { useProductosAutocomplete } from "@/features/dashboard/producto/hooks/useProductosAutocomplete";
+import { useInventarioAutocomplete } from "@/features/dashboard/inventario/hooks/useInventarioAutocomplete";
 import { useRegistrarTransferencia } from "@/features/dashboard/transferencia/hooks/useTransferencias";
 import {
   RegistrarTransferenciaForm,
@@ -97,13 +97,14 @@ export default function RegistrarTransferencia() {
   const [saving, setSaving] = useState(false);
 
   const { tiendas, loading: loadingTiendas } = useTiendas(canAccess);
-  const { productos, loading: loadingProductos } = useProductosAutocomplete();
   const { registrarTransferenciaAsync } = useRegistrarTransferencia();
 
   const {
     control,
     handleSubmit,
     reset,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<RegistrarTransferenciaForm>({
     resolver: standardSchemaResolver(RegistrarTransferenciaSchema),
@@ -113,16 +114,46 @@ export default function RegistrarTransferencia() {
     shouldFocusError: true,
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "Detalles",
   });
+
+  const tiendaOrigenId = useWatch({ control, name: "TiendaOrigenId" });
+  const detalles = useWatch({ control, name: "Detalles" });
+  const { inventario, loading: loadingInventario } = useInventarioAutocomplete(
+    tiendaOrigenId ? Number(tiendaOrigenId) : undefined,
+  );
+
+  // Limpiar detalles cuando cambia la tienda origen (el inventario es por tienda)
+  const prevTiendaOrigen = useRef<number>(0);
+  useEffect(() => {
+    const current = tiendaOrigenId ? Number(tiendaOrigenId) : 0;
+    if (prevTiendaOrigen.current !== current) {
+      prevTiendaOrigen.current = current;
+      replace([{ ProductoId: 0, Cantidad: 1 }]);
+      clearErrors("Detalles");
+    }
+  }, [tiendaOrigenId, replace, clearErrors]);
 
   const resetForm = () => {
     reset(defaultValues);
   };
 
   const onSubmit = async (data: RegistrarTransferenciaForm) => {
+    // Validar que la cantidad no exceda el stock disponible
+    for (let i = 0; i < data.Detalles.length; i++) {
+      const detalle = data.Detalles[i];
+      const item = inventario.find((p) => p.productoId === detalle.ProductoId);
+      if (item && detalle.Cantidad > item.stockDisponible) {
+        setError(`Detalles.${i}.Cantidad`, {
+          type: "manual",
+          message: `Stock disponible: ${item.stockDisponible}`,
+        });
+        return;
+      }
+    }
+
     try {
       setSaving(true);
       await toastPromise(
@@ -317,15 +348,31 @@ export default function RegistrarTransferencia() {
                     control={control}
                     render={({ field }) => (
                       <Autocomplete
-                        options={productos}
-                        loading={loadingProductos}
-                        value={productos.find((p) => p.id === field.value) ?? null}
-                        onChange={(_, value) => field.onChange(value?.id ?? 0)}
-                        getOptionLabel={(option) => option.nombre}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        noOptionsText="Sin resultados"
+                        options={inventario}
+                        loading={loadingInventario}
+                        disabled={!tiendaOrigenId}
+                        value={inventario.find((p) => p.productoId === field.value) ?? null}
+                        onChange={(_, value) => field.onChange(value?.productoId ?? 0)}
+                        getOptionLabel={(option) => `${option.productoCodigoInterno} - ${option.productoNombre}`}
+                        isOptionEqualToValue={(option, value) => option.productoId === value.productoId}
+                        noOptionsText={tiendaOrigenId ? "Sin resultados" : "Seleccione primero la tienda origen"}
                         loadingText="Cargando..."
                         sx={{ flex: 1, minWidth: 260, width: "100%" }}
+                        renderOption={(props, option) => {
+                          const { key, ...optionProps } = props as React.HTMLAttributes<HTMLLIElement> & {
+                            key: React.Key;
+                          };
+                          return (
+                            <li key={key} {...optionProps}>
+                              <Box sx={{ color: option.stockDisponible <= 0 ? "error.main" : "text.primary" }}>
+                                {option.productoCodigoInterno} - {option.productoNombre}
+                              </Box>
+                              <Typography variant="caption" sx={{ ml: 2 }}>
+                                Disponible: {option.stockDisponible}
+                              </Typography>
+                            </li>
+                          );
+                        }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -342,18 +389,22 @@ export default function RegistrarTransferencia() {
                   <Controller
                     name={`Detalles.${index}.Cantidad`}
                     control={control}
-                    render={({ field }) => (
-                      <TextField
-                        label="Cantidad"
-                        type="number"
-                        value={field.value}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        slotProps={{ htmlInput: { min: 1 } }}
-                        error={!!errors.Detalles?.[index]?.Cantidad}
-                        helperText={errors.Detalles?.[index]?.Cantidad?.message}
-                        sx={{ minWidth: 120, width: { xs: "100%", sm: 140 } }}
-                      />
-                    )}
+                    render={({ field }) => {
+                      const productoSel = inventario.find((p) => p.productoId === detalles?.[index]?.ProductoId);
+                      const stockMsg = productoSel ? `Disponible: ${productoSel.stockDisponible}` : undefined;
+                      return (
+                        <TextField
+                          label="Cantidad"
+                          type="number"
+                          value={field.value}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          slotProps={{ htmlInput: { min: 1, max: productoSel?.stockDisponible } }}
+                          error={!!errors.Detalles?.[index]?.Cantidad}
+                          helperText={errors.Detalles?.[index]?.Cantidad?.message ?? stockMsg}
+                          sx={{ minWidth: 120, width: { xs: "100%", sm: 140 } }}
+                        />
+                      );
+                    }}
                   />
 
                   <IconButton
@@ -416,7 +467,7 @@ export default function RegistrarTransferencia() {
               variant="contained"
               startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
               onClick={handleSubmit(onSubmit)}
-              disabled={saving || loadingTiendas || loadingProductos}
+              disabled={saving || loadingTiendas}
               sx={{ minWidth: 160, height: 44, boxShadow: "none", borderRadius: 2, width: { xs: "100%", sm: "auto" } }}
             >
               {saving ? "Guardando..." : "Guardar transferencia"}

@@ -85,4 +85,7 @@ export const permissions = {
   //! Transferencia
   listarTransferencias: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
   registrarTransferencia: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
+
+  //! Inventario
+  listarInventario: [ROLES.SUPER_ADMIN, ROLES.GERENTE, ROLES.ADMINISTRADOR, ROLES.VENDEDOR],
 };

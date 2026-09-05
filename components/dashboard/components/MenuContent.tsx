@@ -194,6 +194,7 @@ const mainListItems: MenuItemType[] = [
       ...permissions.registrarIngreso,
       ...permissions.listarTransferencias,
       ...permissions.registrarTransferencia,
+      ...permissions.listarInventario,
     ],
     children: [
       {
@@ -207,6 +208,12 @@ const mainListItems: MenuItemType[] = [
         icon: <FormatListNumberedIcon />,
         href: "/dashboard/transferencias/listar",
         allowedRoles: [...permissions.listarTransferencias, ...permissions.registrarTransferencia],
+      },
+      {
+        text: "Inventario",
+        icon: <FormatListNumberedIcon />,
+        href: "/dashboard/inventario/listar",
+        allowedRoles: [...permissions.listarInventario],
       },
     ],
   },
