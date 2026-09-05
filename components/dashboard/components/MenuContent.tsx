@@ -189,13 +189,24 @@ const mainListItems: MenuItemType[] = [
   {
     text: "Kardex",
     icon: <InventoryIcon />,
-    allowedRoles: [...permissions.listarIngresos, ...permissions.registrarIngreso],
+    allowedRoles: [
+      ...permissions.listarIngresos,
+      ...permissions.registrarIngreso,
+      ...permissions.listarTransferencias,
+      ...permissions.registrarTransferencia,
+    ],
     children: [
       {
         text: "Ingresos",
         icon: <FormatListNumberedIcon />,
         href: "/dashboard/ingresos/listar",
         allowedRoles: [...permissions.listarIngresos, ...permissions.registrarIngreso],
+      },
+      {
+        text: "Transferencias",
+        icon: <FormatListNumberedIcon />,
+        href: "/dashboard/transferencias/listar",
+        allowedRoles: [...permissions.listarTransferencias, ...permissions.registrarTransferencia],
       },
     ],
   },

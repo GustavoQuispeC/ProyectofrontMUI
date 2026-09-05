@@ -7,6 +7,7 @@ import {
   listarSistemasPensiones,
   listarTiposContrato,
   listarTiposDocumento,
+  listarTiposDocumentoCompra,
   listarTiposJornada,
   listarTiposParentesco,
 } from "../catalogo.service";
@@ -26,6 +27,7 @@ interface Catalogos {
   tiposContrato: CatalogoItem[];
   tiposJornada: CatalogoItem[];
   motivosEgreso: CatalogoItem[];
+  tiposDocumentoCompra: CatalogoItem[];
 }
 
 const initialCatalogos: Catalogos = {
@@ -38,6 +40,7 @@ const initialCatalogos: Catalogos = {
   tiposContrato: [],
   tiposJornada: [],
   motivosEgreso: [],
+  tiposDocumentoCompra: [],
 };
 
 export function useCatalogos() {
@@ -61,6 +64,7 @@ export function useCatalogos() {
           tiposContrato,
           tiposJornada,
           motivosEgreso,
+          tiposDocumentoCompra,
         ] = await Promise.all([
           listarTiposDocumento(),
           listarGeneros(),
@@ -71,6 +75,7 @@ export function useCatalogos() {
           listarTiposContrato(),
           listarTiposJornada(),
           listarMotivosEgreso(),
+          listarTiposDocumentoCompra(),
         ]);
 
         setCatalogos({
@@ -83,6 +88,7 @@ export function useCatalogos() {
           tiposContrato: tiposContrato ?? [],
           tiposJornada: tiposJornada ?? [],
           motivosEgreso: motivosEgreso ?? [],
+          tiposDocumentoCompra: tiposDocumentoCompra ?? [],
         });
       } catch (err) {
         console.error("Error en la carga masiva de catálogos:", err);

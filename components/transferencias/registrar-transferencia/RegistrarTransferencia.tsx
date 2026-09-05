@@ -21,28 +21,25 @@ import {
   FormControl,
   FormHelperText,
   IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import InventoryIcon from "@mui/icons-material/Inventory";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 
-import { useProveedores } from "@/features/dashboard/proveedor/hooks/useProveedores";
 import { useTiendas } from "@/features/dashboard/tienda/hooks/useTiendas";
 import { useProductosAutocomplete } from "@/features/dashboard/producto/hooks/useProductosAutocomplete";
-import { useCatalogos } from "@/features/dashboard/catalogo/hooks/useCatalogos";
-import { useRegistrarIngreso } from "@/features/dashboard/Ingreso/hooks/useIngreso";
-import { RegistrarIngresoForm, RegistrarIngresoSchema } from "@/features/dashboard/Ingreso/ingreso.schema";
+import { useRegistrarTransferencia } from "@/features/dashboard/transferencia/hooks/useTransferencias";
+import {
+  RegistrarTransferenciaForm,
+  RegistrarTransferenciaSchema,
+} from "@/features/dashboard/transferencia/transferencia.schema";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
@@ -50,15 +47,11 @@ import { useMounted } from "@/shared/hooks/useMounted";
 import { toastPromise } from "@/shared/utils/toast";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
-const defaultValues: RegistrarIngresoForm = {
-  ProveedorId: 0,
+const defaultValues: RegistrarTransferenciaForm = {
+  TiendaOrigenId: 0,
   TiendaDestinoId: 0,
-  TipoDocumento: 0,
-  SerieDocumento: "",
-  NumeroDocumento: "",
   Fecha: dayjs().format("YYYY-MM-DD"),
-  Observaciones: "",
-  MontoTotal: 0,
+  Motivo: "",
   Detalles: [{ ProductoId: 0, Cantidad: 1 }],
 };
 
@@ -96,26 +89,24 @@ function Section({ title, children }: SectionProps) {
   );
 }
 
-export default function RegistrarIngreso() {
+export default function RegistrarTransferencia() {
   const user = getAuthUser();
-  const canAccess = user ? hasPermission(user.rol, permissions.registrarIngreso) : false;
+  const canAccess = user ? hasPermission(user.rol, permissions.registrarTransferencia) : false;
   const mounted = useMounted();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
 
-  const { proveedores, loading: loadingProveedores } = useProveedores(canAccess);
   const { tiendas, loading: loadingTiendas } = useTiendas(canAccess);
   const { productos, loading: loadingProductos } = useProductosAutocomplete();
-  const { catalogos, loading: loadingCatalogos } = useCatalogos();
-  const { registrarIngresoAsync } = useRegistrarIngreso();
+  const { registrarTransferenciaAsync } = useRegistrarTransferencia();
 
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<RegistrarIngresoForm>({
-    resolver: standardSchemaResolver(RegistrarIngresoSchema),
+  } = useForm<RegistrarTransferenciaForm>({
+    resolver: standardSchemaResolver(RegistrarTransferenciaSchema),
     defaultValues,
     mode: "onSubmit",
     reValidateMode: "onChange",
@@ -131,17 +122,17 @@ export default function RegistrarIngreso() {
     reset(defaultValues);
   };
 
-  const onSubmit = async (data: RegistrarIngresoForm) => {
+  const onSubmit = async (data: RegistrarTransferenciaForm) => {
     try {
       setSaving(true);
       await toastPromise(
-        registrarIngresoAsync({
+        registrarTransferenciaAsync({
           ...data,
-          Observaciones: data.Observaciones?.trim() || null,
+          Motivo: data.Motivo?.trim() || null,
         }),
         {
-          loading: "Registrando ingreso...",
-          success: "Ingreso registrado correctamente",
+          loading: "Registrando transferencia...",
+          success: "Transferencia registrada correctamente",
           error: (error) => error.message,
         },
       );
@@ -182,7 +173,7 @@ export default function RegistrarIngreso() {
                   height: { xs: 48, md: 52 },
                 }}
               >
-                <InventoryIcon />
+                <SwapHorizIcon />
               </Avatar>
               <Box>
                 <Typography
@@ -193,10 +184,10 @@ export default function RegistrarIngreso() {
                     fontSize: { xs: "1.25rem", sm: "1.25rem" },
                   }}
                 >
-                  REGISTRO DE INGRESO DE PRODUCTOS
+                  REGISTRO DE TRANSFERENCIA DE PRODUCTOS
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  Registre la entrada de mercadería con su documento y detalle de productos.
+                  Registre la transferencia de mercadería entre tiendas con su detalle de productos.
                 </Typography>
               </Box>
             </Stack>
@@ -204,7 +195,7 @@ export default function RegistrarIngreso() {
         </Card>
 
         <Stack sx={{ gap: 2 }}>
-          {/* Documento y origen */}
+          {/* Información general */}
           <Section title="Información general">
             <Stack sx={{ gap: 2 }}>
               <Stack
@@ -215,15 +206,15 @@ export default function RegistrarIngreso() {
                 }}
               >
                 <Controller
-                  name="ProveedorId"
+                  name="TiendaOrigenId"
                   control={control}
                   render={({ field }) => (
                     <Autocomplete
-                      options={proveedores}
-                      loading={loadingProveedores}
-                      value={proveedores.find((p) => p.id === field.value) ?? null}
+                      options={tiendas}
+                      loading={loadingTiendas}
+                      value={tiendas.find((t) => t.id === field.value) ?? null}
                       onChange={(_, value) => field.onChange(value?.id ?? 0)}
-                      getOptionLabel={(option) => option.razonSocial}
+                      getOptionLabel={(option) => option.nombre}
                       isOptionEqualToValue={(option, value) => option.id === value.id}
                       noOptionsText="Sin resultados"
                       loadingText="Cargando..."
@@ -231,10 +222,10 @@ export default function RegistrarIngreso() {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Proveedor"
-                          placeholder="Seleccione un proveedor"
-                          error={!!errors.ProveedorId}
-                          helperText={errors.ProveedorId?.message}
+                          label="Tienda origen"
+                          placeholder="Seleccione una tienda"
+                          error={!!errors.TiendaOrigenId}
+                          helperText={errors.TiendaOrigenId?.message}
                         />
                       )}
                     />
@@ -258,80 +249,12 @@ export default function RegistrarIngreso() {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Almacén"
-                          placeholder="Seleccione un almacén"
+                          label="Tienda destino"
+                          placeholder="Seleccione una tienda"
                           error={!!errors.TiendaDestinoId}
                           helperText={errors.TiendaDestinoId?.message}
                         />
                       )}
-                    />
-                  )}
-                />
-              </Stack>
-
-              <Stack
-                sx={{
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: 2,
-                  alignItems: { xs: "stretch", sm: "flex-start" },
-                }}
-              >
-                <FormControl sx={{ minWidth: 200 }} error={!!errors.TipoDocumento}>
-                  <InputLabel id="tipo-documento-label">Tipo de documento</InputLabel>
-                  <Controller
-                    name="TipoDocumento"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        labelId="tipo-documento-label"
-                        label="Tipo de documento"
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        disabled={loadingCatalogos}
-                      >
-                        <MenuItem value="" disabled>
-                          Seleccione
-                        </MenuItem>
-                        {loadingCatalogos && <MenuItem disabled>Cargando...</MenuItem>}
-                        {catalogos.tiposDocumentoCompra.map((tipo: { id: number; nombre: string }) => (
-                          <MenuItem key={tipo.id} value={tipo.id}>
-                            {tipo.nombre}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                  <FormHelperText>{errors.TipoDocumento?.message}</FormHelperText>
-                </FormControl>
-
-                <Controller
-                  name="SerieDocumento"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      label="Serie documento"
-                      placeholder="Ej. F001"
-                      error={!!errors.SerieDocumento}
-                      helperText={errors.SerieDocumento?.message}
-                      sx={{ flex: 1, minWidth: 120 }}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="NumeroDocumento"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Número documento"
-                      placeholder="Ej. 123458"
-                      error={!!errors.NumeroDocumento}
-                      helperText={errors.NumeroDocumento?.message}
-                      sx={{ flex: 1, minWidth: 160 }}
                     />
                   )}
                 />
@@ -353,45 +276,23 @@ export default function RegistrarIngreso() {
                     </FormControl>
                   )}
                 />
-
-                <Controller
-                  name="MontoTotal"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Monto total"
-                      type="number"
-                      value={field.value}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      error={!!errors.MontoTotal}
-                      helperText={errors.MontoTotal?.message}
-                      slotProps={{
-                        input: {
-                          startAdornment: <InputAdornment position="start">S/</InputAdornment>,
-                        },
-                      }}
-                      sx={{ flex: 1, minWidth: 160 }}
-                    />
-                  )}
-                />
               </Stack>
 
               <Controller
-                name="Observaciones"
+                name="Motivo"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                    label="Observaciones"
+                    label="Motivo"
                     multiline
                     rows={2}
                     fullWidth
-                    placeholder="Notas adicionales (opcional)"
-                    error={!!errors.Observaciones}
-                    helperText={errors.Observaciones?.message}
+                    placeholder="Motivo de la transferencia (opcional)"
+                    error={!!errors.Motivo}
+                    helperText={errors.Motivo?.message}
                   />
                 )}
               />
@@ -493,7 +394,7 @@ export default function RegistrarIngreso() {
               variant="outlined"
               color="inherit"
               startIcon={<KeyboardBackspaceIcon />}
-              onClick={() => router.push("/dashboard/ingresos/listar")}
+              onClick={() => router.push("/dashboard/transferencias/listar")}
               disabled={saving}
               sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
             >
@@ -515,10 +416,10 @@ export default function RegistrarIngreso() {
               variant="contained"
               startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
               onClick={handleSubmit(onSubmit)}
-              disabled={saving || loadingProveedores || loadingTiendas || loadingProductos}
+              disabled={saving || loadingTiendas || loadingProductos}
               sx={{ minWidth: 160, height: 44, boxShadow: "none", borderRadius: 2, width: { xs: "100%", sm: "auto" } }}
             >
-              {saving ? "Guardando..." : "Guardar ingreso"}
+              {saving ? "Guardando..." : "Guardar transferencia"}
             </Button>
           </Stack>
         </Stack>

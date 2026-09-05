@@ -13,9 +13,7 @@ export const RegistrarIngresoSchema = z.object({
   NumeroDocumento: z.string().min(1, "Ingrese el número del documento."),
   Fecha: z.string().min(1, "La fecha es obligatoria."),
   Observaciones: z.string().optional().nullable(),
-  MontoTotal: z.coerce
-    .number({ message: "Ingrese el monto total." })
-    .min(0, "El monto total debe ser mayor o igual a 0."),
+  MontoTotal: z.coerce.number({ message: "Ingrese el monto total." }).positive("El monto total debe ser mayor a 0"),
   Detalles: z.array(DetalleIngresoSchema).min(1, "Agregue al menos un detalle."),
 });
 
