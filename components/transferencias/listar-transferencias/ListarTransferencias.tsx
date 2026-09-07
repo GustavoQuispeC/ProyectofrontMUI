@@ -12,6 +12,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -38,6 +39,8 @@ import AddIcon from "@mui/icons-material/Add";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import { esES } from "@mui/x-data-grid/locales";
 
 import { useTransferencias } from "@/features/dashboard/transferencia/hooks/useTransferencias";
@@ -72,13 +75,54 @@ function LoadingOverlay() {
 function getColumns(onVer: (row: ListarTransferencia) => void): GridColDef<ListarTransferencia>[] {
   return [
     { field: "id", headerName: "ID", width: 70, align: "center", headerAlign: "center" },
-    { field: "tiendaOrigenNombre", headerName: "Tienda origen", flex: 1, minWidth: 180 },
-    { field: "tiendaDestinoNombre", headerName: "Tienda destino", flex: 1, minWidth: 180 },
+    {
+      field: "tiendaOrigenNombre",
+      headerName: "Tienda origen",
+      minWidth: 220,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            width: "100%",
+            bgcolor: "rgba(135, 196, 198, 0.08)",
+            px: 1,
+          }}
+        >
+          <Typography variant="body2">{params.row.tiendaOrigenNombre}</Typography>
+        </Box>
+      ),
+    },
+    {
+      field: "tiendaDestinoNombre",
+      headerName: "Tienda destino",
+      minWidth: 220,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            width: "100%",
+            bgcolor: "rgba(174, 96, 67, 0.08)",
+            px: 1,
+          }}
+        >
+          <Typography variant="body2">{params.row.tiendaDestinoNombre}</Typography>
+        </Box>
+      ),
+    },
     {
       field: "fecha",
       headerName: "Fecha",
-      flex: 1,
-      minWidth: 120,
+      minWidth: 180,
       valueGetter: (_value, row) => dayjs(row.fecha).format("DD/MM/YYYY"),
     },
     {
@@ -88,7 +132,32 @@ function getColumns(onVer: (row: ListarTransferencia) => void): GridColDef<Lista
       minWidth: 160,
       valueGetter: (_value, row) => row.motivo || "—",
     },
-    { field: "createdByUserName", headerName: "Creado por", flex: 1, minWidth: 160 },
+    {
+      field: "isActive",
+      headerName: "Estado",
+      width: 130,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Chip
+          size="small"
+          icon={params.row.isActive ? <LocalShippingIcon sx={{ color: "#2e7d32" }} /> : <ScheduleOutlinedIcon />}
+          label={params.row.isActive ? "Realizado" : "Pendiente"}
+          color={params.row.isActive ? "success" : "warning"}
+          variant="filled"
+          sx={
+            params.row.isActive
+              ? {
+                  color: "#347237",
+                  bgcolor: "rgba(168, 226, 171, 0.2)",
+                  fontWeight: 400,
+                }
+              : undefined
+          }
+        />
+      ),
+    },
+    { field: "createdByUserName", headerName: "Creado por", minWidth: 280 },
     {
       field: "acciones",
       headerName: "Acciones",
