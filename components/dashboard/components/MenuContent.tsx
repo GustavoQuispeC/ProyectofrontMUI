@@ -117,7 +117,15 @@ const mainListItems: MenuItemType[] = [
   {
     text: "Clientes",
     icon: <AccountBoxIcon />,
-    href: "#",
+    allowedRoles: [...permissions.listarClientes, ...permissions.registrarCliente],
+    children: [
+      {
+        text: "Listar",
+        icon: <FormatListNumberedIcon />,
+        href: "/dashboard/clientes/listar",
+        allowedRoles: [...permissions.listarClientes],
+      },
+    ],
   },
 
   {
