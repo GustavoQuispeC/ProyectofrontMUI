@@ -1,11 +1,12 @@
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
-import { buscarClienteApi, crearClienteApi, listarClientesApi } from "./cliente.service";
+import { buscarClienteApi, crearClienteApi, actualizarClienteApi, listarClientesApi } from "./cliente.service";
 import {
   BuscarClienteResponse,
   Cliente,
   CrearClienteRequest,
+  ActualizarClienteRequest,
   ListarClientesRequest,
   ListarCliente,
 } from "./cliente.type";
@@ -45,6 +46,24 @@ export async function crearCliente(payload: CrearClienteRequest): Promise<Client
   }
 
   return crearClienteApi(payload);
+}
+
+//! Actualizar cliente con validación de permisos
+export async function actualizarCliente(id: number, payload: ActualizarClienteRequest): Promise<Cliente> {
+  const user = getAuthUser();
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  if (!hasPermission(user.rol, permissions.registrarCliente)) {
+    throw new Error("No tienes permisos para actualizar clientes");
+  }
+
+  if (!payload.nombre?.trim() && !payload.razonSocial?.trim()) {
+    throw new Error("El nombre o la razón social es requerido");
+  }
+
+  return actualizarClienteApi(id, payload);
 }
 
 //! Listar clientes paginados

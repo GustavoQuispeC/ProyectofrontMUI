@@ -30,5 +30,9 @@ export async function apiCliente(url: string, options: RequestInit = {}) {
     throw new Error(msg);
   }
 
+  if (response.status === 204) {
+    return null;
+  }
+
   return response.json();
 }

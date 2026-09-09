@@ -46,7 +46,21 @@ export interface CrearClienteRequest {
   telefono?: string;
 }
 
-export type ListarCliente = Cliente;
+export interface ActualizarClienteRequest {
+  nombre?: string;
+  apellido?: string | null;
+  razonSocial?: string | null;
+  numeroDni?: string | null;
+  numeroRuc?: string | null;
+  correo?: string;
+  telefono?: string | null;
+}
+
+import { DireccionCliente } from "@/features/dashboard/direccion-cliente/direccion-cliente.type";
+
+export interface ListarCliente extends Cliente {
+  direcciones?: DireccionCliente[];
+}
 
 export interface ListarClientesRequest {
   busqueda?: string;

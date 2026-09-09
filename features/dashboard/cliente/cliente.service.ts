@@ -3,6 +3,7 @@ import {
   BuscarClienteResponse,
   Cliente,
   CrearClienteRequest,
+  ActualizarClienteRequest,
   ListarCliente,
   ListarClientesRequest,
 } from "./cliente.type";
@@ -22,6 +23,16 @@ export async function buscarClienteApi(documento: string): Promise<BuscarCliente
 export async function crearClienteApi(payload: CrearClienteRequest): Promise<Cliente> {
   const response = await apiCliente(`${apiUrl}/cliente`, {
     method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return response as Cliente;
+}
+
+//! Actualizar cliente
+export async function actualizarClienteApi(id: number, payload: ActualizarClienteRequest): Promise<Cliente> {
+  const response = await apiCliente(`${apiUrl}/cliente/${id}`, {
+    method: "PUT",
     body: JSON.stringify(payload),
   });
 
