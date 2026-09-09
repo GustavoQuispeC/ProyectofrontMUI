@@ -47,7 +47,7 @@ interface MobileDrawerProps {
 }
 
 export function MobileDrawer({ open, onClose, isLoggedIn, userName, onLogin, onLogout }: MobileDrawerProps) {
-  const { categorias, loading } = useCategoriasPublicas();
+  const { categorias } = useCategoriasPublicas();
   const menuCategories = useMemo(() => buildMenuCategories(categorias), [categorias]);
   const [activeId, setActiveId] = useState<string | null>(null);
 

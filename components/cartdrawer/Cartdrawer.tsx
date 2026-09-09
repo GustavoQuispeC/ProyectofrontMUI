@@ -1,11 +1,9 @@
 "use client";
 import {
   Add,
-  Check,
-  ContentCopy,
   DeleteOutlined,
+  InfoOutlined,
   Inventory2Outlined,
-  LockOutlined,
   Receipt,
   Remove,
   ShoppingCart,
@@ -13,37 +11,11 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import CloseIcon from "@mui/icons-material/Close";
+import PaymentMethodsModal from "./PaymentMethodsModal";
 
 const CART_KEY = "shopping_cart";
 const CART_EVENT = "cart:updated";
 export const DRAWER_OPEN_EVENT = "drawer:open";
-
-const BANCOS = [
-  {
-    id: "bcp",
-    nombre: "BCP",
-    logo: "/bancos/banco-de-credito-logo.png",
-    cuenta: "2902066737021",
-    cci: "002-29000206673702155",
-  },
-  {
-    id: "bbva",
-    nombre: "BBVA",
-    logo: "/bancos/bbva-logo.png",
-    cuenta: "0011-0347-0100056132",
-    cci: "011-347-000100056132-22",
-  },
-  {
-    id: "bn",
-    nombre: "Banco de la Nación",
-    logo: "/bancos/banco-de-la-nacion-logo.png",
-    cuenta: "00-261-038021",
-    cci: "01826100026103802180",
-  },
-];
-
-const YAPE_NUMERO = "979394237";
-const YAPE_NUMERO_FORMATEADO = "979 394 237";
 
 type CartItem = {
   id: number;
@@ -61,32 +33,6 @@ function safeParseJSON<T>(value: string | null, fallback: T): T {
   } catch {
     return fallback;
   }
-}
-
-function CopyField({ text, label }: { text: string; label: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Ignorar errores de portapapeles (ej. permisos denegados)
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      title={copied ? "Copiado" : "Copiar"}
-      className="inline-flex shrink-0 items-center justify-center rounded p-0.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700"
-    >
-      {copied ? <Check sx={{ fontSize: 12 }} /> : <ContentCopy sx={{ fontSize: 12 }} />}
-      <span className="sr-only">{label}</span>
-    </button>
-  );
 }
 
 function formatMoney(amount: number): string {
@@ -171,10 +117,13 @@ export function CartButton() {
 /* ─── DrawerComponent ────────────────────────────────────── */
 export default function DrawerComponent() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [items, setItems] = useState<CartItem[]>([]);
   const [badgeQty, setBadgeQty] = useState(0);
 
   const onClose = () => setIsOpen(false);
+  const openPaymentModal = () => setIsPaymentModalOpen(true);
+  const closePaymentModal = () => setIsPaymentModalOpen(false);
   useEffect(() => {
     const refresh = () => {
       const cart = readCart();
@@ -412,56 +361,19 @@ export default function DrawerComponent() {
           )}
         </div>
 
-        {/* Métodos de pago */}
-        <div className="border-t border-black/5 px-4 pt-3 pb-2 space-y-3">
-          {/* Bancos (pequeña) */}
-          <div>
-            <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
-              <LockOutlined sx={{ fontSize: 12 }} className="text-yellow-600" />
-              Pago con transferencia bancaria
-            </p>
-            <div className="grid grid-cols-1 gap-1.5">
-              {BANCOS.map((banco) => (
-                <div
-                  key={banco.id}
-                  className="flex items-center gap-2 rounded-lg border border-black/8 bg-slate-50 px-2 py-1.5"
-                >
-                  <div className="relative w-12 h-9 shrink-0 rounded bg-white border border-black/5 overflow-hidden">
-                    <Image src={banco.logo} alt={banco.nombre} fill className="object-contain p-1" sizes="48px" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-semibold text-slate-700 leading-tight">{banco.nombre}</p>
-                    <div className="flex items-center justify-between gap-1">
-                      <p className="text-[10px] text-slate-500 leading-tight truncate">Cta: {banco.cuenta}</p>
-                      <CopyField text={banco.cuenta} label="Copiar número de cuenta" />
-                    </div>
-                    <div className="flex items-center justify-between gap-1">
-                      <p className="text-[10px] text-slate-500 leading-tight truncate">CCI: {banco.cci}</p>
-                      <CopyField text={banco.cci} label="Copiar CCI" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Yape / QR (grande) */}
-          <div className="rounded-xl border border-black/8 bg-[#7620ff]/5 p-3 flex items-center gap-3">
-            <div className="relative w-28 h-28 shrink-0 rounded-lg bg-white border border-black/5 overflow-hidden">
-              <Image src="/bancos/qr_yape_gf.png" alt="QR Yape" fill className="object-contain p-1" sizes="112px" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="relative w-20 h-8 mb-1.5">
-                <Image src="/bancos/yape-app.png" alt="Yape" fill className="object-contain object-left" sizes="80px" />
-              </div>
-              <p className="text-xs font-semibold text-slate-700">Escanea el código QR</p>
-              <div className="flex items-center gap-1">
-                <p className="text-[11px] text-slate-500">o yapea al {YAPE_NUMERO_FORMATEADO}</p>
-                <CopyField text={YAPE_NUMERO} label="Copiar número de Yape" />
-              </div>
-            </div>
-          </div>
+        {/* Medios de pago */}
+        <div className="border-t border-black/5 px-4 py-2.5">
+          <button
+            type="button"
+            onClick={openPaymentModal}
+            className="w-full flex items-center justify-center gap-2 rounded-xl border border-black/8 bg-slate-50 px-4 py-2.5 text-[13px] font-medium text-slate-600 hover:bg-slate-100 hover:text-blue-900 transition-colors"
+          >
+            <InfoOutlined sx={{ fontSize: 16 }} />
+            Ver medios de pago
+          </button>
         </div>
+
+        <PaymentMethodsModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
 
         {/* Footer */}
         <div className="border-t border-black/5 px-4 py-3.5 space-y-3">

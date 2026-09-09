@@ -16,7 +16,7 @@ export function useDni() {
       const response = await buscarDni(dni);
       setDniData(response ?? null);
       return response;
-    } catch (error) {
+    } catch {
       setDniData(null);
       setErrorDni("DNI no encontrado");
       return null;
