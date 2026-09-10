@@ -200,6 +200,8 @@ const mainListItems: MenuItemType[] = [
     allowedRoles: [
       ...permissions.listarIngresos,
       ...permissions.registrarIngreso,
+      ...permissions.listarSalidas,
+      ...permissions.registrarSalida,
       ...permissions.listarTransferencias,
       ...permissions.registrarTransferencia,
       ...permissions.listarInventario,
@@ -210,6 +212,12 @@ const mainListItems: MenuItemType[] = [
         icon: <FormatListNumberedIcon />,
         href: "/dashboard/ingresos/listar",
         allowedRoles: [...permissions.listarIngresos, ...permissions.registrarIngreso],
+      },
+      {
+        text: "Salidas",
+        icon: <FormatListNumberedIcon />,
+        href: "/dashboard/salidas/listar",
+        allowedRoles: [...permissions.listarSalidas, ...permissions.registrarSalida],
       },
       {
         text: "Transferencias",
