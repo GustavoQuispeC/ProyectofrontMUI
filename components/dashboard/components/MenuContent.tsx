@@ -29,10 +29,17 @@ import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import StorefrontOutlinedIcon from "@mui/icons-material/StorefrontOutlined";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
+import SwapHorizontalCircleIcon from "@mui/icons-material/SwapHorizontalCircle";
+import NoteAltIcon from "@mui/icons-material/NoteAlt";
+import FileOpenIcon from "@mui/icons-material/FileOpen";
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { alpha } from "@mui/material/styles";
 
+import { brand } from "@/components/ui/theme/Theme";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
@@ -209,25 +216,25 @@ const mainListItems: MenuItemType[] = [
     children: [
       {
         text: "Ingresos",
-        icon: <FormatListNumberedIcon />,
+        icon: <FileOpenIcon />,
         href: "/dashboard/ingresos/listar",
         allowedRoles: [...permissions.listarIngresos, ...permissions.registrarIngreso],
       },
       {
         text: "Salidas",
-        icon: <FormatListNumberedIcon />,
+        icon: <AssignmentReturnIcon />,
         href: "/dashboard/salidas/listar",
         allowedRoles: [...permissions.listarSalidas, ...permissions.registrarSalida],
       },
       {
         text: "Transferencias",
-        icon: <FormatListNumberedIcon />,
+        icon: <SwapHorizontalCircleIcon />,
         href: "/dashboard/transferencias/listar",
         allowedRoles: [...permissions.listarTransferencias, ...permissions.registrarTransferencia],
       },
       {
         text: "Inventario",
-        icon: <FormatListNumberedIcon />,
+        icon: <NoteAltIcon />,
         href: "/dashboard/inventario/listar",
         allowedRoles: [...permissions.listarInventario],
       },
@@ -263,9 +270,12 @@ export default function MenuContent({ open = true }: MenuContentProps) {
   const mounted = useMounted(); //? controla el estado de montaje
   const user = getAuthUser();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const pathname = usePathname();
   if (!mounted) return null;
 
   const toggleGroup = (text: string) => setOpenGroups((prev) => ({ ...prev, [text]: !prev[text] }));
+
+  const isActive = (href: string) => pathname.startsWith(href);
 
   const filteredMainItems = mainListItems.filter((item) => {
     // Sin restricción
@@ -302,14 +312,28 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                 <ListItem disablePadding sx={{ display: "block" }}>
                   <ListItemButton
                     onClick={() => toggleGroup(item.text)}
-                    sx={{ justifyContent: open ? "flex-start" : "center", px: open ? 2 : 1 }}
+                    selected={item.children?.some((c) => isActive(c.href))}
+                    sx={{
+                      justifyContent: open ? "flex-start" : "center",
+                      px: open ? 2 : 1,
+                      borderRadius: 2,
+                      mx: 0.5,
+                      my: 0.25,
+                      color: "text.primary",
+                      "&.Mui-selected": {
+                        bgcolor: alpha(brand.darkBlue, 0.12),
+                        color: brand.darkBlueDark,
+                        "&:hover": { bgcolor: alpha(brand.darkBlue, 0.18) },
+                      },
+                      "&:hover": { bgcolor: alpha(brand.darkBlue, 0.08) },
+                    }}
                   >
                     <Tooltip title={open ? "" : item.text} placement="right">
                       <ListItemIcon
                         sx={{
                           minWidth: 0,
                           mr: open ? 2 : 0,
-                          color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                          color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue),
                         }}
                       >
                         {item.icon}
@@ -320,15 +344,37 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                   </ListItemButton>
                 </ListItem>
                 <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                  <List dense disablePadding>
+                  <List
+                    dense
+                    disablePadding
+                    sx={{
+                      py: 0.75,
+                      mx: 0.5,
+                      mb: 0.75,
+                      borderRadius: 2,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark" ? alpha(brand.darkBlue, 0.08) : alpha(brand.darkBlue, 0.05),
+                    }}
+                  >
                     {visibleChildren.map((child, ci) => (
                       <ListItem key={ci} disablePadding sx={{ display: "block" }}>
                         <Link href={child.href} passHref>
                           <ListItemButton
+                            selected={isActive(child.href)}
                             sx={{
                               justifyContent: open ? "flex-start" : "center",
                               pl: open ? 4 : 1,
                               pr: open ? 2 : 1,
+                              borderRadius: 2,
+                              color: "text.primary",
+                              "&.Mui-selected": {
+                                bgcolor: alpha(brand.orange, 0.14),
+                                color: brand.orangeDark,
+                                "& .MuiListItemIcon-root": {
+                                  color: brand.orange,
+                                },
+                              },
+                              "&:hover": { bgcolor: alpha(brand.orange, 0.08) },
                             }}
                           >
                             <Tooltip title={open ? "" : child.text} placement="right">
@@ -336,7 +382,7 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                                 sx={{
                                   minWidth: 0,
                                   mr: open ? 1.5 : 0,
-                                  color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                                  color: (theme) => (theme.palette.mode === "dark" ? brand.orangeLight : brand.orange),
                                 }}
                               >
                                 {child.icon}
@@ -355,13 +401,29 @@ export default function MenuContent({ open = true }: MenuContentProps) {
           return (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <Link href={item.href!} passHref>
-                <ListItemButton sx={{ justifyContent: open ? "flex-start" : "center", px: open ? 2 : 1 }}>
+                <ListItemButton
+                  selected={isActive(item.href!)}
+                  sx={{
+                    justifyContent: open ? "flex-start" : "center",
+                    px: open ? 2 : 1,
+                    borderRadius: 2,
+                    mx: 0.5,
+                    my: 0.25,
+                    color: "text.primary",
+                    "&.Mui-selected": {
+                      bgcolor: alpha(brand.darkBlue, 0.12),
+                      color: brand.darkBlueDark,
+                      "&:hover": { bgcolor: alpha(brand.darkBlue, 0.18) },
+                    },
+                    "&:hover": { bgcolor: alpha(brand.darkBlue, 0.08) },
+                  }}
+                >
                   <Tooltip title={open ? "" : item.text} placement="right">
                     <ListItemIcon
                       sx={{
                         minWidth: 0,
                         mr: open ? 2 : 0,
-                        color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                        color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue),
                       }}
                     >
                       {item.icon}
@@ -379,13 +441,29 @@ export default function MenuContent({ open = true }: MenuContentProps) {
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <Link href={item.href} passHref>
-              <ListItemButton sx={{ justifyContent: open ? "flex-start" : "center", px: open ? 2 : 1 }}>
+              <ListItemButton
+                selected={isActive(item.href)}
+                sx={{
+                  justifyContent: open ? "flex-start" : "center",
+                  px: open ? 2 : 1,
+                  borderRadius: 2,
+                  mx: 0.5,
+                  my: 0.25,
+                  color: "text.primary",
+                  "&.Mui-selected": {
+                    bgcolor: alpha(brand.darkBlue, 0.12),
+                    color: brand.darkBlueDark,
+                    "&:hover": { bgcolor: alpha(brand.darkBlue, 0.18) },
+                  },
+                  "&:hover": { bgcolor: alpha(brand.darkBlue, 0.08) },
+                }}
+              >
                 <Tooltip title={open ? "" : item.text} placement="right">
                   <ListItemIcon
                     sx={{
                       minWidth: 0,
                       mr: open ? 2 : 0,
-                      color: (theme) => (theme.palette.mode === "dark" ? "warning.main" : "primary.dark"),
+                      color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue),
                     }}
                   >
                     {item.icon}
