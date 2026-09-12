@@ -16,11 +16,12 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import { IUserData } from "@/shared/auth/types/IAuth";
 import { useEffect, useState } from "react";
 
-const collapsedWidth = 64;
-const expandedWidth = 240;
+const collapsedWidth = 72;
+const expandedWidth = 260;
 
 export default function SideMenu() {
-  const [open, setOpen] = useState(true);
+  const [expanded, setExpanded] = useState(true);
+  const [hovered, setHovered] = useState(false);
   const [usuario, setUsuario] = useState<IUserData | null>(null);
 
   useEffect(() => {
@@ -32,11 +33,14 @@ export default function SideMenu() {
     loadUser();
   }, []);
 
+  const open = expanded || hovered;
   const drawerWidth = open ? expandedWidth : collapsedWidth;
 
   return (
     <MuiDrawer
       variant="permanent"
+      onMouseEnter={() => !expanded && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       sx={{
         display: { xs: "none", md: "block" },
         width: drawerWidth,
@@ -46,10 +50,11 @@ export default function SideMenu() {
           width: drawerWidth,
           boxSizing: "border-box",
           overflowX: "hidden",
-          backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#0F172A" : "grey.50"),
+          backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#09090B" : "#FFFFFF"),
           borderRight: "1px solid",
-          borderColor: (theme) => (theme.palette.mode === "dark" ? "#1E293B" : "#E2E8F0"),
-          transition: (theme) => theme.transitions.create("width"),
+          borderColor: (theme) => (theme.palette.mode === "dark" ? "#27272A" : "#E5E7EB"),
+          boxShadow: open ? "8px 0 24px rgba(15, 23, 42, 0.08)" : "none",
+          transition: (theme) => theme.transitions.create("width", { duration: theme.transitions.duration.shorter }),
         },
       }}
     >
@@ -67,7 +72,10 @@ export default function SideMenu() {
         <SelectContent open={open} />
         <IconButton
           size="small"
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={() => {
+            setExpanded((prev) => !prev);
+            setHovered(false);
+          }}
           sx={{
             flexShrink: 0,
             color: "text.primary",

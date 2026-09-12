@@ -1,13 +1,9 @@
 import { createTheme } from "@mui/material/styles";
 
 export const brand = {
-  darkBlue: "#0b43c7",
-  darkBlueLight: "#334155",
-  darkBlueDark: "#020617",
-  orange: "#F97316",
-  orangeLight: "#FDBA74",
-  orangeDark: "#C2410C",
-  black: "#000000",
+  darkBlue: "#2563EB", // azul principal (modo claro)
+  darkBlueLight: "#93C5FD", // azul claro (modo oscuro)
+  darkBlueDark: "#1E3A8A", // azul oscuro (texto seleccionado claro)
 };
 
 export const getTheme = (mode: "light" | "dark") =>

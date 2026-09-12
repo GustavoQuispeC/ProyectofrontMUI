@@ -123,7 +123,7 @@ function getColumns(onVer: (row: ListarTransferencia) => void): GridColDef<Lista
       field: "fecha",
       headerName: "Fecha",
       minWidth: 180,
-      valueGetter: (_value, row) => dayjs(row.fecha).format("DD/MM/YYYY"),
+      valueGetter: (_value, row) => dayjs(row.fecha).format("DD/MM/YYYY HH:mm"),
     },
     {
       field: "motivo",
@@ -429,7 +429,7 @@ export default function ListarTransferencias() {
                     <strong>Tienda destino:</strong> {selectedRow.tiendaDestinoNombre}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Fecha:</strong> {dayjs(selectedRow.fecha).format("DD/MM/YYYY")}
+                    <strong>Fecha:</strong> {dayjs(selectedRow.fecha).format("DD/MM/YYYY HH:mm")}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Motivo:</strong> {selectedRow.motivo || "—"}

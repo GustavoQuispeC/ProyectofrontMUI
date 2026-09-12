@@ -10,9 +10,7 @@ export const salidaSchema = z
     tiendaOrigenId: z.number().min(1, "Seleccione una tienda"),
     origen: z.number().min(1, "Seleccione un origen"),
     empleadoSolicitaId: z.number().nullable().optional(),
-    ventaId: z.number().nullable().optional(),
     motivo: z.string().trim().max(500, "Máximo 500 caracteres").optional().nullable(),
-    fecha: z.string().min(1, "La fecha es requerida"),
     detalles: z.array(detalleSchema).min(1, "Debe agregar al menos un producto"),
   })
   .refine((data) => data.origen !== 2 || (data.empleadoSolicitaId && data.empleadoSolicitaId > 0), {

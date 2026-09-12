@@ -12,6 +12,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -35,6 +36,8 @@ import AddIcon from "@mui/icons-material/Add";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
+import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
+import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import { esES } from "@mui/x-data-grid/locales";
 
 import { useSalidas } from "@/features/dashboard/salida/hooks/useSalidas";
@@ -78,48 +81,68 @@ function LoadingOverlay() {
 function getColumns(onVer: (row: ListarSalida) => void): GridColDef<ListarSalida>[] {
   return [
     { field: "id", headerName: "ID", width: 70, align: "center", headerAlign: "center" },
-    { field: "tiendaOrigenNombre", headerName: "Tienda origen", flex: 1, minWidth: 180 },
+    { field: "tiendaOrigenNombre", headerName: "Tienda origen", minWidth: 200 },
     {
       field: "origenDescripcion",
       headerName: "Origen",
-      flex: 1,
-      minWidth: 120,
+      minWidth: 140,
       valueGetter: (_value, row) => row.origenDescripcion || nombreOrigen(row.origen),
     },
     {
       field: "empleadoSolicitaNombre",
       headerName: "Solicitante",
-      flex: 1,
-      minWidth: 160,
+      minWidth: 400,
       valueGetter: (_value, row) => row.empleadoSolicitaNombre || "—",
-    },
-    {
-      field: "ventaId",
-      headerName: "Venta",
-      flex: 1,
-      minWidth: 100,
-      valueGetter: (_value, row) => row.ventaId || "—",
     },
     {
       field: "motivo",
       headerName: "Motivo",
       flex: 1,
-      minWidth: 180,
+      minWidth: 320,
       valueGetter: (_value, row) => row.motivo || "—",
     },
     {
       field: "fecha",
       headerName: "Fecha",
-      flex: 1,
-      minWidth: 120,
-      valueGetter: (_value, row) => dayjs(row.fecha).format("DD/MM/YYYY"),
+      minWidth: 170,
+      valueGetter: (_value, row) => dayjs(row.fecha).format("DD/MM/YYYY - HH:mm"),
     },
     {
       field: "createdByUserName",
       headerName: "Creado por",
-      flex: 1,
-      minWidth: 160,
+      minWidth: 220,
       valueGetter: (_value, row) => row.createdByUserName || "—",
+    },
+    {
+      field: "updatedByUserName",
+      headerName: "Actualizado por",
+      minWidth: 220,
+      valueGetter: (_value, row) => row.updatedByUserName || "—",
+    },
+    {
+      field: "isActive",
+      headerName: "Estado",
+      width: 130,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Chip
+          size="small"
+          icon={params.row.isActive ? <ExitToAppOutlinedIcon sx={{ color: "#2e7d32" }} /> : <ScheduleOutlinedIcon />}
+          label={params.row.isActive ? "Realizado" : "Pendiente"}
+          color={params.row.isActive ? "success" : "warning"}
+          variant="filled"
+          sx={
+            params.row.isActive
+              ? {
+                  color: "#347237",
+                  bgcolor: "rgba(168, 226, 171, 0.2)",
+                  fontWeight: 400,
+                }
+              : undefined
+          }
+        />
+      ),
     },
     {
       field: "acciones",
@@ -154,7 +177,6 @@ export default function ListarSalidas() {
   const { tiendas, loading: loadingTiendas } = useTiendas(canAccess);
 
   const [tiendaOrigenId, setTiendaOrigenId] = useState<string>("");
-  const [origen, setOrigen] = useState<string>("");
   const [fechaDesde, setFechaDesde] = useState<string>("");
   const [fechaHasta, setFechaHasta] = useState<string>("");
 
@@ -170,11 +192,10 @@ export default function ListarSalidas() {
       pagina: paginationModel.page + 1,
       tamanoPagina: paginationModel.pageSize,
       tiendaOrigenId: tiendaOrigenId ? Number(tiendaOrigenId) : undefined,
-      origen: origen ? Number(origen) : undefined,
       fechaDesde: fechaDesde || undefined,
       fechaHasta: fechaHasta || undefined,
     }),
-    [paginationModel.page, paginationModel.pageSize, tiendaOrigenId, origen, fechaDesde, fechaHasta],
+    [paginationModel.page, paginationModel.pageSize, tiendaOrigenId, fechaDesde, fechaHasta],
   );
 
   const { salidas, totalRegistros, loading } = useSalidas(params);
@@ -275,26 +296,6 @@ export default function ListarSalidas() {
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel id="origen-filter-label">Origen</InputLabel>
-                <Select
-                  labelId="origen-filter-label"
-                  label="Origen"
-                  value={origen}
-                  onChange={(e) => {
-                    setOrigen(e.target.value);
-                    setPaginationModel((prev) => ({ ...prev, page: 0 }));
-                  }}
-                >
-                  <MenuItem value="">Todos</MenuItem>
-                  {origenes.map((o) => (
-                    <MenuItem key={o.id} value={String(o.id)}>
-                      {o.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
               <DatePicker
                 label="Fecha desde"
                 value={fechaDesde ? dayjs(fechaDesde) : null}
@@ -363,11 +364,6 @@ export default function ListarSalidas() {
                   {selectedRow.origen === 2 && selectedRow.empleadoSolicitaNombre && (
                     <Typography variant="body2">
                       <strong>Solicitante:</strong> {selectedRow.empleadoSolicitaNombre}
-                    </Typography>
-                  )}
-                  {selectedRow.origen === 1 && selectedRow.ventaId && (
-                    <Typography variant="body2">
-                      <strong>Venta:</strong> #{selectedRow.ventaId}
                     </Typography>
                   )}
                   <Typography variant="body2">

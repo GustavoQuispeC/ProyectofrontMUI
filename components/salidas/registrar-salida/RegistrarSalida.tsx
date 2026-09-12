@@ -5,10 +5,6 @@ import { useRouter } from "next/navigation";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import dayjs from "dayjs";
-import "dayjs/locale/es";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import {
   Autocomplete,
   Avatar,
@@ -18,14 +14,9 @@ import {
   CardContent,
   CircularProgress,
   Divider,
-  FormControl,
   FormHelperText,
   IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
   Typography,
@@ -53,9 +44,7 @@ const defaultValues: SalidaForm = {
   tiendaOrigenId: 0,
   origen: 2,
   empleadoSolicitaId: null,
-  ventaId: null,
   motivo: null,
-  fecha: dayjs().format("YYYY-MM-DD"),
   detalles: [{ productoId: 0, cantidad: 1 }],
 };
 
@@ -125,7 +114,6 @@ export default function RegistrarSalida() {
   });
 
   const tiendaOrigenId = useWatch({ control, name: "tiendaOrigenId" });
-  const origen = useWatch({ control, name: "origen" });
   const detalles = useWatch({ control, name: "detalles" });
 
   const { inventario, loading: loadingInventario } = useInventarioAutocomplete(
@@ -165,10 +153,8 @@ export default function RegistrarSalida() {
         crearSalidaMutation.mutateAsync({
           tiendaOrigenId: data.tiendaOrigenId,
           origen: data.origen,
-          empleadoSolicitaId: data.origen === 2 ? (data.empleadoSolicitaId ?? null) : null,
-          ventaId: data.origen === 1 ? (data.ventaId ?? null) : null,
+          empleadoSolicitaId: data.empleadoSolicitaId ?? null,
           motivo: data.motivo?.trim() || null,
-          fecha: dayjs(data.fecha).toISOString(),
           detalles: data.detalles.map((d) => ({ productoId: d.productoId, cantidad: d.cantidad })),
         }),
         {
@@ -187,359 +173,299 @@ export default function RegistrarSalida() {
   if (!canAccess) return <AccessDenied />;
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-      <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" }}>
-        <Card
-          variant="outlined"
+    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: "auto" }}>
+      <Card
+        variant="outlined"
+        sx={{
+          mb: 2,
+          borderRadius: 3,
+          boxShadow: "none",
+        }}
+      >
+        <CardContent
           sx={{
-            mb: 2,
-            borderRadius: 3,
-            boxShadow: "none",
+            p: { xs: 2, md: 3 },
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
           }}
         >
-          <CardContent
-            sx={{
-              p: { xs: 2, md: 3 },
-              borderBottom: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
-            }}
-          >
-            <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
-              <Avatar
+          <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
+            <Avatar
+              sx={{
+                bgcolor: "primary.main",
+                width: { xs: 48, md: 52 },
+                height: { xs: 48, md: 52 },
+              }}
+            >
+              <ArrowOutwardIcon />
+            </Avatar>
+            <Box>
+              <Typography
+                variant="h5"
                 sx={{
-                  bgcolor: "primary.main",
-                  width: { xs: 48, md: 52 },
-                  height: { xs: 48, md: 52 },
+                  fontWeight: 700,
+                  color: "text.primary",
+                  fontSize: { xs: "1.25rem", sm: "1.25rem" },
                 }}
               >
-                <ArrowOutwardIcon />
-              </Avatar>
-              <Box>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 700,
-                    color: "text.primary",
-                    fontSize: { xs: "1.25rem", sm: "1.25rem" },
-                  }}
-                >
-                  REGISTRO DE SALIDA DE PRODUCTOS
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                  Registre la salida de mercadería según el origen y productos disponibles en la tienda.
-                </Typography>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
+                REGISTRO DE SALIDA DE PRODUCTOS
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                Registre la salida de mercadería según el origen y productos disponibles en la tienda.
+              </Typography>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
 
-        <Stack sx={{ gap: 2 }}>
-          <Section title="Información general">
-            <Stack sx={{ gap: 2 }}>
+      <Stack sx={{ gap: 2 }}>
+        <Section title="Información general">
+          <Stack sx={{ gap: 2 }}>
+            <Stack
+              sx={{
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 2,
+                alignItems: { xs: "stretch", sm: "flex-start" },
+              }}
+            >
+              <Controller
+                name="tiendaOrigenId"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    options={tiendas}
+                    loading={loadingTiendas}
+                    value={tiendas.find((t) => t.id === field.value) ?? null}
+                    onChange={(_, value) => field.onChange(value?.id ?? 0)}
+                    getOptionLabel={(option) => option.nombre}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    noOptionsText="Sin resultados"
+                    loadingText="Cargando..."
+                    sx={{ flex: 1, minWidth: 240 }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Tienda origen"
+                        placeholder="Seleccione una tienda"
+                        error={!!errors.tiendaOrigenId}
+                        helperText={errors.tiendaOrigenId?.message}
+                      />
+                    )}
+                  />
+                )}
+              />
+
+              <TextField
+                label="Fecha"
+                value={dayjs().format("DD/MM/YYYY")}
+                slotProps={{ input: { readOnly: true } }}
+                sx={{ flex: 1, minWidth: 180 }}
+              />
+            </Stack>
+
+            <Stack
+              sx={{
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 2,
+                alignItems: { xs: "stretch", sm: "flex-start" },
+              }}
+            >
+              <Controller
+                name="empleadoSolicitaId"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    options={empleados}
+                    loading={loadingEmpleados}
+                    value={empleados.find((e) => e.id === field.value) ?? null}
+                    onChange={(_, value) => field.onChange(value?.id ?? null)}
+                    getOptionLabel={(option) => option.nombreCompleto}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    noOptionsText="Sin resultados"
+                    loadingText="Cargando..."
+                    sx={{ flex: 1, minWidth: 260 }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Empleado solicitante *"
+                        placeholder="Seleccione un empleado"
+                        error={!!errors.empleadoSolicitaId}
+                        helperText={errors.empleadoSolicitaId?.message}
+                      />
+                    )}
+                  />
+                )}
+              />
+
+              <Controller
+                name="motivo"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value || null)}
+                    label="Motivo"
+                    multiline
+                    rows={1}
+                    fullWidth
+                    placeholder="Motivo de la salida (opcional)"
+                    error={!!errors.motivo}
+                    helperText={errors.motivo?.message}
+                    sx={{ flex: 2, minWidth: 260 }}
+                  />
+                )}
+              />
+            </Stack>
+          </Stack>
+        </Section>
+
+        <Section title="Detalle de productos">
+          <Stack sx={{ gap: 2 }}>
+            {fields.map((item, index) => (
               <Stack
+                key={item.id}
+                direction="row"
                 sx={{
-                  flexDirection: { xs: "column", sm: "row" },
                   gap: 2,
-                  alignItems: { xs: "stretch", sm: "flex-start" },
+                  alignItems: "flex-start",
+                  flexDirection: { xs: "column", sm: "row" },
                 }}
               >
                 <Controller
-                  name="tiendaOrigenId"
+                  name={`detalles.${index}.productoId`}
                   control={control}
                   render={({ field }) => (
                     <Autocomplete
-                      options={tiendas}
-                      loading={loadingTiendas}
-                      value={tiendas.find((t) => t.id === field.value) ?? null}
-                      onChange={(_, value) => field.onChange(value?.id ?? 0)}
-                      getOptionLabel={(option) => option.nombre}
-                      isOptionEqualToValue={(option, value) => option.id === value.id}
-                      noOptionsText="Sin resultados"
+                      options={inventario}
+                      loading={loadingInventario}
+                      disabled={!tiendaOrigenId}
+                      value={inventario.find((p) => p.productoId === field.value) ?? null}
+                      onChange={(_, value) => field.onChange(value?.productoId ?? 0)}
+                      getOptionLabel={(option) => `${option.productoCodigoInterno} - ${option.productoNombre}`}
+                      isOptionEqualToValue={(option, value) => option.productoId === value.productoId}
+                      noOptionsText={tiendaOrigenId ? "Sin resultados" : "Seleccione primero la tienda origen"}
                       loadingText="Cargando..."
-                      sx={{ flex: 1, minWidth: 240 }}
+                      sx={{ flex: 1, minWidth: 260, width: "100%" }}
+                      renderOption={(props, option) => {
+                        const { key, ...optionProps } = props as React.HTMLAttributes<HTMLLIElement> & {
+                          key: React.Key;
+                        };
+                        return (
+                          <li key={key} {...optionProps}>
+                            <Box sx={{ color: option.stockDisponible <= 0 ? "error.main" : "text.primary" }}>
+                              {option.productoCodigoInterno} - {option.productoNombre}
+                            </Box>
+                            <Typography variant="caption" sx={{ ml: 2 }}>
+                              Disponible: {option.stockDisponible}
+                            </Typography>
+                          </li>
+                        );
+                      }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Tienda origen"
-                          placeholder="Seleccione una tienda"
-                          error={!!errors.tiendaOrigenId}
-                          helperText={errors.tiendaOrigenId?.message}
+                          label="Producto"
+                          placeholder="Seleccione un producto"
+                          error={!!errors.detalles?.[index]?.productoId}
+                          helperText={errors.detalles?.[index]?.productoId?.message}
                         />
                       )}
                     />
                   )}
                 />
 
-                <FormControl sx={{ minWidth: 220 }} error={!!errors.origen}>
-                  <InputLabel id="origen-label">Origen</InputLabel>
-                  <Controller
-                    name="origen"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        labelId="origen-label"
-                        label="Origen"
-                        value={field.value || 0}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      >
-                        <MenuItem value={1}>Venta</MenuItem>
-                        <MenuItem value={2}>Uso interno</MenuItem>
-                      </Select>
-                    )}
-                  />
-                  <FormHelperText>{errors.origen?.message}</FormHelperText>
-                </FormControl>
-
                 <Controller
-                  name="fecha"
+                  name={`detalles.${index}.cantidad`}
                   control={control}
-                  render={({ field }) => (
-                    <FormControl sx={{ flex: 1, minWidth: 180 }} error={!!errors.fecha}>
-                      <DatePicker
-                        label="Fecha"
-                        value={field.value ? dayjs(field.value) : null}
-                        onChange={(val) => field.onChange(val?.format("YYYY-MM-DD") ?? "")}
-                        slotProps={{
-                          textField: { fullWidth: true, error: !!errors.fecha },
-                        }}
-                      />
-                      <FormHelperText>{errors.fecha?.message}</FormHelperText>
-                    </FormControl>
-                  )}
-                />
-              </Stack>
-
-              <Stack
-                sx={{
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: 2,
-                  alignItems: { xs: "stretch", sm: "flex-start" },
-                }}
-              >
-                {origen === 2 && (
-                  <Controller
-                    name="empleadoSolicitaId"
-                    control={control}
-                    render={({ field }) => (
-                      <Autocomplete
-                        options={empleados}
-                        loading={loadingEmpleados}
-                        value={empleados.find((e) => e.id === field.value) ?? null}
-                        onChange={(_, value) => field.onChange(value?.id ?? null)}
-                        getOptionLabel={(option) => option.nombreCompleto}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        noOptionsText="Sin resultados"
-                        loadingText="Cargando..."
-                        sx={{ flex: 1, minWidth: 260 }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Empleado solicitante *"
-                            placeholder="Seleccione un empleado"
-                            error={!!errors.empleadoSolicitaId}
-                            helperText={errors.empleadoSolicitaId?.message}
-                          />
-                        )}
-                      />
-                    )}
-                  />
-                )}
-
-                {origen === 1 && (
-                  <Controller
-                    name="ventaId"
-                    control={control}
-                    render={({ field }) => (
+                  render={({ field }) => {
+                    const productoSel = inventario.find((p) => p.productoId === detalles?.[index]?.productoId);
+                    const stockMsg = productoSel ? `Disponible: ${productoSel.stockDisponible}` : undefined;
+                    return (
                       <TextField
-                        {...field}
-                        value={field.value ?? ""}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
-                        label="Venta relacionada"
+                        label="Cantidad"
                         type="number"
-                        placeholder="ID de la venta (opcional)"
-                        error={!!errors.ventaId}
-                        helperText={errors.ventaId?.message}
-                        sx={{ flex: 1, minWidth: 220 }}
+                        value={field.value}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                         slotProps={{
-                          input: {
-                            startAdornment: <InputAdornment position="start">#</InputAdornment>,
-                          },
+                          htmlInput: { min: 0.01, step: 0.01, max: productoSel?.stockDisponible },
                         }}
+                        error={!!errors.detalles?.[index]?.cantidad}
+                        helperText={errors.detalles?.[index]?.cantidad?.message ?? stockMsg}
+                        sx={{ minWidth: 120, width: { xs: "100%", sm: 140 } }}
                       />
-                    )}
-                  />
-                )}
-
-                <Controller
-                  name="motivo"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
-                      label="Motivo"
-                      multiline
-                      rows={1}
-                      fullWidth
-                      placeholder="Motivo de la salida (opcional)"
-                      error={!!errors.motivo}
-                      helperText={errors.motivo?.message}
-                      sx={{ flex: 2, minWidth: 260 }}
-                    />
-                  )}
-                />
-              </Stack>
-            </Stack>
-          </Section>
-
-          <Section title="Detalle de productos">
-            <Stack sx={{ gap: 2 }}>
-              {fields.map((item, index) => (
-                <Stack
-                  key={item.id}
-                  direction="row"
-                  sx={{
-                    gap: 2,
-                    alignItems: "flex-start",
-                    flexDirection: { xs: "column", sm: "row" },
+                    );
                   }}
+                />
+
+                <IconButton
+                  color="error"
+                  onClick={() => remove(index)}
+                  disabled={fields.length === 1}
+                  sx={{ mt: { sm: 1 } }}
                 >
-                  <Controller
-                    name={`detalles.${index}.productoId`}
-                    control={control}
-                    render={({ field }) => (
-                      <Autocomplete
-                        options={inventario}
-                        loading={loadingInventario}
-                        disabled={!tiendaOrigenId}
-                        value={inventario.find((p) => p.productoId === field.value) ?? null}
-                        onChange={(_, value) => field.onChange(value?.productoId ?? 0)}
-                        getOptionLabel={(option) => `${option.productoCodigoInterno} - ${option.productoNombre}`}
-                        isOptionEqualToValue={(option, value) => option.productoId === value.productoId}
-                        noOptionsText={tiendaOrigenId ? "Sin resultados" : "Seleccione primero la tienda origen"}
-                        loadingText="Cargando..."
-                        sx={{ flex: 1, minWidth: 260, width: "100%" }}
-                        renderOption={(props, option) => {
-                          const { key, ...optionProps } = props as React.HTMLAttributes<HTMLLIElement> & {
-                            key: React.Key;
-                          };
-                          return (
-                            <li key={key} {...optionProps}>
-                              <Box sx={{ color: option.stockDisponible <= 0 ? "error.main" : "text.primary" }}>
-                                {option.productoCodigoInterno} - {option.productoNombre}
-                              </Box>
-                              <Typography variant="caption" sx={{ ml: 2 }}>
-                                Disponible: {option.stockDisponible}
-                              </Typography>
-                            </li>
-                          );
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Producto"
-                            placeholder="Seleccione un producto"
-                            error={!!errors.detalles?.[index]?.productoId}
-                            helperText={errors.detalles?.[index]?.productoId?.message}
-                          />
-                        )}
-                      />
-                    )}
-                  />
+                  <DeleteForeverIcon />
+                </IconButton>
+              </Stack>
+            ))}
 
-                  <Controller
-                    name={`detalles.${index}.cantidad`}
-                    control={control}
-                    render={({ field }) => {
-                      const productoSel = inventario.find((p) => p.productoId === detalles?.[index]?.productoId);
-                      const stockMsg = productoSel ? `Disponible: ${productoSel.stockDisponible}` : undefined;
-                      return (
-                        <TextField
-                          label="Cantidad"
-                          type="number"
-                          value={field.value}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                          slotProps={{
-                            htmlInput: { min: 0.01, step: 0.01, max: productoSel?.stockDisponible },
-                          }}
-                          error={!!errors.detalles?.[index]?.cantidad}
-                          helperText={errors.detalles?.[index]?.cantidad?.message ?? stockMsg}
-                          sx={{ minWidth: 120, width: { xs: "100%", sm: 140 } }}
-                        />
-                      );
-                    }}
-                  />
-
-                  <IconButton
-                    color="error"
-                    onClick={() => remove(index)}
-                    disabled={fields.length === 1}
-                    sx={{ mt: { sm: 1 } }}
-                  >
-                    <DeleteForeverIcon />
-                  </IconButton>
-                </Stack>
-              ))}
-
-              {errors.detalles?.root?.message && <FormHelperText error>{errors.detalles.root.message}</FormHelperText>}
-
-              <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={() => append({ productoId: 0, cantidad: 1 })}
-                sx={{ alignSelf: "flex-start" }}
-              >
-                Agregar producto
-              </Button>
-            </Stack>
-          </Section>
-
-          <Divider />
-
-          <Stack
-            sx={{
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: { xs: "stretch", sm: "flex-end" },
-              gap: { xs: 1, sm: 1.5 },
-              flexWrap: "wrap",
-            }}
-          >
-            <Button
-              variant="outlined"
-              color="inherit"
-              startIcon={<KeyboardBackspaceIcon />}
-              onClick={() => router.push("/dashboard/salidas/listar")}
-              disabled={saving}
-              sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
-            >
-              Volver
-            </Button>
+            {errors.detalles?.root?.message && <FormHelperText error>{errors.detalles.root.message}</FormHelperText>}
 
             <Button
               variant="outlined"
-              color="warning"
-              startIcon={<RestartAltIcon />}
-              onClick={resetForm}
-              disabled={saving}
-              sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
+              startIcon={<AddIcon />}
+              onClick={() => append({ productoId: 0, cantidad: 1 })}
+              sx={{ alignSelf: "flex-start" }}
             >
-              Limpiar
-            </Button>
-
-            <Button
-              variant="contained"
-              startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
-              onClick={handleSubmit(onSubmit)}
-              disabled={saving || loadingTiendas || loadingInventario}
-              sx={{ minWidth: 160, height: 44, boxShadow: "none", borderRadius: 2, width: { xs: "100%", sm: "auto" } }}
-            >
-              {saving ? "Guardando..." : "Guardar salida"}
+              Agregar producto
             </Button>
           </Stack>
+        </Section>
+
+        <Divider />
+
+        <Stack
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: { xs: "stretch", sm: "flex-end" },
+            gap: { xs: 1, sm: 1.5 },
+            flexWrap: "wrap",
+          }}
+        >
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<KeyboardBackspaceIcon />}
+            onClick={() => router.push("/dashboard/salidas/listar")}
+            disabled={saving}
+            sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
+          >
+            Volver
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="warning"
+            startIcon={<RestartAltIcon />}
+            onClick={resetForm}
+            disabled={saving}
+            sx={{ minWidth: 120, height: 44, width: { xs: "100%", sm: "auto" } }}
+          >
+            Limpiar
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
+            onClick={handleSubmit(onSubmit)}
+            disabled={saving || loadingTiendas || loadingInventario}
+            sx={{ minWidth: 160, height: 44, boxShadow: "none", borderRadius: 2, width: { xs: "100%", sm: "auto" } }}
+          >
+            {saving ? "Guardando..." : "Guardar salida"}
+          </Button>
         </Stack>
-      </Box>
-    </LocalizationProvider>
+      </Stack>
+    </Box>
   );
 }

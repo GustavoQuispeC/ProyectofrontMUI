@@ -7,9 +7,7 @@ export interface CrearSalidaRequest {
   tiendaOrigenId: number;
   origen: number;
   empleadoSolicitaId?: number | null;
-  ventaId?: number | null;
   motivo?: string | null;
-  fecha: string;
   detalles: SalidaDetalleRequest[];
 }
 
@@ -26,7 +24,6 @@ export interface Salida {
   tiendaOrigenId: number;
   origen: number;
   empleadoSolicitaId: number | null;
-  ventaId: number | null;
   motivo: string | null;
   fecha: string;
   detalles: SalidaDetalle[];
@@ -49,7 +46,6 @@ export interface ListarSalida {
   origenDescripcion: string;
   empleadoSolicitaId: number | null;
   empleadoSolicitaNombre: string | null;
-  ventaId: number | null;
   motivo: string | null;
   fecha: string;
   detalles: ListarSalidaDetalle[];

@@ -306,7 +306,8 @@ export default function MenuContent({ open = true }: MenuContentProps) {
               (child) => !child.allowedRoles || (user && hasPermission(user.rol, child.allowedRoles)),
             );
             if (visibleChildren.length === 0) return null;
-            const isOpen = !!openGroups[item.text];
+            const hasActiveChild = item.children.some((child) => isActive(child.href));
+            const isOpen = open && (openGroups[item.text] ?? hasActiveChild);
             return (
               <React.Fragment key={index}>
                 <ListItem disablePadding sx={{ display: "block" }}>
@@ -321,11 +322,27 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                       my: 0.25,
                       color: "text.primary",
                       "&.Mui-selected": {
-                        bgcolor: alpha(brand.darkBlue, 0.12),
-                        color: brand.darkBlueDark,
-                        "&:hover": { bgcolor: alpha(brand.darkBlue, 0.18) },
+                        bgcolor: (theme) =>
+                          alpha(
+                            theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue,
+                            theme.palette.mode === "dark" ? 0.22 : 0.12,
+                          ),
+                        color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlueDark),
+                        "& .MuiListItemIcon-root": {
+                          color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlueDark),
+                        },
+                        "&:hover": {
+                          bgcolor: (theme) =>
+                            alpha(
+                              theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue,
+                              theme.palette.mode === "dark" ? 0.28 : 0.18,
+                            ),
+                        },
                       },
-                      "&:hover": { bgcolor: alpha(brand.darkBlue, 0.08) },
+                      "&:hover": {
+                        bgcolor: (theme) =>
+                          alpha(theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue, 0.08),
+                      },
                     }}
                   >
                     <Tooltip title={open ? "" : item.text} placement="right">
@@ -333,7 +350,7 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                         sx={{
                           minWidth: 0,
                           mr: open ? 2 : 0,
-                          color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue),
+                          color: "text.secondary",
                         }}
                       >
                         {item.icon}
@@ -348,12 +365,8 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                     dense
                     disablePadding
                     sx={{
-                      py: 0.75,
-                      mx: 0.5,
+                      py: 0.5,
                       mb: 0.75,
-                      borderRadius: 2,
-                      bgcolor: (theme) =>
-                        theme.palette.mode === "dark" ? alpha(brand.darkBlue, 0.08) : alpha(brand.darkBlue, 0.05),
                     }}
                   >
                     {visibleChildren.map((child, ci) => (
@@ -362,33 +375,30 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                           <ListItemButton
                             selected={isActive(child.href)}
                             sx={{
-                              justifyContent: open ? "flex-start" : "center",
-                              pl: open ? 4 : 1,
-                              pr: open ? 2 : 1,
+                              justifyContent: "flex-start",
+                              pl: 5.5,
+                              pr: 2,
+                              py: 0.75,
+                              mx: 0.75,
+                              my: 0.25,
                               borderRadius: 2,
-                              color: "text.primary",
+                              color: "text.secondary",
+                              "& .MuiListItemText-primary": { fontSize: "0.875rem", fontWeight: 500 },
                               "&.Mui-selected": {
-                                bgcolor: alpha(brand.orange, 0.14),
-                                color: brand.orangeDark,
-                                "& .MuiListItemIcon-root": {
-                                  color: brand.orange,
-                                },
+                                bgcolor: (theme) =>
+                                  alpha(theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue, 0.14),
+                                color: (theme) =>
+                                  theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue,
                               },
-                              "&:hover": { bgcolor: alpha(brand.orange, 0.08) },
+                              "&:hover": {
+                                bgcolor: (theme) =>
+                                  alpha(theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue, 0.1),
+                                color: (theme) =>
+                                  theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue,
+                              },
                             }}
                           >
-                            <Tooltip title={open ? "" : child.text} placement="right">
-                              <ListItemIcon
-                                sx={{
-                                  minWidth: 0,
-                                  mr: open ? 1.5 : 0,
-                                  color: (theme) => (theme.palette.mode === "dark" ? brand.orangeLight : brand.orange),
-                                }}
-                              >
-                                {child.icon}
-                              </ListItemIcon>
-                            </Tooltip>
-                            {open && <ListItemText primary={child.text} />}
+                            <ListItemText primary={child.text} />
                           </ListItemButton>
                         </Link>
                       </ListItem>
@@ -411,11 +421,27 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                     my: 0.25,
                     color: "text.primary",
                     "&.Mui-selected": {
-                      bgcolor: alpha(brand.darkBlue, 0.12),
-                      color: brand.darkBlueDark,
-                      "&:hover": { bgcolor: alpha(brand.darkBlue, 0.18) },
+                      bgcolor: (theme) =>
+                        alpha(
+                          theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue,
+                          theme.palette.mode === "dark" ? 0.22 : 0.12,
+                        ),
+                      color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlueDark),
+                      "& .MuiListItemIcon-root": {
+                        color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlueDark),
+                      },
+                      "&:hover": {
+                        bgcolor: (theme) =>
+                          alpha(
+                            theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue,
+                            theme.palette.mode === "dark" ? 0.28 : 0.18,
+                          ),
+                      },
                     },
-                    "&:hover": { bgcolor: alpha(brand.darkBlue, 0.08) },
+                    "&:hover": {
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue, 0.08),
+                    },
                   }}
                 >
                   <Tooltip title={open ? "" : item.text} placement="right">
@@ -423,7 +449,7 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                       sx={{
                         minWidth: 0,
                         mr: open ? 2 : 0,
-                        color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue),
+                        color: "text.secondary",
                       }}
                     >
                       {item.icon}
@@ -451,11 +477,27 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                   my: 0.25,
                   color: "text.primary",
                   "&.Mui-selected": {
-                    bgcolor: alpha(brand.darkBlue, 0.12),
-                    color: brand.darkBlueDark,
-                    "&:hover": { bgcolor: alpha(brand.darkBlue, 0.18) },
+                    bgcolor: (theme) =>
+                      alpha(
+                        theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue,
+                        theme.palette.mode === "dark" ? 0.22 : 0.12,
+                      ),
+                    color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlueDark),
+                    "& .MuiListItemIcon-root": {
+                      color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlueDark),
+                    },
+                    "&:hover": {
+                      bgcolor: (theme) =>
+                        alpha(
+                          theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue,
+                          theme.palette.mode === "dark" ? 0.28 : 0.18,
+                        ),
+                    },
                   },
-                  "&:hover": { bgcolor: alpha(brand.darkBlue, 0.08) },
+                  "&:hover": {
+                    bgcolor: (theme) =>
+                      alpha(theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue, 0.08),
+                  },
                 }}
               >
                 <Tooltip title={open ? "" : item.text} placement="right">
@@ -463,7 +505,7 @@ export default function MenuContent({ open = true }: MenuContentProps) {
                     sx={{
                       minWidth: 0,
                       mr: open ? 2 : 0,
-                      color: (theme) => (theme.palette.mode === "dark" ? brand.darkBlueLight : brand.darkBlue),
+                      color: "text.secondary",
                     }}
                   >
                     {item.icon}

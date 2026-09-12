@@ -105,7 +105,7 @@ function getColumns(onVer: (row: ListarIngreso) => void): GridColDef<ListarIngre
       headerName: "Fecha",
       flex: 1,
       minWidth: 120,
-      valueGetter: (_value, row) => dayjs(row.fecha).format("DD/MM/YYYY"),
+      valueGetter: (_value, row) => dayjs(row.fecha).format("DD/MM/YYYY HH:mm"),
     },
     {
       field: "montoTotal",
@@ -367,7 +367,7 @@ export default function ListarIngresos() {
                     {selectedRow.serieDocumento}-{selectedRow.numeroDocumento}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Fecha:</strong> {dayjs(selectedRow.fecha).format("DD/MM/YYYY")}
+                    <strong>Fecha:</strong> {dayjs(selectedRow.fecha).format("DD/MM/YYYY HH:mm")}
                   </Typography>
                 </Stack>
 

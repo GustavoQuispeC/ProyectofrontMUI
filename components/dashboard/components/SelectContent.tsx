@@ -6,10 +6,12 @@ interface SelectContentProps {
 }
 
 export default function SelectContent({ open = true }: SelectContentProps) {
-  const width = open ? 95 : 22;
+  if (!open) return null;
+
+  const width = 95;
   const height = Math.round((width * 2216) / 4500);
   return (
-    <Box sx={{ display: "flex", justifyContent: open ? "flex-start" : "center", alignItems: "center", width: "100%" }}>
+    <Box sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center", width: "100%" }}>
       <Image
         src="/LogoFamet2.png"
         alt="Grupo Famet"
