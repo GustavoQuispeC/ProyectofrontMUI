@@ -64,6 +64,7 @@ const columns: GridColDef<ListarInventarioItem>[] = [
     width: 150,
     align: "center",
     headerAlign: "center",
+    cellClassName: "bg-blue-50",
     renderCell: (params) => (
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
         <Typography
@@ -81,6 +82,7 @@ const columns: GridColDef<ListarInventarioItem>[] = [
     width: 150,
     align: "center",
     headerAlign: "center",
+    cellClassName: "bg-yellow-50",
   },
   {
     field: "stockDisponible",
@@ -88,6 +90,7 @@ const columns: GridColDef<ListarInventarioItem>[] = [
     width: 150,
     align: "center",
     headerAlign: "center",
+    cellClassName: "bg-gray-50",
     renderCell: (params) => (
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
         <Typography
@@ -107,7 +110,7 @@ const columns: GridColDef<ListarInventarioItem>[] = [
     align: "center",
     headerAlign: "center",
     valueGetter: (_value, row) =>
-      row.ultimaActualizacion ? dayjs(row.ultimaActualizacion).format("DD/MM/YYYY HH:mm") : "—",
+      row.ultimaActualizacion ? dayjs(row.ultimaActualizacion).format("DD/MM/YYYY - HH:mm") : "—",
   },
 ];
 

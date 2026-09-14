@@ -12,6 +12,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -35,9 +36,11 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { esES } from "@mui/x-data-grid/locales";
 
 import { useIngresos } from "@/features/dashboard/Ingreso/hooks/useIngreso";
@@ -123,6 +126,45 @@ function getColumns(onVer: (row: ListarIngreso) => void): GridColDef<ListarIngre
     },
     { field: "createdByUserName", headerName: "Creado por", flex: 1, minWidth: 160 },
     {
+      field: "isActive",
+      headerName: "Estado",
+      width: 130,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <Chip
+          size="small"
+          icon={params.row.isActive ? <CheckCircleIcon /> : <CancelIcon />}
+          label={params.row.isActive ? "Realizado" : "Cancelado"}
+          variant="filled"
+          sx={(theme) => ({
+            fontWeight: 500,
+            border: "1px solid",
+            "& .MuiChip-icon": {
+              color: params.row.isActive
+                ? theme.palette.mode === "dark"
+                  ? "#49ef6d"
+                  : "#02710497"
+                : theme.palette.mode === "dark"
+                  ? "#fbbf24"
+                  : "#b45309",
+            },
+            ...(params.row.isActive
+              ? {
+                  color: theme.palette.mode === "dark" ? "#86efac" : "#347237",
+                  bgcolor: theme.palette.mode === "dark" ? "rgba(74, 222, 128, 0.15)" : "rgba(168, 226, 171, 0.2)",
+                  borderColor: theme.palette.mode === "dark" ? "rgba(74, 222, 128, 0.3)" : "rgba(134, 197, 140, 0.5)",
+                }
+              : {
+                  color: theme.palette.mode === "dark" ? "#fbbf24" : "#92400e",
+                  bgcolor: theme.palette.mode === "dark" ? "rgba(251, 191, 36, 0.15)" : "rgba(253, 230, 138, 0.4)",
+                  borderColor: theme.palette.mode === "dark" ? "rgba(251, 191, 36, 0.3)" : "rgba(217, 119, 6, 0.35)",
+                }),
+          })}
+        />
+      ),
+    },
+    {
       field: "acciones",
       headerName: "Acciones",
       width: 100,
@@ -134,7 +176,7 @@ function getColumns(onVer: (row: ListarIngreso) => void): GridColDef<ListarIngre
       renderCell: (params: GridRenderCellParams<ListarIngreso>) => (
         <Tooltip title="Ver detalle">
           <Box>
-            <VisibilityOutlinedIcon
+            <VisibilityIcon
               fontSize="small"
               color="primary"
               sx={{ cursor: "pointer" }}

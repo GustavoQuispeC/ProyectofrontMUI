@@ -33,11 +33,11 @@ import {
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
-import ExitToAppOutlinedIcon from "@mui/icons-material/ExitToAppOutlined";
-import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { esES } from "@mui/x-data-grid/locales";
 
 import { useSalidas } from "@/features/dashboard/salida/hooks/useSalidas";
@@ -128,19 +128,33 @@ function getColumns(onVer: (row: ListarSalida) => void): GridColDef<ListarSalida
       renderCell: (params) => (
         <Chip
           size="small"
-          icon={params.row.isActive ? <ExitToAppOutlinedIcon sx={{ color: "#2e7d32" }} /> : <ScheduleOutlinedIcon />}
-          label={params.row.isActive ? "Realizado" : "Pendiente"}
-          color={params.row.isActive ? "success" : "warning"}
+          icon={params.row.isActive ? <CheckCircleIcon /> : <CancelIcon />}
+          label={params.row.isActive ? "Realizado" : "Cancelado"}
           variant="filled"
-          sx={
-            params.row.isActive
+          sx={(theme) => ({
+            fontWeight: 500,
+            border: "1px solid",
+            "& .MuiChip-icon": {
+              color: params.row.isActive
+                ? theme.palette.mode === "dark"
+                  ? "#86efac"
+                  : "#2e7d32"
+                : theme.palette.mode === "dark"
+                  ? "#fbbf24"
+                  : "#b45309",
+            },
+            ...(params.row.isActive
               ? {
-                  color: "#347237",
-                  bgcolor: "rgba(168, 226, 171, 0.2)",
-                  fontWeight: 400,
+                  color: theme.palette.mode === "dark" ? "#86efac" : "#347237",
+                  bgcolor: theme.palette.mode === "dark" ? "rgba(74, 222, 128, 0.15)" : "rgba(168, 226, 171, 0.2)",
+                  borderColor: theme.palette.mode === "dark" ? "rgba(74, 222, 128, 0.3)" : "rgba(134, 197, 140, 0.5)",
                 }
-              : undefined
-          }
+              : {
+                  color: theme.palette.mode === "dark" ? "#fbbf24" : "#92400e",
+                  bgcolor: theme.palette.mode === "dark" ? "rgba(251, 191, 36, 0.15)" : "rgba(253, 230, 138, 0.4)",
+                  borderColor: theme.palette.mode === "dark" ? "rgba(251, 191, 36, 0.3)" : "rgba(217, 119, 6, 0.35)",
+                }),
+          })}
         />
       ),
     },
@@ -155,7 +169,7 @@ function getColumns(onVer: (row: ListarSalida) => void): GridColDef<ListarSalida
       filterable: false,
       renderCell: (params: GridRenderCellParams<ListarSalida>) => (
         <Box>
-          <VisibilityOutlinedIcon
+          <VisibilityIcon
             fontSize="small"
             color="primary"
             sx={{ cursor: "pointer" }}
