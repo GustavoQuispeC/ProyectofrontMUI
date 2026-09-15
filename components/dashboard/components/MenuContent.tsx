@@ -34,6 +34,7 @@ import SwapHorizontalCircleIcon from "@mui/icons-material/SwapHorizontalCircle";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
 import FileOpenIcon from "@mui/icons-material/FileOpen";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 
 import React from "react";
 import Link from "next/link";
@@ -207,6 +208,12 @@ const mainListItems: MenuItemType[] = [
     icon: <DirectionsCarIcon />,
     href: "/dashboard/vehiculo/listar",
     allowedRoles: [...permissions.listarVehiculos, ...permissions.registrarVehiculo],
+  },
+  {
+    text: "Caja",
+    icon: <PointOfSaleIcon />,
+    href: "/dashboard/caja",
+    allowedRoles: [...permissions.listarCajaSesiones, ...permissions.abrirCajaSesion, ...permissions.cerrarCajaSesion],
   },
   {
     text: "Kardex",

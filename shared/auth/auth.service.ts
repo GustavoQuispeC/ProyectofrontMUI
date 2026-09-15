@@ -9,6 +9,8 @@ const GUID_KEY = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameiden
 type JwtPayload = {
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string | string[];
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"?: string;
+  empleadoId?: number | string;
+  empleado_id?: number | string;
   sub?: string;
   exp?: number;
 };
@@ -36,6 +38,21 @@ const extractGuidFromToken = (token: string): string | null => {
   }
 };
 
+const toEmpleadoId = (value: unknown): number | null => {
+  const num = Number(value);
+  return Number.isInteger(num) && num > 0 ? num : null;
+};
+
+//! Función para extraer el ID del empleado del token JWT
+const extractEmpleadoIdFromToken = (token: string): number | null => {
+  try {
+    const decoded = jwtDecode<JwtPayload>(token);
+    return toEmpleadoId(decoded.empleadoId) ?? toEmpleadoId(decoded.empleado_id);
+  } catch {
+    return null;
+  }
+};
+
 //! Función para guardar los datos de autenticación
 export const saveAuthData = (data: ILoginResponse): void => {
   if (!isClient()) return;
@@ -46,6 +63,7 @@ export const saveAuthData = (data: ILoginResponse): void => {
       fotoUrl: data.fotoUrl ?? null,
       rol: extractRolFromToken(data.token),
       guid: extractGuidFromToken(data.token),
+      empleadoId: toEmpleadoId((data as { empleadoId?: unknown }).empleadoId) ?? extractEmpleadoIdFromToken(data.token),
     };
 
     localStorage.setItem(AUTH_KEY, JSON.stringify(authData));
@@ -64,10 +82,21 @@ export const getAuthUser = (): IUserData | null => {
 
     const parsed = JSON.parse(raw) as ILoginResponse;
 
+    const p = parsed as IUserData & { empleadoId?: unknown };
+
+    // TODO: debug temporal — ver de dónde viene el empleadoId
+    console.log("[Auth] auth_usuario en localStorage:", parsed);
+    try {
+      console.log("[Auth] Claims del JWT:", jwtDecode<Record<string, unknown>>(parsed.token));
+    } catch {
+      console.log("[Auth] No se pudo decodificar el token");
+    }
+
     return {
       ...parsed,
       rol: extractRolFromToken(parsed.token),
       guid: extractGuidFromToken(parsed.token),
+      empleadoId: toEmpleadoId(p.empleadoId) ?? extractEmpleadoIdFromToken(parsed.token),
     };
   } catch (error) {
     console.error("❌ Error al leer sesión:", error);

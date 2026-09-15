@@ -20,3 +20,18 @@ export const listarTiposContrato = () => fetchCatalogo("tipos-contrato");
 export const listarTiposJornada = () => fetchCatalogo("tipos-jornada");
 export const listarMotivosEgreso = () => fetchCatalogo("motivos-egreso");
 export const listarTiposDocumentoCompra = () => fetchCatalogo("tipos-documento-compra");
+
+// Ventas y Despachos
+export const listarEstadosVenta = () => fetchCatalogo("estados-venta");
+export const listarEstadosPago = () => fetchCatalogo("estados-pago");
+export const listarTiposPago = () => fetchCatalogo("tipos-pago");
+export const listarEstadosDespacho = () => fetchCatalogo("estados-despacho");
+export const listarModalidadesEntrega = () => fetchCatalogo("modalidades-entrega");
+export const listarOrigenesSalida = () => fetchCatalogo("origenes-salida");
+export const listarEstadosPedido = () => fetchCatalogo("estados-pedido");
+
+// Caja
+export const listarEstadosCajaSesion = () => fetchCatalogo("estados-caja-sesion");
+export const listarEstadosPagoTransaccion = () => fetchCatalogo("estados-pago-transaccion");
+export const listarTiposCajaMovimiento = () => fetchCatalogo("tipos-caja-movimiento");
+export const listarTiposMovimientoCuentaCliente = () => fetchCatalogo("tipos-movimiento-cuenta-cliente");

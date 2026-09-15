@@ -9,4 +9,5 @@ export interface ILoginResponse {
 export interface IUserData extends ILoginResponse {
   rol: string; //! Aquí se guarda el rol extraído del JWT
   guid: string | null; //! GUID del usuario extraído del JWT
+  empleadoId: number | null; //! ID del empleado asociado al usuario
 }
