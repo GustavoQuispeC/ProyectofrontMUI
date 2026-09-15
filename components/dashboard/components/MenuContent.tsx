@@ -33,6 +33,7 @@ import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 import SwapHorizontalCircleIcon from "@mui/icons-material/SwapHorizontalCircle";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
 import FileOpenIcon from "@mui/icons-material/FileOpen";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 
 import React from "react";
 import Link from "next/link";
@@ -200,6 +201,12 @@ const mainListItems: MenuItemType[] = [
     icon: <LocalShippingIcon />,
     href: "/dashboard/proveedores/listar",
     allowedRoles: [...permissions.listarProveedores, ...permissions.registrarProveedor],
+  },
+  {
+    text: "Vehículos",
+    icon: <DirectionsCarIcon />,
+    href: "/dashboard/vehiculo/listar",
+    allowedRoles: [...permissions.listarVehiculos, ...permissions.registrarVehiculo],
   },
   {
     text: "Kardex",
