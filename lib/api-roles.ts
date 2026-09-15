@@ -1,8 +1,4 @@
-interface ApiError {
-  message?: string;
-  error?: string;
-  title?: string;
-}
+import { extractApiErrorMessage } from "./api-error";
 
 export async function ApiRoles<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
@@ -22,9 +18,7 @@ export async function ApiRoles<T>(url: string, options: RequestInit = {}): Promi
   }
 
   if (!response.ok) {
-    const error = data as ApiError;
-
-    throw new Error(error?.message || error?.error || error?.title || "Error en la petición");
+    throw new Error(extractApiErrorMessage(data, response.status, response.statusText));
   }
 
   return data as T;

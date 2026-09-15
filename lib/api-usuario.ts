@@ -1,4 +1,5 @@
 import { getAuthUser } from "@/shared/auth/auth.service";
+import { getApiErrorMessage } from "./api-error";
 
 export async function apiUsuario(url: string, options: RequestInit = {}) {
   const auth = getAuthUser();
@@ -19,9 +20,7 @@ export async function apiUsuario(url: string, options: RequestInit = {}) {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => null);
-      const msg = error?.message || error?.error || error?.title || "Error en la petición";
-      throw new Error(msg);
+      throw new Error(await getApiErrorMessage(response));
     }
 
     if (response.status === 204 || response.headers.get("content-length") === "0") {

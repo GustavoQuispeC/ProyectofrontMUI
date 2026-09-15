@@ -1,4 +1,5 @@
 import { getAuthUser } from "@/shared/auth/auth.service";
+import { getApiErrorMessage } from "./api-error";
 
 export async function apiVacaciones<T>(url: string, options: RequestInit = {}): Promise<T> {
   const auth = getAuthUser();
@@ -18,9 +19,7 @@ export async function apiVacaciones<T>(url: string, options: RequestInit = {}): 
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    const msg = error?.message || error?.error || error?.title || "Error en la petición";
-    throw new Error(msg);
+    throw new Error(await getApiErrorMessage(response));
   }
 
   return response.json() as Promise<T>;

@@ -1,3 +1,5 @@
+import { getApiErrorMessage } from "./api-error";
+
 export async function apiCatalogo(url: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -10,11 +12,7 @@ export async function apiCatalogo(url: string, options: RequestInit = {}) {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => null);
-    const msg =
-      error?.message || error?.error || error?.title || "Error en la petición";
-
-    throw new Error(msg);
+    throw new Error(await getApiErrorMessage(response));
   }
 
   return response.json();
