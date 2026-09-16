@@ -29,6 +29,7 @@ export const listarEstadosDespacho = () => fetchCatalogo("estados-despacho");
 export const listarModalidadesEntrega = () => fetchCatalogo("modalidades-entrega");
 export const listarOrigenesSalida = () => fetchCatalogo("origenes-salida");
 export const listarEstadosPedido = () => fetchCatalogo("estados-pedido");
+export const listarMediosPago = () => fetchCatalogo("medio-pago");
 
 // Caja
 export const listarEstadosCajaSesion = () => fetchCatalogo("estados-caja-sesion");

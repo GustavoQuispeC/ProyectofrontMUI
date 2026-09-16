@@ -1,7 +1,7 @@
 import { getAuthUser, logout } from "@/shared/auth/auth.service";
 import { getApiErrorMessage } from "./api-error";
 
-export async function apiCatalogo(url: string, options: RequestInit = {}) {
+export async function apiVenta(url: string, options: RequestInit = {}) {
   const auth = getAuthUser();
 
   const headers: Record<string, string> = {
@@ -26,6 +26,10 @@ export async function apiCatalogo(url: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     throw new Error(await getApiErrorMessage(response));
+  }
+
+  if (response.status === 204) {
+    return null;
   }
 
   return response.json();
