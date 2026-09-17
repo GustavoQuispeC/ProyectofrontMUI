@@ -15,6 +15,7 @@ export interface RegistrarVentaPago {
 
 export interface RegistrarVentaRequest {
   clienteId: number;
+  clienteTipoDocumento: number;
   tiendaId: number;
   tipoPago: number;
   descuento: number;
@@ -47,6 +48,8 @@ export interface Venta {
   codigo: string;
   clienteId: number;
   clienteNombre: string;
+  clienteTipoDocumento: number;
+  clienteNumeroDocumento: string;
   tiendaId: number;
   tiendaNombre: string;
   estado: number;

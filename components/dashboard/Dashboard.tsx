@@ -20,6 +20,7 @@ export default function Dashboard({ children }: DashboardProps) {
     pathname?.startsWith("/dashboard/ingresos/listar") ||
     pathname?.startsWith("/dashboard/salidas/listar") ||
     pathname?.startsWith("/dashboard/transferencias/listar") ||
+    pathname?.startsWith("/dashboard/ventas/listar") ||
     pathname?.startsWith("/dashboard/inventario/listar") ||
     pathname?.startsWith("/dashboard/clientes/listar");
   return (

@@ -40,6 +40,8 @@ import AddIcon from "@mui/icons-material/Add";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
 import SellIcon from "@mui/icons-material/Sell";
+import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
@@ -50,9 +52,11 @@ import {
   useEstadosVenta,
   useEstadosPago,
   useTiposPago,
+  useTiposDocumento,
 } from "@/features/dashboard/venta/hooks/useVenta";
 import { useTiendas } from "@/features/dashboard/tienda/hooks/useTiendas";
 import { Venta } from "@/features/dashboard/venta/venta.type";
+import { generarNotaVentaPdf, imprimirTicketVenta } from "@/features/dashboard/venta/helpers/ventaPdf";
 import { CatalogoItem } from "@/features/dashboard/catalogo/catalogo.type";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
@@ -121,19 +125,37 @@ interface ColumnsContext {
   tiposPago: CatalogoItem[];
   estadosVenta: CatalogoItem[];
   estadosPago: CatalogoItem[];
+  tiposDocumento: CatalogoItem[];
 }
 
-function getColumns(ctx: ColumnsContext, onVer: (row: Venta) => void): GridColDef<Venta>[] {
+function getColumns(
+  ctx: ColumnsContext,
+  onVer: (row: Venta) => void,
+  onTicket: (row: Venta) => void,
+  onPdf: (row: Venta) => void,
+): GridColDef<Venta>[] {
   return [
     { field: "id", headerName: "ID", width: 70, align: "center", headerAlign: "center" },
     {
       field: "codigo",
       headerName: "Código",
       minWidth: 140,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontWeight: 600, alignSelf: "center" }}>
-          {params.row.codigo}
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            width: "100%",
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {params.row.codigo}
+          </Typography>
+        </Box>
       ),
     },
     {
@@ -142,6 +164,23 @@ function getColumns(ctx: ColumnsContext, onVer: (row: Venta) => void): GridColDe
       flex: 1,
       minWidth: 180,
       valueGetter: (_value, row) => row.clienteNombre || "—",
+    },
+    {
+      field: "clienteTipoDocumento",
+      headerName: "Tipo doc.",
+      width: 110,
+      align: "center",
+      headerAlign: "center",
+      valueGetter: (_value, row) =>
+        row.clienteTipoDocumento ? catalogoNombre(ctx.tiposDocumento, row.clienteTipoDocumento) : "—",
+    },
+    {
+      field: "clienteNumeroDocumento",
+      headerName: "Documento",
+      width: 130,
+      align: "center",
+      headerAlign: "center",
+      valueGetter: (_value, row) => row.clienteNumeroDocumento || "—",
     },
     {
       field: "tiendaNombre",
@@ -245,23 +284,39 @@ function getColumns(ctx: ColumnsContext, onVer: (row: Venta) => void): GridColDe
     {
       field: "acciones",
       headerName: "Acciones",
-      width: 100,
-      minWidth: 100,
+      width: 140,
+      minWidth: 140,
       headerAlign: "center",
       align: "center",
       sortable: false,
       filterable: false,
       renderCell: (params: GridRenderCellParams<Venta>) => (
-        <Tooltip title="Ver detalle">
-          <Box>
+        <Stack direction="row" sx={{ alignItems: "center", justifyContent: "center", gap: 1, height: "100%" }}>
+          <Tooltip title="Ver detalle">
             <VisibilityIcon
               fontSize="small"
               color="primary"
               sx={{ cursor: "pointer" }}
               onClick={() => onVer(params.row)}
             />
-          </Box>
-        </Tooltip>
+          </Tooltip>
+          <Tooltip title="Imprimir ticket">
+            <LocalPrintshopOutlinedIcon
+              fontSize="small"
+              color="action"
+              sx={{ cursor: "pointer" }}
+              onClick={() => onTicket(params.row)}
+            />
+          </Tooltip>
+          <Tooltip title="Descargar nota de venta (PDF)">
+            <PictureAsPdfOutlinedIcon
+              fontSize="small"
+              color="error"
+              sx={{ cursor: "pointer" }}
+              onClick={() => onPdf(params.row)}
+            />
+          </Tooltip>
+        </Stack>
       ),
     },
   ];
@@ -278,6 +333,7 @@ export default function ListarVentas() {
   const { items: estadosVenta } = useEstadosVenta();
   const { items: estadosPago } = useEstadosPago();
   const { items: tiposPago } = useTiposPago();
+  const { items: tiposDocumento } = useTiposDocumento();
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -334,9 +390,40 @@ export default function ListarVentas() {
     setSelectedRow(null);
   };
 
+  const extrasVenta = useCallback(
+    (row: Venta) => {
+      const tienda = tiendas.find((t) => t.id === row.tiendaId);
+      return {
+        tipoPagoNombre: catalogoNombre(tiposPago, row.tipoPago),
+        estadoVentaNombre: catalogoNombre(estadosVenta, row.estado),
+        estadoPagoNombre: catalogoNombre(estadosPago, row.estadoPago),
+        clienteTipoDocumentoNombre: row.clienteTipoDocumento
+          ? catalogoNombre(tiposDocumento, row.clienteTipoDocumento)
+          : undefined,
+        tiendaDireccion: tienda?.direccion,
+        tiendaTelefono: tienda?.telefono,
+      };
+    },
+    [tiposPago, estadosVenta, estadosPago, tiposDocumento, tiendas],
+  );
+
+  const handleTicket = useCallback(
+    (row: Venta) => {
+      void imprimirTicketVenta(row, extrasVenta(row));
+    },
+    [extrasVenta],
+  );
+
+  const handlePdf = useCallback(
+    (row: Venta) => {
+      void generarNotaVentaPdf(row, extrasVenta(row));
+    },
+    [extrasVenta],
+  );
+
   const columns = useMemo(
-    () => getColumns({ tiposPago, estadosVenta, estadosPago }, handleVer),
-    [tiposPago, estadosVenta, estadosPago, handleVer],
+    () => getColumns({ tiposPago, estadosVenta, estadosPago, tiposDocumento }, handleVer, handleTicket, handlePdf),
+    [tiposPago, estadosVenta, estadosPago, tiposDocumento, handleVer, handleTicket, handlePdf],
   );
 
   if (!canAccess) return <AccessDenied />;
@@ -541,6 +628,12 @@ export default function ListarVentas() {
                     <strong>Cliente:</strong> {selectedRow.clienteNombre}
                   </Typography>
                   <Typography variant="body2">
+                    <strong>Documento:</strong>{" "}
+                    {selectedRow.clienteTipoDocumento
+                      ? `${catalogoNombre(tiposDocumento, selectedRow.clienteTipoDocumento)} ${selectedRow.clienteNumeroDocumento ?? ""}`
+                      : "—"}
+                  </Typography>
+                  <Typography variant="body2">
                     <strong>Tienda:</strong> {selectedRow.tiendaNombre}
                   </Typography>
                   <Typography variant="body2">
@@ -617,6 +710,25 @@ export default function ListarVentas() {
             )}
           </DialogContent>
           <DialogActions>
+            {selectedRow && (
+              <>
+                <Button
+                  onClick={() => handleTicket(selectedRow)}
+                  variant="outlined"
+                  startIcon={<LocalPrintshopOutlinedIcon />}
+                >
+                  Imprimir ticket
+                </Button>
+                <Button
+                  onClick={() => handlePdf(selectedRow)}
+                  variant="outlined"
+                  color="error"
+                  startIcon={<PictureAsPdfOutlinedIcon />}
+                >
+                  Descargar PDF
+                </Button>
+              </>
+            )}
             <Button onClick={handleCloseDialog} variant="contained" startIcon={<CloseIcon />}>
               Cerrar
             </Button>

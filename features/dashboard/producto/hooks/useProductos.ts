@@ -5,6 +5,7 @@ import {
   obtenerProductos,
   obtenerProductoPorId,
   editarProducto,
+  listarProductosCatalogoVenta,
 } from "../producto.logic";
 import {
   CrearProductoRequest,
@@ -12,6 +13,8 @@ import {
   EditarProductoRequest,
   ProductosResponse,
   ListarProductosRequest,
+  ListarProductosVentaRequest,
+  ProductosVentaResponse,
 } from "../Producto.types";
 
 //! Hook para listar productos
@@ -23,6 +26,28 @@ export function useProductos(params: ListarProductosRequest) {
   } = useQuery<ProductosResponse>({
     queryKey: ["productos", params],
     queryFn: () => obtenerProductos(params),
+  });
+
+  return {
+    productos: response?.productos ?? [],
+    paginacion: response?.paginacion,
+    loading,
+    error: error instanceof Error ? error.message : null,
+  };
+}
+
+//! Hook para el catálogo de productos de venta (requiere tiendaId)
+export function useProductosCatalogoVenta(params: ListarProductosVentaRequest, enabled = true) {
+  const {
+    data: response,
+    isLoading: loading,
+    error,
+  } = useQuery<ProductosVentaResponse>({
+    queryKey: ["productos-catalogo-venta", params],
+    queryFn: () => listarProductosCatalogoVenta(params),
+    enabled: enabled && !!params.tiendaId,
+    staleTime: 1000 * 30,
+    retry: 1,
   });
 
   return {

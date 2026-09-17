@@ -5,6 +5,8 @@ import {
   ProductosResponse,
   DetalleProducto,
   ListarProductosRequest,
+  ListarProductosVentaRequest,
+  ProductosVentaResponse,
   EditarProductoRequest,
 } from "./Producto.types";
 import { getToken } from "@/shared/auth/auth.service";
@@ -26,6 +28,21 @@ export async function obtenerProductosApi(params: ListarProductosRequest): Promi
   if (params.ordenamiento) query.append("ordenamiento", params.ordenamiento);
 
   return apiProducto(`${apiUrl}/productos?${query.toString()}`, {
+    method: "GET",
+  });
+}
+
+//! Obtener catálogo de productos para venta (incluye precios por lista y stock de la tienda)
+export function listarProductosCatalogoVentaApi(params: ListarProductosVentaRequest): Promise<ProductosVentaResponse> {
+  const query = new URLSearchParams();
+
+  query.append("tiendaId", String(params.tiendaId));
+  query.append("pagina", String(params.pagina || 1));
+  query.append("tamanoPagina", String(params.tamanoPagina || 20));
+
+  if (params.busqueda) query.append("busqueda", params.busqueda);
+
+  return apiProducto(`${apiUrl}/productos/catalogo-venta?${query.toString()}`, {
     method: "GET",
   });
 }

@@ -14,12 +14,26 @@ const optionalString = z
   .or(z.null())
   .transform((value) => value || null);
 
-const detalleSchema = z.object({
-  productoId: z.coerce.number().int().min(1, "Seleccione un producto"),
-  cantidad: z.coerce.number().positive("La cantidad debe ser mayor a 0"),
-  precioUnitario: z.coerce.number().positive("El precio unitario debe ser mayor a 0"),
-  descuentoUnitario: z.coerce.number().min(0, "El descuento no puede ser negativo").default(0),
-});
+const detalleSchema = z
+  .object({
+    productoId: z.coerce.number().int().min(1, "Seleccione un producto"),
+    productoCodigo: z.string().optional(),
+    productoNombre: z.string().optional(),
+    unidadMedidaNombre: z.string().optional(),
+    stockDisponible: z.coerce.number().optional(),
+    cantidad: z.coerce.number().positive("La cantidad debe ser mayor a 0"),
+    precioUnitario: z.coerce.number().positive("El precio unitario debe ser mayor a 0"),
+    descuentoUnitario: z.coerce.number().min(0, "El descuento no puede ser negativo").default(0),
+  })
+  .superRefine((detalle, ctx) => {
+    if (detalle.stockDisponible !== undefined && detalle.cantidad > detalle.stockDisponible) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["cantidad"],
+        message: `Stock disponible: ${detalle.stockDisponible}`,
+      });
+    }
+  });
 
 const pagoSchema = z
   .object({
@@ -42,6 +56,7 @@ const pagoSchema = z
 export const ventaSchema = z
   .object({
     clienteId: z.coerce.number().int().min(1, "Seleccione un cliente"),
+    clienteTipoDocumento: z.coerce.number().int().min(1, "Seleccione el tipo de documento"),
     tiendaId: z.coerce.number().int().min(1, "Seleccione una tienda"),
     tipoPago: z.coerce.number().int().min(1, "Seleccione el tipo de pago"),
     descuento: z.coerce.number().min(0, "El descuento no puede ser negativo").default(0),

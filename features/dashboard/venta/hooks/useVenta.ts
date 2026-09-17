@@ -7,6 +7,7 @@ import {
   listarMediosPago,
   listarEstadosVenta,
   listarEstadosPago,
+  listarTiposDocumento,
 } from "@/features/dashboard/catalogo/catalogo.service";
 import { CatalogoItem } from "@/features/dashboard/catalogo/catalogo.type";
 
@@ -90,4 +91,8 @@ export function useEstadosVenta() {
 
 export function useEstadosPago() {
   return useCatalogoVenta("estados-pago", listarEstadosPago);
+}
+
+export function useTiposDocumento() {
+  return useCatalogoVenta("tipos-documento", listarTiposDocumento);
 }

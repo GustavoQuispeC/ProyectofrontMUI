@@ -117,3 +117,35 @@ export interface ListarProductosRequest {
   ordenarPor?: string;
   ordenamiento?: "asc" | "desc";
 }
+
+export interface PrecioProductoVenta {
+  listaPrecioId: number;
+  listaPrecioNombre: string;
+  precio: number;
+}
+
+export interface ProductoCatalogoVenta {
+  id: number;
+  codigoInterno: string;
+  codigoBarras: string | null;
+  nombre: string;
+  marcaId: number;
+  marcaNombre: string;
+  unidadMedidaNombre: string;
+  precios: PrecioProductoVenta[];
+  stockActual: number;
+  stockReservado: number;
+  stockDisponible: number;
+}
+
+export interface ListarProductosVentaRequest {
+  tiendaId: number;
+  busqueda?: string;
+  pagina: number;
+  tamanoPagina: number;
+}
+
+export interface ProductosVentaResponse {
+  productos: ProductoCatalogoVenta[];
+  paginacion: Paginacion;
+}

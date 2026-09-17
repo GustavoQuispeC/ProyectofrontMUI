@@ -5,8 +5,14 @@ import {
   obtenerProductosApi,
   obtenerProductoPorIdApi,
   editarProductoApi,
+  listarProductosCatalogoVentaApi,
 } from "./producto.service";
-import { CrearProductoRequest, EditarProductoRequest, ListarProductosRequest } from "./Producto.types";
+import {
+  CrearProductoRequest,
+  EditarProductoRequest,
+  ListarProductosRequest,
+  ListarProductosVentaRequest,
+} from "./Producto.types";
 
 //! Crear producto
 export async function crearProducto(data: CrearProductoRequest) {
@@ -62,4 +68,15 @@ export async function editarProducto(id: number, data: EditarProductoRequest) {
   }
 
   return editarProductoApi(id, data);
+}
+
+//! Listar catálogo de productos para venta
+export async function listarProductosCatalogoVenta(params: ListarProductosVentaRequest) {
+  const user = getAuthUser();
+
+  if (!user) {
+    throw new Error("No autenticado");
+  }
+
+  return listarProductosCatalogoVentaApi(params);
 }
