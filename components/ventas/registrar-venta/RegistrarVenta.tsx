@@ -68,9 +68,12 @@ import {
 } from "@/features/dashboard/venta/hooks/useVenta";
 import { ProductoCatalogoVenta } from "@/features/dashboard/producto/Producto.types";
 import {
+  MEDIO_CREDITO,
   MEDIO_DEPOSITO_BANCARIO,
+  MEDIO_EFECTIVO,
   MODALIDAD_ENVIO_EMPRESA,
   TIPO_PAGO_CONTADO,
+  TIPO_PAGO_CREDITO,
   VentaForm,
   ventaSchema,
 } from "@/features/dashboard/venta/venta.schema";
@@ -105,10 +108,12 @@ const defaultValues: VentaForm = {
   tiendaId: 0,
   tipoPago: 0,
   descuento: 0,
+  costoEnvio: 0,
+  observaciones: "",
   modalidadEntrega: 0,
   direccionEntrega: "",
   detalles: [],
-  pagos: [{ tipoMedio: 0, monto: 0, banco: "", numeroOperacion: "", fechaDeposito: "" }],
+  pagos: [{ tipoMedio: 0, monto: 0, montoRecibido: null, banco: "", numeroOperacion: "", fechaDeposito: "" }],
 };
 
 interface SectionProps {
@@ -245,6 +250,7 @@ export default function RegistrarVenta() {
   const detalles = useWatch({ control, name: "detalles" });
   const pagos = useWatch({ control, name: "pagos" });
   const descuento = useWatch({ control, name: "descuento" });
+  const costoEnvio = useWatch({ control, name: "costoEnvio" });
   const tipoPago = useWatch({ control, name: "tipoPago" });
   const modalidadEntrega = useWatch({ control, name: "modalidadEntrega" });
 
@@ -313,8 +319,34 @@ export default function RegistrarVenta() {
     (acc, d) => acc + (Number(d.cantidad) || 0) * (Number(d.precioUnitario) || 0) - (Number(d.descuentoUnitario) || 0),
     0,
   );
-  const totalVenta = Math.max(0, subtotal - (Number(descuento) || 0));
+  //! Medios de pago permitidos según el tipo de pago: Contado → Efectivo/Depósito; Crédito → solo Crédito
+  const mediosPagoFiltrados = useMemo(() => {
+    if (Number(tipoPago) === TIPO_PAGO_CREDITO) return mediosPago.filter((m) => m.id === MEDIO_CREDITO);
+    if (Number(tipoPago) === TIPO_PAGO_CONTADO) return mediosPago.filter((m) => m.id !== MEDIO_CREDITO);
+    return mediosPago;
+  }, [mediosPago, tipoPago]);
+
+  //! Resetea medios de pago que quedan inválidos al cambiar el tipo de pago
+  useEffect(() => {
+    if (!Number(tipoPago)) return;
+    pagos?.forEach((p, index) => {
+      const medioId = Number(p.tipoMedio);
+      if (!medioId) return;
+      const invalido = Number(tipoPago) === TIPO_PAGO_CREDITO ? medioId !== MEDIO_CREDITO : medioId === MEDIO_CREDITO;
+      if (invalido) setValue(`pagos.${index}.tipoMedio`, 0);
+    });
+  }, [tipoPago, pagos, setValue]);
+
+  const costoEnvioNum = Number(modalidadEntrega) === MODALIDAD_ENVIO_EMPRESA ? Number(costoEnvio) || 0 : 0;
+  const totalVenta = Math.max(0, subtotal - (Number(descuento) || 0) + costoEnvioNum);
   const totalPagado = (pagos ?? []).reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
+  const vueltoTotal = (pagos ?? []).reduce(
+    (acc, p) =>
+      Number(p.tipoMedio) === MEDIO_EFECTIVO
+        ? acc + Math.max(0, (Number(p.montoRecibido) || 0) - (Number(p.monto) || 0))
+        : acc,
+    0,
+  );
 
   // ---- Selección de producto: abre el modal de cantidad/precio ----
   const handleClienteCreado = useCallback(
@@ -392,6 +424,7 @@ export default function RegistrarVenta() {
       cantidad,
       precioUnitario: precio,
       descuentoUnitario: 0,
+      observaciones: null,
     };
 
     if (itemDialog.editIndex !== null) {
@@ -426,6 +459,8 @@ export default function RegistrarVenta() {
       tiendaId: data.tiendaId,
       tipoPago: data.tipoPago,
       descuento: data.descuento,
+      costoEnvio: data.modalidadEntrega === MODALIDAD_ENVIO_EMPRESA ? data.costoEnvio : 0,
+      observaciones: data.observaciones || null,
       modalidadEntrega: data.modalidadEntrega,
       direccionEntrega: data.modalidadEntrega === MODALIDAD_ENVIO_EMPRESA ? data.direccionEntrega : null,
       detalles: data.detalles.map((d) => ({
@@ -433,10 +468,12 @@ export default function RegistrarVenta() {
         cantidad: d.cantidad,
         precioUnitario: d.precioUnitario,
         descuentoUnitario: d.descuentoUnitario,
+        observaciones: d.observaciones ?? null,
       })),
       pagos: data.pagos.map((p) => ({
         tipoMedio: p.tipoMedio,
         monto: p.monto,
+        montoRecibido: p.tipoMedio === MEDIO_EFECTIVO && p.montoRecibido !== null ? Number(p.montoRecibido) : null,
         banco: p.tipoMedio === MEDIO_DEPOSITO_BANCARIO ? p.banco : null,
         numeroOperacion: p.tipoMedio === MEDIO_DEPOSITO_BANCARIO ? p.numeroOperacion : null,
         fechaDeposito: p.tipoMedio === MEDIO_DEPOSITO_BANCARIO ? p.fechaDeposito : null,
@@ -872,27 +909,80 @@ export default function RegistrarVenta() {
                   />
                 </Stack>
 
+                <Stack
+                  sx={{
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 2,
+                    alignItems: { xs: "stretch", sm: "flex-start" },
+                  }}
+                >
+                  <Controller
+                    name="direccionEntrega"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        value={field.value ?? ""}
+                        label={
+                          modalidadEntrega === MODALIDAD_ENVIO_EMPRESA
+                            ? "Dirección de entrega *"
+                            : "Dirección de entrega"
+                        }
+                        size="small"
+                        placeholder="Dirección de entrega"
+                        disabled={modalidadEntrega !== MODALIDAD_ENVIO_EMPRESA}
+                        error={!!errors.direccionEntrega}
+                        helperText={
+                          errors.direccionEntrega?.message ??
+                          (modalidadEntrega === MODALIDAD_ENVIO_EMPRESA
+                            ? "Obligatoria para envío por empresa"
+                            : "Solo aplica para envío por empresa")
+                        }
+                        sx={{ flex: 1 }}
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    name="costoEnvio"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Costo de envío"
+                        size="small"
+                        type="number"
+                        onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                        disabled={modalidadEntrega !== MODALIDAD_ENVIO_EMPRESA}
+                        slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                        error={!!errors.costoEnvio}
+                        helperText={
+                          errors.costoEnvio?.message ??
+                          (modalidadEntrega === MODALIDAD_ENVIO_EMPRESA
+                            ? "Se suma al total de la venta"
+                            : "Solo aplica para envío por empresa")
+                        }
+                        sx={{ minWidth: 150, width: { xs: "100%", sm: 180 } }}
+                      />
+                    )}
+                  />
+                </Stack>
+
                 <Controller
-                  name="direccionEntrega"
+                  name="observaciones"
                   control={control}
                   render={({ field }) => (
                     <TextField
                       {...field}
                       value={field.value ?? ""}
-                      label={
-                        modalidadEntrega === MODALIDAD_ENVIO_EMPRESA ? "Dirección de entrega *" : "Dirección de entrega"
-                      }
+                      label="Observaciones"
                       size="small"
                       fullWidth
-                      placeholder="Dirección de entrega"
-                      disabled={modalidadEntrega !== MODALIDAD_ENVIO_EMPRESA}
-                      error={!!errors.direccionEntrega}
-                      helperText={
-                        errors.direccionEntrega?.message ??
-                        (modalidadEntrega === MODALIDAD_ENVIO_EMPRESA
-                          ? "Obligatoria para envío por empresa"
-                          : "Solo aplica para envío por empresa")
-                      }
+                      multiline
+                      minRows={1}
+                      placeholder="Observaciones de la venta (opcional)"
+                      error={!!errors.observaciones}
+                      helperText={errors.observaciones?.message}
                     />
                   )}
                 />
@@ -1114,6 +1204,10 @@ export default function RegistrarVenta() {
               <Stack sx={{ gap: 2 }}>
                 {pagoFields.map((item, index) => {
                   const esDeposito = Number(pagos?.[index]?.tipoMedio) === MEDIO_DEPOSITO_BANCARIO;
+                  const esEfectivo = Number(pagos?.[index]?.tipoMedio) === MEDIO_EFECTIVO;
+                  const montoPago = Number(pagos?.[index]?.monto) || 0;
+                  const montoRecibidoPago = Number(pagos?.[index]?.montoRecibido) || 0;
+                  const vueltoPago = Math.max(0, montoRecibidoPago - montoPago);
 
                   return (
                     <Stack key={item.id} sx={{ gap: 2 }}>
@@ -1143,7 +1237,7 @@ export default function RegistrarVenta() {
                                 onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
                                 disabled={loadingMediosPago}
                               >
-                                {mediosPago.map((m) => (
+                                {mediosPagoFiltrados.map((m) => (
                                   <MenuItem key={m.id} value={String(m.id)}>
                                     {m.nombre}
                                   </MenuItem>
@@ -1173,6 +1267,31 @@ export default function RegistrarVenta() {
                             />
                           )}
                         />
+
+                        {esEfectivo && (
+                          <Controller
+                            name={`pagos.${index}.montoRecibido`}
+                            control={control}
+                            render={({ field }) => (
+                              <TextField
+                                label="Monto recibido"
+                                size="small"
+                                type="number"
+                                value={field.value ?? ""}
+                                onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                                slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                                error={!!errors.pagos?.[index]?.montoRecibido}
+                                helperText={
+                                  errors.pagos?.[index]?.montoRecibido?.message ??
+                                  (vueltoPago > 0
+                                    ? `Vuelto: ${monedaFormatter.format(vueltoPago)}`
+                                    : "Opcional — para calcular el vuelto")
+                                }
+                                sx={{ minWidth: 150, width: { xs: "100%", sm: 200 } }}
+                              />
+                            )}
+                          />
+                        )}
 
                         <IconButton
                           color="error"
@@ -1258,7 +1377,14 @@ export default function RegistrarVenta() {
                   size="small"
                   startIcon={<AddIcon />}
                   onClick={() =>
-                    appendPago({ tipoMedio: 0, monto: 0, banco: "", numeroOperacion: "", fechaDeposito: "" })
+                    appendPago({
+                      tipoMedio: 0,
+                      monto: 0,
+                      montoRecibido: null,
+                      banco: "",
+                      numeroOperacion: "",
+                      fechaDeposito: "",
+                    })
                   }
                   sx={{ alignSelf: "flex-start" }}
                 >
@@ -1267,6 +1393,11 @@ export default function RegistrarVenta() {
 
                 <Divider />
                 <Stack direction="row" sx={{ gap: 3, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  {costoEnvioNum > 0 && (
+                    <Typography variant="body2">
+                      <strong>Envío:</strong> {monedaFormatter.format(costoEnvioNum)}
+                    </Typography>
+                  )}
                   <Typography variant="body2">
                     <strong>Total venta:</strong> {monedaFormatter.format(totalVenta)}
                   </Typography>
@@ -1283,6 +1414,11 @@ export default function RegistrarVenta() {
                   {Number(tipoPago) === TIPO_PAGO_CONTADO && totalPagado < totalVenta && (
                     <Typography variant="body2" color="error.main">
                       <strong>Faltante:</strong> {monedaFormatter.format(totalVenta - totalPagado)}
+                    </Typography>
+                  )}
+                  {vueltoTotal > 0 && (
+                    <Typography variant="body2" color="info.main">
+                      <strong>Vuelto:</strong> {monedaFormatter.format(vueltoTotal)}
                     </Typography>
                   )}
                 </Stack>

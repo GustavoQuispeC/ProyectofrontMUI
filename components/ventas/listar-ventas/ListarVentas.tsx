@@ -699,12 +699,27 @@ export default function ListarVentas() {
                   <Typography variant="body2">
                     <strong>Descuento:</strong> {monedaFormatter.format(selectedRow.descuento)}
                   </Typography>
+                  {Number(selectedRow.costoEnvio) > 0 && (
+                    <Typography variant="body2">
+                      <strong>Envío:</strong> {monedaFormatter.format(selectedRow.costoEnvio)}
+                    </Typography>
+                  )}
                   <Typography variant="body2">
                     <strong>Total:</strong> {monedaFormatter.format(selectedRow.total)}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Pagado:</strong> {monedaFormatter.format(selectedRow.montoPagado)}
                   </Typography>
+                  {Number(selectedRow.montoRecibido) > 0 && (
+                    <Typography variant="body2">
+                      <strong>Recibido:</strong> {monedaFormatter.format(selectedRow.montoRecibido)}
+                    </Typography>
+                  )}
+                  {Number(selectedRow.vuelto) > 0 && (
+                    <Typography variant="body2">
+                      <strong>Vuelto:</strong> {monedaFormatter.format(selectedRow.vuelto)}
+                    </Typography>
+                  )}
                 </Stack>
               </Stack>
             )}

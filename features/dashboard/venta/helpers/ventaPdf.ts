@@ -161,7 +161,11 @@ export async function imprimirTicketVenta(venta: Venta, extras: VentaDocExtras =
     lineasPorItem.reduce((a, b) => a + b, 0) * 3.2 +
     venta.detalles.length * 4 +
     42 +
-    (venta.clienteNumeroDocumento ? 4 : 0);
+    (venta.clienteNumeroDocumento ? 4 : 0) +
+    (Number(venta.costoEnvio) > 0 ? 4 : 0) +
+    (Number(venta.montoRecibido) > 0 ? 4 : 0) +
+    (Number(venta.vuelto) > 0 ? 4 : 0) +
+    (venta.observaciones ? 4 : 0);
 
   const doc = new jsPDF({ unit: "mm", format: [ancho, Math.max(altura, 130)] });
   let y = 6;
@@ -279,14 +283,40 @@ export async function imprimirTicketVenta(venta: Venta, extras: VentaDocExtras =
   doc.text("I.G.V", margen, y);
   doc.text("(S/)", ancho - 24, y, { align: "right" });
   doc.text(impuestoTotal.toFixed(2), ancho - margen, y, { align: "right" });
-  y += 4;
+  y += 3.5;
+
+  if (Number(venta.costoEnvio) > 0) {
+    doc.text("COSTO ENVIO", margen, y);
+    doc.text("(S/)", ancho - 24, y, { align: "right" });
+    doc.text(Number(venta.costoEnvio).toFixed(2), ancho - margen, y, { align: "right" });
+    y += 4;
+  } else {
+    y += 0.5;
+  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.text("TOTAL", margen, y);
   doc.text("(S/)", ancho - 24, y, { align: "right" });
   doc.text(venta.total.toFixed(2), ancho - margen, y, { align: "right" });
-  y += 4.5;
+  y += 3.5;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  if (Number(venta.montoRecibido) > 0) {
+    doc.text("RECIBIDO", margen, y);
+    doc.text("(S/)", ancho - 24, y, { align: "right" });
+    doc.text(Number(venta.montoRecibido).toFixed(2), ancho - margen, y, { align: "right" });
+    y += 3.5;
+  }
+  if (Number(venta.vuelto) > 0) {
+    doc.text("VUELTO", margen, y);
+    doc.text("(S/)", ancho - 24, y, { align: "right" });
+    doc.text(Number(venta.vuelto).toFixed(2), ancho - margen, y, { align: "right" });
+    y += 4.5;
+  } else {
+    y += 1;
+  }
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
@@ -297,6 +327,13 @@ export async function imprimirTicketVenta(venta: Venta, extras: VentaDocExtras =
   });
   y += 0.8;
 
+  if (venta.observaciones) {
+    const obs = doc.splitTextToSize(`OBS: ${venta.observaciones}`, anchoUtil) as string[];
+    obs.forEach((linea) => {
+      doc.text(linea, margen, y);
+      y += 3.2;
+    });
+  }
   if (extras.medioPagoNombre) {
     doc.text(`FORMA DE PAGO: ${extras.medioPagoNombre.toUpperCase()}`, margen, y);
     y += 3.5;
@@ -422,9 +459,12 @@ export async function generarNotaVentaPdf(venta: Venta, extras: VentaDocExtras =
       ["Total gravado", moneda(totalGravado)],
       ["I.G.V", moneda(impuestoTotal)],
       ...(venta.descuento > 0 ? [["Descuento", `-${moneda(venta.descuento)}`]] : []),
+      ...(Number(venta.costoEnvio) > 0 ? [["Costo de envío", moneda(Number(venta.costoEnvio))]] : []),
       ["Total", moneda(venta.total)],
       ["Monto pagado", moneda(venta.montoPagado)],
       ...(pendiente > 0.005 ? [["Pendiente", moneda(pendiente)]] : []),
+      ...(Number(venta.montoRecibido) > 0 ? [["Monto recibido", moneda(Number(venta.montoRecibido))]] : []),
+      ...(Number(venta.vuelto) > 0 ? [["Vuelto", moneda(Number(venta.vuelto))]] : []),
     ],
     theme: "plain",
     styles: { fontSize: 10, cellPadding: 1.5 },
@@ -442,6 +482,10 @@ export async function generarNotaVentaPdf(venta: Venta, extras: VentaDocExtras =
   doc.text(`SON: ${numeroALetras(venta.total)} SOLES`, 14, startY);
   startY += 5;
   doc.setFont("helvetica", "normal");
+  if (venta.observaciones) {
+    doc.text(`OBSERVACIONES: ${venta.observaciones}`, 14, startY);
+    startY += 4.5;
+  }
   if (extras.medioPagoNombre) {
     doc.text(`FORMA DE PAGO: ${extras.medioPagoNombre.toUpperCase()}`, 14, startY);
     startY += 4.5;

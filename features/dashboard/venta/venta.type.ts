@@ -3,11 +3,13 @@ export interface RegistrarVentaDetalle {
   cantidad: number;
   precioUnitario: number;
   descuentoUnitario: number;
+  observaciones?: string | null;
 }
 
 export interface RegistrarVentaPago {
   tipoMedio: number;
   monto: number;
+  montoRecibido?: number | null;
   banco?: string | null;
   numeroOperacion?: string | null;
   fechaDeposito?: string | null;
@@ -19,6 +21,8 @@ export interface RegistrarVentaRequest {
   tiendaId: number;
   tipoPago: number;
   descuento: number;
+  costoEnvio: number;
+  observaciones?: string | null;
   modalidadEntrega: number;
   direccionEntrega?: string | null;
   detalles: RegistrarVentaDetalle[];
@@ -32,6 +36,7 @@ export interface VentaRegistrada {
 
 export interface VentaDetalle {
   id: number;
+  ventaId?: number;
   productoId: number;
   productoNombre: string;
   productoCodigo: string;
@@ -41,6 +46,7 @@ export interface VentaDetalle {
   subtotal: number;
   impuesto: number;
   total: number;
+  observaciones?: string | null;
 }
 
 export interface Venta {
@@ -56,10 +62,16 @@ export interface Venta {
   tipoPago: number;
   estadoPago: number;
   descuento: number;
+  costoEnvio: number;
   total: number;
   montoPagado: number;
+  montoRecibido: number;
+  vuelto: number;
+  observaciones: string | null;
+  empleadoAtiendeId?: number;
   empleadoAtiendeNombre: string;
   fechaConfirmacion: string;
+  createdAt?: string;
   detalles: VentaDetalle[];
 }
 

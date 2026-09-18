@@ -2,7 +2,9 @@ import { z } from "zod";
 
 export const TIPO_PAGO_CONTADO = 1;
 export const TIPO_PAGO_CREDITO = 2;
+export const MEDIO_EFECTIVO = 1;
 export const MEDIO_DEPOSITO_BANCARIO = 2;
+export const MEDIO_CREDITO = 3;
 export const MODALIDAD_RECOJO_TIENDA = 1;
 export const MODALIDAD_ENVIO_EMPRESA = 2;
 
@@ -24,6 +26,7 @@ const detalleSchema = z
     cantidad: z.coerce.number().positive("La cantidad debe ser mayor a 0"),
     precioUnitario: z.coerce.number().positive("El precio unitario debe ser mayor a 0"),
     descuentoUnitario: z.coerce.number().min(0, "El descuento no puede ser negativo").default(0),
+    observaciones: optionalString,
   })
   .superRefine((detalle, ctx) => {
     if (detalle.stockDisponible !== undefined && detalle.cantidad > detalle.stockDisponible) {
@@ -35,10 +38,16 @@ const detalleSchema = z
     }
   });
 
+const montoRecibidoSchema = z.preprocess(
+  (value) => (value === "" || value === null || value === undefined ? null : Number(value)),
+  z.number().min(0, "El monto recibido no puede ser negativo").nullable(),
+);
+
 const pagoSchema = z
   .object({
     tipoMedio: z.coerce.number().int().min(1, "Seleccione el medio de pago"),
     monto: z.coerce.number().positive("El monto debe ser mayor a 0"),
+    montoRecibido: montoRecibidoSchema,
     banco: optionalString,
     numeroOperacion: optionalString,
     fechaDeposito: optionalString,
@@ -51,6 +60,13 @@ const pagoSchema = z
         message: "El banco es obligatorio para depósito bancario",
       });
     }
+    if (pago.montoRecibido !== null && pago.montoRecibido < pago.monto) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["montoRecibido"],
+        message: "El monto recibido no puede ser menor al monto aplicado",
+      });
+    }
   });
 
 export const ventaSchema = z
@@ -60,6 +76,8 @@ export const ventaSchema = z
     tiendaId: z.coerce.number().int().min(1, "Seleccione una tienda"),
     tipoPago: z.coerce.number().int().min(1, "Seleccione el tipo de pago"),
     descuento: z.coerce.number().min(0, "El descuento no puede ser negativo").default(0),
+    costoEnvio: z.coerce.number().min(0, "El costo de envío no puede ser negativo").default(0),
+    observaciones: optionalString,
     modalidadEntrega: z.coerce.number().int().min(1, "Seleccione la modalidad de entrega"),
     direccionEntrega: optionalString,
     detalles: z.array(detalleSchema).min(1, "Agregue al menos un producto"),
@@ -76,7 +94,8 @@ export const ventaSchema = z
 
     if (data.tipoPago === TIPO_PAGO_CONTADO) {
       const subtotal = data.detalles.reduce((acc, d) => acc + d.cantidad * d.precioUnitario - d.descuentoUnitario, 0);
-      const total = Math.max(0, subtotal - data.descuento);
+      const envio = data.modalidadEntrega === MODALIDAD_ENVIO_EMPRESA ? data.costoEnvio : 0;
+      const total = Math.max(0, subtotal - data.descuento + envio);
       const pagado = data.pagos.reduce((acc, p) => acc + p.monto, 0);
 
       if (pagado < total) {

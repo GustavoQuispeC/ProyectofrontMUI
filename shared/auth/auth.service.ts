@@ -83,14 +83,11 @@ export const getAuthUser = (): IUserData | null => {
     const parsed = JSON.parse(raw) as ILoginResponse;
 
     const p = parsed as IUserData & { empleadoId?: unknown };
-
-    // TODO: debug temporal — ver de dónde viene el empleadoId
-    console.log("[Auth] auth_usuario en localStorage:", parsed);
-    try {
-      console.log("[Auth] Claims del JWT:", jwtDecode<Record<string, unknown>>(parsed.token));
-    } catch {
-      console.log("[Auth] No se pudo decodificar el token");
-    }
+    // try {
+    //   console.log("[Auth] Claims del JWT:", jwtDecode<Record<string, unknown>>(parsed.token));
+    // } catch {
+    //   console.log("[Auth] No se pudo decodificar el token");
+    // }
 
     return {
       ...parsed,
