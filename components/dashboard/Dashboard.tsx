@@ -1,9 +1,11 @@
 "use client";
 import type {} from "@mui/x-date-pickers/themeAugmentation";
+import { useState } from "react";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import RegistrarVenta from "@/components/ventas/registrar-venta/RegistrarVenta";
 import AppNavbar from "./components/AppNavbar";
 import Header from "./components/Header";
 import SideMenu from "./components/SideMenu";
@@ -14,6 +16,15 @@ interface DashboardProps {
 
 export default function Dashboard({ children }: DashboardProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [ventaPersistente, setVentaPersistente] = useState(false);
+  const ventaOpen = ventaPersistente || pathname === "/dashboard/ventas/registrar";
+
+  const handleCloseVenta = () => {
+    setVentaPersistente(false);
+    if (pathname === "/dashboard/ventas/registrar") router.push("/dashboard/ventas/listar");
+  };
+
   const isFullWidthList =
     pathname?.startsWith("/dashboard/productos/listar") ||
     pathname?.startsWith("/dashboard/proveedores/listar") ||
@@ -38,10 +49,8 @@ export default function Dashboard({ children }: DashboardProps) {
           overflow: "auto",
         })}
       >
-        {/* Header con bordes mejorados */}
         <Header />
 
-        {/* Contenido con mejor espaciado */}
         <Stack
           spacing={3}
           sx={{
@@ -57,6 +66,7 @@ export default function Dashboard({ children }: DashboardProps) {
           {children}
         </Stack>
       </Box>
+      <RegistrarVenta open={ventaOpen} onClose={handleCloseVenta} onMinimize={() => setVentaPersistente(true)} />
     </Box>
   );
 }

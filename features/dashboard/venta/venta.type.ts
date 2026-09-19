@@ -29,10 +29,7 @@ export interface RegistrarVentaRequest {
   pagos: RegistrarVentaPago[];
 }
 
-export interface VentaRegistrada {
-  id: number;
-  [key: string]: unknown;
-}
+export type VentaRegistrada = Venta;
 
 export interface VentaDetalle {
   id: number;
@@ -56,6 +53,7 @@ export interface Venta {
   clienteNombre: string;
   clienteTipoDocumento: number;
   clienteNumeroDocumento: string;
+  clienteTelefono: string | null;
   tiendaId: number;
   tiendaNombre: string;
   estado: number;

@@ -5,8 +5,13 @@ import { useRouter } from "next/navigation";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import dayjs from "dayjs";
+import "dayjs/locale/es";
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { alpha } from "@mui/material/styles";
 import {
   Alert,
   Autocomplete,
@@ -18,7 +23,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -47,6 +51,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import MinimizeIcon from "@mui/icons-material/Minimize";
+import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -71,13 +77,14 @@ import {
   MEDIO_CREDITO,
   MEDIO_DEPOSITO_BANCARIO,
   MEDIO_EFECTIVO,
-  MODALIDAD_ENVIO_EMPRESA,
+  MODALIDAD_ENVIO_DOMICILIO,
   TIPO_PAGO_CONTADO,
   TIPO_PAGO_CREDITO,
   VentaForm,
   ventaSchema,
 } from "@/features/dashboard/venta/venta.schema";
-import { RegistrarVentaRequest } from "@/features/dashboard/venta/venta.type";
+import { RegistrarVentaRequest, Venta } from "@/features/dashboard/venta/venta.type";
+import { generarNotaVentaPdf, imprimirTicketVenta } from "@/features/dashboard/venta/helpers/ventaPdf";
 import { Cliente } from "@/features/dashboard/cliente/cliente.type";
 import RegistrarCliente from "@/components/clientes/registrar-cliente/RegistrarCliente";
 import { getAuthUser } from "@/shared/auth/auth.service";
@@ -94,6 +101,10 @@ const monedaFormatter = new Intl.NumberFormat("es-PE", {
 });
 
 const catalogoPageSizeOptions = [10, 20, 50];
+
+const seleccionarContenidoInput = (event: React.SyntheticEvent) => {
+  if (event.target instanceof HTMLInputElement) event.target.select();
+};
 
 //! Fallback si el endpoint de listas de precio no responde
 const listasPrecioFallback = [
@@ -121,28 +132,45 @@ interface SectionProps {
   children: React.ReactNode;
 }
 
+const sectionColors: Record<string, string> = {
+  "Fecha y tienda": "#536f82",
+  "Catálogo de productos": "#4f7477",
+  "Detalle de la venta": "#826f55",
+  "Datos del cliente y condiciones de venta": "#6d6878",
+  Pagos: "#5d7564",
+  "Resumen de la venta": "#526f6d",
+};
+
 function Section({ title, children }: SectionProps) {
+  const color = sectionColors[title] ?? "#006064";
+
   return (
     <Paper
       elevation={0}
-      sx={{
+      sx={(theme) => ({
         border: "1px solid",
-        borderColor: "divider",
-        borderRadius: "8px",
+        borderColor: alpha(color, theme.palette.mode === "dark" ? 0.35 : 0.18),
+        borderRadius: 2,
         overflow: "hidden",
-      }}
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: `0 2px 8px ${alpha("#263238", theme.palette.mode === "dark" ? 0.14 : 0.06)}`,
+      })}
     >
       <Box
-        sx={{
+        sx={(theme) => ({
           px: 2.5,
           py: 1.25,
-          bgcolor: "action.hover",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          backgroundColor: alpha(color, theme.palette.mode === "dark" ? 0.14 : 0.055),
           borderBottom: "1px solid",
-          borderColor: "divider",
-        }}
+          borderColor: alpha(color, theme.palette.mode === "dark" ? 0.28 : 0.14),
+        })}
       >
-        <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.secondary", letterSpacing: "0.02em" }}>
-          {title}
+        <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: color, flexShrink: 0 }} />
+        <Typography sx={{ fontSize: 13, fontWeight: 700, color, letterSpacing: "0.04em" }}>
+          {title.toUpperCase()}
         </Typography>
       </Box>
       <Box sx={{ p: 2.5 }}>{children}</Box>
@@ -177,7 +205,13 @@ interface ItemDialogState {
   editIndex: number | null;
 }
 
-export default function RegistrarVenta() {
+interface RegistrarVentaProps {
+  open: boolean;
+  onClose: () => void;
+  onMinimize: () => void;
+}
+
+export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarVentaProps) {
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.registrarVenta) : false;
   const mounted = useMounted();
@@ -185,6 +219,7 @@ export default function RegistrarVenta() {
   const [saving, setSaving] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [clienteDialogOpen, setClienteDialogOpen] = useState(false);
+  const [ventaRegistrada, setVentaRegistrada] = useState<Venta | null>(null);
   const canRegistrarCliente = user ? hasPermission(user.rol, permissions.registrarCliente) : false;
 
   const { tiendas, loading: loadingTiendas } = useTiendas(canAccess);
@@ -208,6 +243,7 @@ export default function RegistrarVenta() {
   //! ---- Catálogo de productos (tabla 1) ----
   const [busquedaProducto, setBusquedaProducto] = useState("");
   const [debouncedBusqueda, setDebouncedBusqueda] = useState("");
+  const busquedaProductoRef = useRef<HTMLInputElement | null>(null);
   const [listaPrecioId, setListaPrecioId] = useState<number>(1);
   const [catalogoPagination, setCatalogoPagination] = useState<GridPaginationModel>({
     page: 0,
@@ -337,9 +373,12 @@ export default function RegistrarVenta() {
     });
   }, [tipoPago, pagos, setValue]);
 
-  const costoEnvioNum = Number(modalidadEntrega) === MODALIDAD_ENVIO_EMPRESA ? Number(costoEnvio) || 0 : 0;
-  const totalVenta = Math.max(0, subtotal - (Number(descuento) || 0) + costoEnvioNum);
+  const costoEnvioNum = Number(modalidadEntrega) === MODALIDAD_ENVIO_DOMICILIO ? Number(costoEnvio) || 0 : 0;
+  const totalProductos = Math.max(0, subtotal - (Number(descuento) || 0));
+  const totalVenta = totalProductos + costoEnvioNum;
   const totalPagado = (pagos ?? []).reduce((acc, p) => acc + (Number(p.monto) || 0), 0);
+  const efectivoPagoIndex = pagos?.findIndex((p) => Number(p.tipoMedio) === MEDIO_EFECTIVO) ?? -1;
+  const montoRecibidoEfectivo = efectivoPagoIndex >= 0 ? Number(pagos?.[efectivoPagoIndex]?.montoRecibido) || 0 : 0;
   const vueltoTotal = (pagos ?? []).reduce(
     (acc, p) =>
       Number(p.tipoMedio) === MEDIO_EFECTIVO
@@ -435,6 +474,10 @@ export default function RegistrarVenta() {
 
     setItemDialog(null);
     clearErrors("detalles");
+    window.setTimeout(() => {
+      busquedaProductoRef.current?.focus();
+      busquedaProductoRef.current?.select();
+    }, 0);
   };
 
   const resetForm = () => {
@@ -444,8 +487,22 @@ export default function RegistrarVenta() {
   };
 
   const handleClose = () => {
-    router.push("/dashboard/ventas/listar");
+    setMinimized(false);
+    onClose();
   };
+
+  const extrasDocumentoVenta = useCallback(
+    (venta: Venta) => {
+      const tienda = tiendas.find((item) => item.id === venta.tiendaId);
+      return {
+        tipoPagoNombre: tiposPago.find((item) => item.id === venta.tipoPago)?.nombre,
+        clienteTipoDocumentoNombre: tiposDocumento.find((item) => item.id === venta.clienteTipoDocumento)?.nombre,
+        tiendaDireccion: tienda?.direccion,
+        tiendaTelefono: tienda?.telefono,
+      };
+    },
+    [tiendas, tiposPago, tiposDocumento],
+  );
 
   const onSubmit = async (data: VentaForm) => {
     if (cajaCerrada) {
@@ -459,10 +516,10 @@ export default function RegistrarVenta() {
       tiendaId: data.tiendaId,
       tipoPago: data.tipoPago,
       descuento: data.descuento,
-      costoEnvio: data.modalidadEntrega === MODALIDAD_ENVIO_EMPRESA ? data.costoEnvio : 0,
+      costoEnvio: data.modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO ? data.costoEnvio : 0,
       observaciones: data.observaciones || null,
       modalidadEntrega: data.modalidadEntrega,
-      direccionEntrega: data.modalidadEntrega === MODALIDAD_ENVIO_EMPRESA ? data.direccionEntrega : null,
+      direccionEntrega: data.modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO ? data.direccionEntrega : null,
       detalles: data.detalles.map((d) => ({
         productoId: d.productoId,
         cantidad: d.cantidad,
@@ -482,11 +539,12 @@ export default function RegistrarVenta() {
 
     try {
       setSaving(true);
-      await toastPromise(registrarVentaMutation.registrarVenta(payload), {
+      const nuevaVenta = await toastPromise(registrarVentaMutation.registrarVenta(payload), {
         loading: "Registrando venta...",
         success: "Venta registrada correctamente",
         error: (error) => error.message,
       });
+      setVentaRegistrada(nuevaVenta);
       resetForm();
     } finally {
       setSaving(false);
@@ -571,13 +629,13 @@ export default function RegistrarVenta() {
     [precioPorLista, handleSelectProducto],
   );
 
-  if (!mounted) return null;
+  if (!mounted || !open) return null;
   if (!canAccess) return <AccessDenied />;
 
   return (
     <>
       {/* Barra flotante cuando la ventana está minimizada */}
-      {minimized && (
+      {open && minimized && (
         <Paper
           elevation={8}
           sx={{
@@ -614,7 +672,7 @@ export default function RegistrarVenta() {
       <Dialog
         fullScreen
         keepMounted
-        open={!minimized}
+        open={open && !minimized}
         onClose={handleClose}
         slotProps={{ paper: { sx: { bgcolor: "background.default" } } }}
       >
@@ -650,13 +708,19 @@ export default function RegistrarVenta() {
           </Stack>
           <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
             <Tooltip title="Minimizar">
-              <IconButton onClick={() => setMinimized(true)}>
-                <MinimizeIcon />
+              <IconButton
+                size="small"
+                onClick={() => {
+                  onMinimize();
+                  setMinimized(true);
+                }}
+              >
+                <MinimizeIcon fontSize="small" />
               </IconButton>
             </Tooltip>
             <Tooltip title="Cerrar">
-              <IconButton onClick={handleClose}>
-                <CloseIcon />
+              <IconButton size="small" onClick={handleClose}>
+                <CloseIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -664,13 +728,14 @@ export default function RegistrarVenta() {
 
         <DialogContent sx={{ p: { xs: 1.5, md: 2.5 } }}>
           <Stack sx={{ gap: 2, maxWidth: 1400, mx: "auto" }}>
-            <Section title="Información general">
+            <Section title="Fecha y tienda">
               <Stack sx={{ gap: 2 }}>
                 <Stack
                   sx={{
                     flexDirection: { xs: "column", sm: "row" },
                     gap: 2,
                     alignItems: { xs: "stretch", sm: "flex-start" },
+                    justifyContent: "space-between",
                   }}
                 >
                   <Controller
@@ -687,7 +752,7 @@ export default function RegistrarVenta() {
                         isOptionEqualToValue={(option, value) => option.id === value.id}
                         noOptionsText="Sin resultados"
                         loadingText="Cargando..."
-                        sx={{ flex: 1, minWidth: 240 }}
+                        sx={{ minWidth: 280, width: { xs: "100%", sm: 360 } }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -701,110 +766,12 @@ export default function RegistrarVenta() {
                     )}
                   />
 
-                  <Stack direction="row" sx={{ flex: 1, minWidth: 240, gap: 0.5, alignItems: "flex-start" }}>
-                    <Controller
-                      name="clienteId"
-                      control={control}
-                      render={({ field }) => (
-                        <Autocomplete
-                          options={clientes}
-                          loading={loadingClientes}
-                          size="small"
-                          value={clientes.find((c) => c.id === field.value) ?? null}
-                          onChange={(_, value) => field.onChange(value?.id ?? 0)}
-                          getOptionLabel={(option) =>
-                            option.nombreCompleto || option.razonSocial || `Cliente #${option.id}`
-                          }
-                          isOptionEqualToValue={(option, value) => option.id === value.id}
-                          noOptionsText="Sin resultados"
-                          loadingText="Cargando..."
-                          fullWidth
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Cliente *"
-                              placeholder="Seleccione un cliente"
-                              error={!!errors.clienteId}
-                              helperText={errors.clienteId?.message}
-                            />
-                          )}
-                        />
-                      )}
-                    />
-                    <Tooltip title="Agregar cliente">
-                      <span>
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => setClienteDialogOpen(true)}
-                          disabled={!canRegistrarCliente}
-                          sx={{ mt: 0.25 }}
-                        >
-                          <PersonAddIcon />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-                  </Stack>
-
                   <TextField
                     label="Fecha"
                     size="small"
                     value={dayjs().format("DD/MM/YYYY")}
                     slotProps={{ input: { readOnly: true } }}
-                    sx={{ minWidth: 160 }}
-                  />
-                </Stack>
-
-                <Stack
-                  sx={{
-                    flexDirection: { xs: "column", sm: "row" },
-                    gap: 2,
-                    alignItems: { xs: "stretch", sm: "center" },
-                  }}
-                >
-                  <Controller
-                    name="clienteTipoDocumento"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControl size="small" error={!!errors.clienteTipoDocumento}>
-                        <FormLabel sx={{ fontSize: 12, mb: 0.25 }}>Tipo de documento del cliente *</FormLabel>
-                        <RadioGroup
-                          row
-                          value={field.value ? String(field.value) : ""}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
-                        >
-                          {tiposDocumento.map((t) => (
-                            <FormControlLabel
-                              key={t.id}
-                              value={String(t.id)}
-                              control={<Radio size="small" />}
-                              label={t.nombre}
-                              disabled={loadingTiposDocumento}
-                            />
-                          ))}
-                        </RadioGroup>
-                        {errors.clienteTipoDocumento && (
-                          <FormHelperText>{errors.clienteTipoDocumento.message}</FormHelperText>
-                        )}
-                      </FormControl>
-                    )}
-                  />
-
-                  <TextField
-                    label="Documento"
-                    size="small"
-                    value={documentoCliente}
-                    placeholder="—"
-                    slotProps={{ input: { readOnly: true } }}
-                    helperText={
-                      !clienteSel
-                        ? "Seleccione un cliente"
-                        : tipoDocumentoSel && !documentoCliente
-                          ? "El cliente no tiene este documento registrado"
-                          : undefined
-                    }
-                    error={!!tipoDocumentoSel && !!clienteSel && !documentoCliente}
-                    sx={{ minWidth: 200 }}
+                    sx={{ minWidth: 180, width: { xs: "100%", sm: 220 } }}
                   />
                 </Stack>
 
@@ -830,162 +797,6 @@ export default function RegistrarVenta() {
                     La caja de esta tienda está cerrada. Debe abrir una sesión de caja antes de registrar una venta.
                   </Alert>
                 )}
-
-                <Stack
-                  sx={{
-                    flexDirection: { xs: "column", sm: "row" },
-                    gap: 2,
-                    alignItems: { xs: "stretch", sm: "flex-start" },
-                  }}
-                >
-                  <Controller
-                    name="tipoPago"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControl fullWidth size="small" error={!!errors.tipoPago} sx={{ flex: 1, minWidth: 200 }}>
-                        <InputLabel id="tipo-pago-label">Tipo de pago *</InputLabel>
-                        <Select
-                          labelId="tipo-pago-label"
-                          label="Tipo de pago *"
-                          value={field.value ? String(field.value) : ""}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
-                          disabled={loadingTiposPago}
-                        >
-                          {tiposPago.map((t) => (
-                            <MenuItem key={t.id} value={String(t.id)}>
-                              {t.nombre}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        {errors.tipoPago && <FormHelperText>{errors.tipoPago.message}</FormHelperText>}
-                      </FormControl>
-                    )}
-                  />
-
-                  <Controller
-                    name="modalidadEntrega"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControl
-                        fullWidth
-                        size="small"
-                        error={!!errors.modalidadEntrega}
-                        sx={{ flex: 1, minWidth: 200 }}
-                      >
-                        <InputLabel id="modalidad-entrega-label">Modalidad de entrega *</InputLabel>
-                        <Select
-                          labelId="modalidad-entrega-label"
-                          label="Modalidad de entrega *"
-                          value={field.value ? String(field.value) : ""}
-                          onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
-                          disabled={loadingModalidades}
-                        >
-                          {modalidadesEntrega.map((m) => (
-                            <MenuItem key={m.id} value={String(m.id)}>
-                              {m.nombre}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        {errors.modalidadEntrega && <FormHelperText>{errors.modalidadEntrega.message}</FormHelperText>}
-                      </FormControl>
-                    )}
-                  />
-
-                  <Controller
-                    name="descuento"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label="Descuento"
-                        size="small"
-                        type="number"
-                        onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
-                        error={!!errors.descuento}
-                        helperText={errors.descuento?.message}
-                        sx={{ minWidth: 140, width: { xs: "100%", sm: 160 } }}
-                      />
-                    )}
-                  />
-                </Stack>
-
-                <Stack
-                  sx={{
-                    flexDirection: { xs: "column", sm: "row" },
-                    gap: 2,
-                    alignItems: { xs: "stretch", sm: "flex-start" },
-                  }}
-                >
-                  <Controller
-                    name="direccionEntrega"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        value={field.value ?? ""}
-                        label={
-                          modalidadEntrega === MODALIDAD_ENVIO_EMPRESA
-                            ? "Dirección de entrega *"
-                            : "Dirección de entrega"
-                        }
-                        size="small"
-                        placeholder="Dirección de entrega"
-                        disabled={modalidadEntrega !== MODALIDAD_ENVIO_EMPRESA}
-                        error={!!errors.direccionEntrega}
-                        helperText={
-                          errors.direccionEntrega?.message ??
-                          (modalidadEntrega === MODALIDAD_ENVIO_EMPRESA
-                            ? "Obligatoria para envío por empresa"
-                            : "Solo aplica para envío por empresa")
-                        }
-                        sx={{ flex: 1 }}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="costoEnvio"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label="Costo de envío"
-                        size="small"
-                        type="number"
-                        onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
-                        disabled={modalidadEntrega !== MODALIDAD_ENVIO_EMPRESA}
-                        slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
-                        error={!!errors.costoEnvio}
-                        helperText={
-                          errors.costoEnvio?.message ??
-                          (modalidadEntrega === MODALIDAD_ENVIO_EMPRESA
-                            ? "Se suma al total de la venta"
-                            : "Solo aplica para envío por empresa")
-                        }
-                        sx={{ minWidth: 150, width: { xs: "100%", sm: 180 } }}
-                      />
-                    )}
-                  />
-                </Stack>
-
-                <Controller
-                  name="observaciones"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      value={field.value ?? ""}
-                      label="Observaciones"
-                      size="small"
-                      fullWidth
-                      multiline
-                      minRows={1}
-                      placeholder="Observaciones de la venta (opcional)"
-                      error={!!errors.observaciones}
-                      helperText={errors.observaciones?.message}
-                    />
-                  )}
-                />
               </Stack>
             </Section>
 
@@ -997,6 +808,7 @@ export default function RegistrarVenta() {
                   sx={{ gap: 2, alignItems: { xs: "stretch", md: "center" } }}
                 >
                   <TextField
+                    inputRef={busquedaProductoRef}
                     placeholder="Buscar por nombre, código o código de barras"
                     size="small"
                     value={busquedaProducto}
@@ -1013,7 +825,7 @@ export default function RegistrarVenta() {
                     sx={{ minWidth: 260, flex: 1 }}
                   />
 
-                  <FormControl>
+                  <FormControl size="small">
                     <RadioGroup row value={listaPrecioId} onChange={(e) => setListaPrecioId(Number(e.target.value))}>
                       {opcionesPrecio.map((l) => (
                         <FormControlLabel key={l.id} value={l.id} control={<Radio size="small" />} label={l.nombre} />
@@ -1053,11 +865,12 @@ export default function RegistrarVenta() {
                           color: "error.main",
                         },
                         "& .MuiDataGrid-columnHeader": {
-                          backgroundColor: "#e4eaeb",
+                          backgroundColor: (theme) => alpha("#4f7477", theme.palette.mode === "dark" ? 0.15 : 0.07),
+                          borderBottomColor: alpha("#4f7477", 0.18),
                         },
                         "& .MuiDataGrid-columnHeaderTitle": {
                           fontWeight: 700,
-                          color: "#006064",
+                          color: (theme) => (theme.palette.mode === "dark" ? "#a9c4c6" : "#3f6265"),
                           textTransform: "uppercase",
                         },
                       }}
@@ -1072,7 +885,16 @@ export default function RegistrarVenta() {
               <Stack sx={{ gap: 2 }}>
                 <TableContainer component={Paper} variant="outlined">
                   <Table size="small">
-                    <TableHead>
+                    <TableHead
+                      sx={(theme) => ({
+                        backgroundColor: alpha("#826f55", theme.palette.mode === "dark" ? 0.14 : 0.065),
+                        "& .MuiTableCell-root": {
+                          color: theme.palette.mode === "dark" ? "#cfc4b3" : "#695a46",
+                          fontWeight: 700,
+                          borderBottomColor: alpha("#826f55", 0.18),
+                        },
+                      })}
+                    >
                       <TableRow>
                         <TableCell>Producto</TableCell>
                         <TableCell align="center" sx={{ width: 130 }}>
@@ -1122,7 +944,11 @@ export default function RegistrarVenta() {
                                     onChange={(e) =>
                                       field.onChange(e.target.value === "" ? "" : Number(e.target.value))
                                     }
-                                    onClick={(e) => e.stopPropagation()}
+                                    onFocus={seleccionarContenidoInput}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      seleccionarContenidoInput(e);
+                                    }}
                                     onDoubleClick={(e) => e.stopPropagation()}
                                     slotProps={{
                                       htmlInput: {
@@ -1154,7 +980,11 @@ export default function RegistrarVenta() {
                                     onChange={(e) =>
                                       field.onChange(e.target.value === "" ? "" : Number(e.target.value))
                                     }
-                                    onClick={(e) => e.stopPropagation()}
+                                    onFocus={seleccionarContenidoInput}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      seleccionarContenidoInput(e);
+                                    }}
                                     onDoubleClick={(e) => e.stopPropagation()}
                                     slotProps={{
                                       htmlInput: { min: 0, step: 0.01, style: { textAlign: "center" } },
@@ -1197,28 +1027,344 @@ export default function RegistrarVenta() {
                 {typeof errors.detalles?.message === "string" && (
                   <FormHelperText error>{errors.detalles.message}</FormHelperText>
                 )}
+
+                <Typography variant="h6" sx={{ alignSelf: "flex-end", fontWeight: 700, color: "primary.main" }}>
+                  Total venta: {monedaFormatter.format(Math.max(0, subtotal))}
+                </Typography>
               </Stack>
             </Section>
+
+            <Section title="Datos del cliente y condiciones de venta">
+              <Stack sx={{ gap: 2 }}>
+                <Stack
+                  sx={{
+                    flexDirection: { xs: "column", md: "row" },
+                    gap: 2,
+                    alignItems: { xs: "stretch", md: "flex-start" },
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    sx={{
+                      flex: { md: "0 1 36%" },
+                      minWidth: { xs: "100%", md: 224 },
+                      maxWidth: { md: 480 },
+                      gap: 0.5,
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Controller
+                      name="clienteId"
+                      control={control}
+                      render={({ field }) => (
+                        <Autocomplete
+                          options={clientes}
+                          loading={loadingClientes}
+                          size="small"
+                          value={clientes.find((c) => c.id === field.value) ?? null}
+                          onChange={(_, value) => field.onChange(value?.id ?? 0)}
+                          getOptionLabel={(option) =>
+                            option.nombreCompleto || option.razonSocial || `Cliente #${option.id}`
+                          }
+                          isOptionEqualToValue={(option, value) => option.id === value.id}
+                          noOptionsText="Sin resultados"
+                          loadingText="Cargando..."
+                          fullWidth
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Cliente *"
+                              placeholder="Seleccione un cliente"
+                              error={!!errors.clienteId}
+                              helperText={errors.clienteId?.message}
+                            />
+                          )}
+                        />
+                      )}
+                    />
+                    <Tooltip title="Agregar cliente">
+                      <span>
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={() => setClienteDialogOpen(true)}
+                          disabled={!canRegistrarCliente}
+                          sx={{ mt: 0.25 }}
+                        >
+                          <PersonAddIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  </Stack>
+
+                  <Controller
+                    name="clienteTipoDocumento"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl size="small" error={!!errors.clienteTipoDocumento} sx={{ minWidth: 340, flex: 1 }}>
+                        <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+                          <FormLabel sx={{ fontSize: 12, whiteSpace: "nowrap" }}>Tipo de documento</FormLabel>
+                          <RadioGroup
+                            row
+                            value={field.value ? String(field.value) : ""}
+                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
+                            sx={{ flexWrap: "nowrap" }}
+                          >
+                            {tiposDocumento.map((t) => (
+                              <FormControlLabel
+                                key={t.id}
+                                value={String(t.id)}
+                                control={<Radio size="small" />}
+                                label={t.nombre}
+                                disabled={loadingTiposDocumento}
+                                sx={{ mr: 1 }}
+                              />
+                            ))}
+                          </RadioGroup>
+                        </Stack>
+                        {errors.clienteTipoDocumento && (
+                          <FormHelperText>{errors.clienteTipoDocumento.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+
+                  <TextField
+                    label="Documento"
+                    size="small"
+                    value={documentoCliente}
+                    placeholder="—"
+                    slotProps={{ input: { readOnly: true } }}
+                    helperText={
+                      !clienteSel
+                        ? "Seleccione un cliente"
+                        : tipoDocumentoSel && !documentoCliente
+                          ? "El cliente no tiene este documento registrado"
+                          : undefined
+                    }
+                    error={!!tipoDocumentoSel && !!clienteSel && !documentoCliente}
+                    sx={{ minWidth: 180, width: { xs: "100%", md: 200 } }}
+                  />
+
+                  <TextField
+                    label="Teléfono"
+                    size="small"
+                    value={clienteSel?.telefono || ""}
+                    placeholder="—"
+                    slotProps={{ input: { readOnly: true } }}
+                    helperText={
+                      !clienteSel
+                        ? "Seleccione un cliente"
+                        : !clienteSel.telefono
+                          ? "Sin teléfono registrado"
+                          : undefined
+                    }
+                    sx={{ minWidth: 170, width: { xs: "100%", md: 190 } }}
+                  />
+                </Stack>
+
+                <Stack
+                  sx={{
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 2,
+                    alignItems: { xs: "stretch", sm: "flex-start" },
+                  }}
+                >
+                  <Controller
+                    name="modalidadEntrega"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl
+                        fullWidth
+                        size="small"
+                        error={!!errors.modalidadEntrega}
+                        sx={{ minWidth: 210, width: { xs: "100%", sm: 240 } }}
+                      >
+                        <InputLabel id="modalidad-entrega-label">Modalidad de entrega *</InputLabel>
+                        <Select
+                          labelId="modalidad-entrega-label"
+                          label="Modalidad de entrega *"
+                          value={field.value ? String(field.value) : ""}
+                          onChange={(e) => {
+                            const value = e.target.value ? Number(e.target.value) : 0;
+                            field.onChange(value);
+                            if (value !== MODALIDAD_ENVIO_DOMICILIO) {
+                              setValue("direccionEntrega", "");
+                              clearErrors("direccionEntrega");
+                            }
+                          }}
+                          disabled={loadingModalidades}
+                        >
+                          {modalidadesEntrega.map((m) => (
+                            <MenuItem key={m.id} value={String(m.id)}>
+                              {m.nombre}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.modalidadEntrega && <FormHelperText>{errors.modalidadEntrega.message}</FormHelperText>}
+                      </FormControl>
+                    )}
+                  />
+
+                  <Controller
+                    name="direccionEntrega"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        value={field.value ?? ""}
+                        label={
+                          modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
+                            ? "Dirección de entrega *"
+                            : "Dirección de entrega"
+                        }
+                        size="small"
+                        placeholder="Dirección de entrega"
+                        disabled={modalidadEntrega !== MODALIDAD_ENVIO_DOMICILIO}
+                        error={!!errors.direccionEntrega}
+                        helperText={
+                          errors.direccionEntrega?.message ??
+                          (modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
+                            ? "Obligatorio para envio a domicilio"
+                            : "Solo aplica para envio a domicilio")
+                        }
+                        sx={{ flex: 1 }}
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    name="costoEnvio"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Costo de envío"
+                        size="small"
+                        type="number"
+                        onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                        onFocus={seleccionarContenidoInput}
+                        onClick={seleccionarContenidoInput}
+                        disabled={modalidadEntrega !== MODALIDAD_ENVIO_DOMICILIO}
+                        slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                        error={!!errors.costoEnvio}
+                        helperText={
+                          errors.costoEnvio?.message ??
+                          (modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
+                            ? "Se suma al total de la venta"
+                            : "Solo aplica para envío a domicilio")
+                        }
+                        sx={{ minWidth: 150, width: { xs: "100%", sm: 180 } }}
+                      />
+                    )}
+                  />
+                </Stack>
+
+                <Controller
+                  name="observaciones"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      value={field.value ?? ""}
+                      label="Observaciones"
+                      size="small"
+                      fullWidth
+                      multiline
+                      minRows={1}
+                      placeholder="Observaciones de la venta (opcional)"
+                      error={!!errors.observaciones}
+                      helperText={errors.observaciones?.message}
+                    />
+                  )}
+                />
+              </Stack>
+            </Section>
+
+            {Number(modalidadEntrega) === MODALIDAD_ENVIO_DOMICILIO && (
+              <Alert severity="info" sx={{ alignItems: "center" }}>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  sx={{ gap: { xs: 0.5, sm: 1.5 }, alignItems: { xs: "flex-start", sm: "center" } }}
+                >
+                  <Typography variant="body2">
+                    Total de productos: <strong>{monedaFormatter.format(totalProductos)}</strong>
+                  </Typography>
+                  <Typography variant="body2">+</Typography>
+                  <Typography variant="body2">
+                    Envío: <strong>{monedaFormatter.format(costoEnvioNum)}</strong>
+                  </Typography>
+                  <Typography variant="body2">=</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    Total de la venta: {monedaFormatter.format(totalVenta)}
+                  </Typography>
+                </Stack>
+              </Alert>
+            )}
 
             <Section title="Pagos">
               <Stack sx={{ gap: 2 }}>
                 {pagoFields.map((item, index) => {
                   const esDeposito = Number(pagos?.[index]?.tipoMedio) === MEDIO_DEPOSITO_BANCARIO;
-                  const esEfectivo = Number(pagos?.[index]?.tipoMedio) === MEDIO_EFECTIVO;
-                  const montoPago = Number(pagos?.[index]?.monto) || 0;
-                  const montoRecibidoPago = Number(pagos?.[index]?.montoRecibido) || 0;
-                  const vueltoPago = Math.max(0, montoRecibidoPago - montoPago);
+                  const mediosDisponibles = mediosPagoFiltrados.filter(
+                    (medio) =>
+                      medio.id === Number(pagos?.[index]?.tipoMedio) ||
+                      !pagos?.some((pago, pagoIndex) => pagoIndex !== index && Number(pago.tipoMedio) === medio.id),
+                  );
 
                   return (
                     <Stack key={item.id} sx={{ gap: 2 }}>
                       <Stack
-                        direction="row"
                         sx={{
+                          display: { xs: "flex", sm: "grid" },
+                          flexDirection: "column",
+                          gridTemplateColumns: "minmax(220px, 1fr) minmax(220px, 1fr) 180px 40px",
                           gap: 2,
                           alignItems: "flex-start",
-                          flexDirection: { xs: "column", sm: "row" },
                         }}
                       >
+                        {index === 0 ? (
+                          <Controller
+                            name="tipoPago"
+                            control={control}
+                            render={({ field }) => (
+                              <FormControl
+                                fullWidth
+                                size="small"
+                                error={!!errors.tipoPago}
+                                sx={{ flex: 1, minWidth: 220 }}
+                              >
+                                <InputLabel id="tipo-pago-label">Tipo de pago *</InputLabel>
+                                <Select
+                                  labelId="tipo-pago-label"
+                                  label="Tipo de pago *"
+                                  value={field.value ? String(field.value) : ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value ? Number(e.target.value) : 0;
+                                    field.onChange(value);
+                                    if (value === TIPO_PAGO_CREDITO) {
+                                      if (pagoFields.length > 1) {
+                                        removePago(pagoFields.slice(1).map((_, pagoIndex) => pagoIndex + 1));
+                                      }
+                                      setValue("pagos.0.tipoMedio", MEDIO_CREDITO);
+                                    }
+                                  }}
+                                  disabled={loadingTiposPago}
+                                >
+                                  {tiposPago.map((t) => (
+                                    <MenuItem key={t.id} value={String(t.id)}>
+                                      {t.nombre}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                                {errors.tipoPago && <FormHelperText>{errors.tipoPago.message}</FormHelperText>}
+                              </FormControl>
+                            )}
+                          />
+                        ) : (
+                          <Box sx={{ display: { xs: "none", sm: "block" } }} />
+                        )}
+
                         <Controller
                           name={`pagos.${index}.tipoMedio`}
                           control={control}
@@ -1234,10 +1380,16 @@ export default function RegistrarVenta() {
                                 labelId={`medio-pago-label-${index}`}
                                 label="Medio de pago *"
                                 value={field.value ? String(field.value) : ""}
-                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
-                                disabled={loadingMediosPago}
+                                onChange={(e) => {
+                                  const value = e.target.value ? Number(e.target.value) : 0;
+                                  field.onChange(value);
+                                  if (value === MEDIO_DEPOSITO_BANCARIO && !pagos?.[index]?.fechaDeposito) {
+                                    setValue(`pagos.${index}.fechaDeposito`, dayjs().format("YYYY-MM-DD"));
+                                  }
+                                }}
+                                disabled={loadingMediosPago || !Number(tipoPago)}
                               >
-                                {mediosPagoFiltrados.map((m) => (
+                                {mediosDisponibles.map((m) => (
                                   <MenuItem key={m.id} value={String(m.id)}>
                                     {m.nombre}
                                   </MenuItem>
@@ -1260,6 +1412,8 @@ export default function RegistrarVenta() {
                               type="number"
                               value={field.value}
                               onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                              onFocus={seleccionarContenidoInput}
+                              onClick={seleccionarContenidoInput}
                               slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
                               error={!!errors.pagos?.[index]?.monto}
                               helperText={errors.pagos?.[index]?.monto?.message}
@@ -1267,31 +1421,6 @@ export default function RegistrarVenta() {
                             />
                           )}
                         />
-
-                        {esEfectivo && (
-                          <Controller
-                            name={`pagos.${index}.montoRecibido`}
-                            control={control}
-                            render={({ field }) => (
-                              <TextField
-                                label="Monto recibido"
-                                size="small"
-                                type="number"
-                                value={field.value ?? ""}
-                                onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
-                                slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
-                                error={!!errors.pagos?.[index]?.montoRecibido}
-                                helperText={
-                                  errors.pagos?.[index]?.montoRecibido?.message ??
-                                  (vueltoPago > 0
-                                    ? `Vuelto: ${monedaFormatter.format(vueltoPago)}`
-                                    : "Opcional — para calcular el vuelto")
-                                }
-                                sx={{ minWidth: 150, width: { xs: "100%", sm: 200 } }}
-                              />
-                            )}
-                          />
-                        )}
 
                         <IconButton
                           color="error"
@@ -1305,66 +1434,81 @@ export default function RegistrarVenta() {
                       </Stack>
 
                       {esDeposito && (
-                        <Stack
-                          direction="row"
+                        <Box
                           sx={{
+                            display: { xs: "flex", sm: "grid" },
+                            flexDirection: "column",
+                            gridTemplateColumns: "minmax(220px, 1fr) minmax(220px, 1fr) 180px 40px",
                             gap: 2,
-                            alignItems: "flex-start",
-                            flexDirection: { xs: "column", sm: "row" },
                           }}
                         >
-                          <Controller
-                            name={`pagos.${index}.banco`}
-                            control={control}
-                            render={({ field }) => (
-                              <TextField
-                                {...field}
-                                value={field.value ?? ""}
-                                label="Banco *"
-                                size="small"
-                                placeholder="Ej: BCP, Interbank"
-                                error={!!errors.pagos?.[index]?.banco}
-                                helperText={errors.pagos?.[index]?.banco?.message}
-                                sx={{ flex: 1, minWidth: 180 }}
-                              />
-                            )}
-                          />
+                          <Stack
+                            direction="row"
+                            sx={{
+                              gridColumn: { sm: "2 / 5" },
+                              gap: 2,
+                              alignItems: "flex-start",
+                              flexDirection: { xs: "column", sm: "row" },
+                            }}
+                          >
+                            <Controller
+                              name={`pagos.${index}.banco`}
+                              control={control}
+                              render={({ field }) => (
+                                <TextField
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  label="Banco *"
+                                  size="small"
+                                  placeholder="Ej: BCP, Interbank"
+                                  error={!!errors.pagos?.[index]?.banco}
+                                  helperText={errors.pagos?.[index]?.banco?.message}
+                                  sx={{ flex: 1, minWidth: 180 }}
+                                />
+                              )}
+                            />
 
-                          <Controller
-                            name={`pagos.${index}.numeroOperacion`}
-                            control={control}
-                            render={({ field }) => (
-                              <TextField
-                                {...field}
-                                value={field.value ?? ""}
-                                label="N° de operación"
-                                size="small"
-                                placeholder="Opcional"
-                                error={!!errors.pagos?.[index]?.numeroOperacion}
-                                helperText={errors.pagos?.[index]?.numeroOperacion?.message}
-                                sx={{ flex: 1, minWidth: 160 }}
-                              />
-                            )}
-                          />
+                            <Controller
+                              name={`pagos.${index}.numeroOperacion`}
+                              control={control}
+                              render={({ field }) => (
+                                <TextField
+                                  {...field}
+                                  value={field.value ?? ""}
+                                  label="N° de operación"
+                                  size="small"
+                                  placeholder="Opcional"
+                                  error={!!errors.pagos?.[index]?.numeroOperacion}
+                                  helperText={errors.pagos?.[index]?.numeroOperacion?.message}
+                                  sx={{ flex: 1, minWidth: 160 }}
+                                />
+                              )}
+                            />
 
-                          <Controller
-                            name={`pagos.${index}.fechaDeposito`}
-                            control={control}
-                            render={({ field }) => (
-                              <TextField
-                                {...field}
-                                value={field.value ?? ""}
-                                label="Fecha de depósito"
-                                size="small"
-                                type="date"
-                                slotProps={{ inputLabel: { shrink: true } }}
-                                error={!!errors.pagos?.[index]?.fechaDeposito}
-                                helperText={errors.pagos?.[index]?.fechaDeposito?.message}
-                                sx={{ flex: 1, minWidth: 160 }}
-                              />
-                            )}
-                          />
-                        </Stack>
+                            <Controller
+                              name={`pagos.${index}.fechaDeposito`}
+                              control={control}
+                              render={({ field }) => (
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                                  <DatePicker
+                                    label="Fecha de depósito"
+                                    value={field.value ? dayjs(field.value) : dayjs()}
+                                    onChange={(value) => field.onChange(value?.format("YYYY-MM-DD") ?? null)}
+                                    format="DD/MM/YYYY"
+                                    slotProps={{
+                                      textField: {
+                                        size: "small",
+                                        error: !!errors.pagos?.[index]?.fechaDeposito,
+                                        helperText: errors.pagos?.[index]?.fechaDeposito?.message,
+                                        sx: { flex: 1, minWidth: 180 },
+                                      },
+                                    }}
+                                  />
+                                </LocalizationProvider>
+                              )}
+                            />
+                          </Stack>
+                        </Box>
                       )}
                     </Stack>
                   );
@@ -1372,57 +1516,94 @@ export default function RegistrarVenta() {
 
                 {errors.pagos?.root?.message && <FormHelperText error>{errors.pagos.root.message}</FormHelperText>}
 
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<AddIcon />}
-                  onClick={() =>
-                    appendPago({
-                      tipoMedio: 0,
-                      monto: 0,
-                      montoRecibido: null,
-                      banco: "",
-                      numeroOperacion: "",
-                      fechaDeposito: "",
-                    })
-                  }
-                  sx={{ alignSelf: "flex-start" }}
-                >
-                  Agregar pago
-                </Button>
-
-                <Divider />
-                <Stack direction="row" sx={{ gap: 3, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                  {costoEnvioNum > 0 && (
-                    <Typography variant="body2">
-                      <strong>Envío:</strong> {monedaFormatter.format(costoEnvioNum)}
-                    </Typography>
-                  )}
-                  <Typography variant="body2">
-                    <strong>Total venta:</strong> {monedaFormatter.format(totalVenta)}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color={
-                      Number(tipoPago) === TIPO_PAGO_CONTADO && totalPagado < totalVenta
-                        ? "warning.main"
-                        : "success.main"
+                {Number(tipoPago) !== TIPO_PAGO_CREDITO && pagoFields.length < 2 && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={() =>
+                      appendPago({
+                        tipoMedio: 0,
+                        monto: 0,
+                        montoRecibido: null,
+                        banco: "",
+                        numeroOperacion: "",
+                        fechaDeposito: "",
+                      })
                     }
+                    disabled={!Number(pagos?.[0]?.tipoMedio)}
+                    sx={{ alignSelf: "flex-start" }}
                   >
-                    <strong>Total pagado:</strong> {monedaFormatter.format(totalPagado)}
-                  </Typography>
-                  {Number(tipoPago) === TIPO_PAGO_CONTADO && totalPagado < totalVenta && (
-                    <Typography variant="body2" color="error.main">
-                      <strong>Faltante:</strong> {monedaFormatter.format(totalVenta - totalPagado)}
-                    </Typography>
-                  )}
-                  {vueltoTotal > 0 && (
-                    <Typography variant="body2" color="info.main">
-                      <strong>Vuelto:</strong> {monedaFormatter.format(vueltoTotal)}
-                    </Typography>
-                  )}
-                </Stack>
+                    Agregar pago
+                  </Button>
+                )}
               </Stack>
+            </Section>
+
+            <Section title="Resumen de la venta">
+              <Stack
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "repeat(5, minmax(150px, 1fr))" },
+                  gap: 2,
+                  alignItems: "flex-start",
+                }}
+              >
+                <TextField
+                  label="Total a pagar"
+                  size="small"
+                  value={monedaFormatter.format(totalVenta)}
+                  slotProps={{ input: { readOnly: true } }}
+                />
+                <TextField
+                  label="Envío"
+                  size="small"
+                  value={monedaFormatter.format(costoEnvioNum)}
+                  slotProps={{ input: { readOnly: true } }}
+                />
+                <TextField
+                  label="Descuento"
+                  size="small"
+                  value={monedaFormatter.format(Number(descuento) || 0)}
+                  slotProps={{ input: { readOnly: true } }}
+                />
+                <TextField
+                  label="Monto recibido"
+                  size="small"
+                  type="number"
+                  value={montoRecibidoEfectivo || ""}
+                  onFocus={seleccionarContenidoInput}
+                  onClick={seleccionarContenidoInput}
+                  onChange={(e) => {
+                    if (efectivoPagoIndex < 0) return;
+                    setValue(
+                      `pagos.${efectivoPagoIndex}.montoRecibido`,
+                      e.target.value === "" ? null : Number(e.target.value),
+                      { shouldValidate: true },
+                    );
+                  }}
+                  disabled={efectivoPagoIndex < 0}
+                  slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                  error={efectivoPagoIndex >= 0 && !!errors.pagos?.[efectivoPagoIndex]?.montoRecibido}
+                  helperText={
+                    efectivoPagoIndex >= 0
+                      ? errors.pagos?.[efectivoPagoIndex]?.montoRecibido?.message
+                      : "Disponible al seleccionar Efectivo"
+                  }
+                />
+                <TextField
+                  label="Vuelto"
+                  size="small"
+                  value={monedaFormatter.format(vueltoTotal)}
+                  slotProps={{ input: { readOnly: true } }}
+                />
+              </Stack>
+
+              {Number(tipoPago) === TIPO_PAGO_CONTADO && totalPagado < totalVenta && (
+                <FormHelperText error sx={{ mt: 1.5, textAlign: "right" }}>
+                  Faltante por pagar: {monedaFormatter.format(totalVenta - totalPagado)}
+                </FormHelperText>
+              )}
             </Section>
           </Stack>
         </DialogContent>
@@ -1448,14 +1629,25 @@ export default function RegistrarVenta() {
               mx: "auto",
             }}
           >
-            <Typography variant="body2" sx={{ mr: { sm: "auto" }, fontWeight: 600 }}>
+            <Typography
+              variant="body2"
+              sx={(theme) => ({
+                mr: { sm: "auto" },
+                px: 2,
+                py: 1,
+                borderRadius: 2,
+                fontWeight: 700,
+                color: theme.palette.mode === "dark" ? "#b0c6c4" : "#486563",
+                backgroundColor: alpha("#526f6d", theme.palette.mode === "dark" ? 0.14 : 0.07),
+              })}
+            >
               Total: {monedaFormatter.format(totalVenta)}
             </Typography>
 
             <Button
               variant="outlined"
               color="inherit"
-              size="small"
+              size="medium"
               startIcon={<KeyboardBackspaceIcon />}
               onClick={handleClose}
               disabled={saving}
@@ -1467,7 +1659,7 @@ export default function RegistrarVenta() {
             <Button
               variant="outlined"
               color="warning"
-              size="small"
+              size="medium"
               startIcon={<RestartAltIcon />}
               onClick={resetForm}
               disabled={saving}
@@ -1478,7 +1670,7 @@ export default function RegistrarVenta() {
 
             <Button
               variant="contained"
-              size="small"
+              size="medium"
               startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRoundedIcon />}
               onClick={handleSubmit(onSubmit)}
               disabled={saving || loadingTiendas || cajaCerrada}
@@ -1495,6 +1687,89 @@ export default function RegistrarVenta() {
         onClose={() => setClienteDialogOpen(false)}
         onClienteCreado={handleClienteCreado}
       />
+
+      <Dialog open={!!ventaRegistrada} onClose={() => setVentaRegistrada(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+            <Avatar sx={{ width: 34, height: 34, bgcolor: "success.main" }}>
+              <SellIcon fontSize="small" />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                Venta registrada
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                La nota de venta fue generada correctamente
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent dividers>
+          {ventaRegistrada && (
+            <Stack sx={{ gap: 1.5 }}>
+              <Stack direction="row" sx={{ justifyContent: "space-between", gap: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Código
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  {ventaRegistrada.codigo}
+                </Typography>
+              </Stack>
+              <Stack direction="row" sx={{ justifyContent: "space-between", gap: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Cliente
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, textAlign: "right" }}>
+                  {ventaRegistrada.clienteNombre}
+                </Typography>
+              </Stack>
+              <Stack direction="row" sx={{ justifyContent: "space-between", gap: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Total
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: "success.main" }}>
+                  {monedaFormatter.format(ventaRegistrada.total)}
+                </Typography>
+              </Stack>
+              {Number(ventaRegistrada.vuelto) > 0 && (
+                <Stack direction="row" sx={{ justifyContent: "space-between", gap: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Vuelto
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {monedaFormatter.format(ventaRegistrada.vuelto)}
+                  </Typography>
+                </Stack>
+              )}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button size="small" color="inherit" onClick={() => setVentaRegistrada(null)}>
+            Cerrar
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<LocalPrintshopOutlinedIcon />}
+            onClick={() => {
+              if (ventaRegistrada) void imprimirTicketVenta(ventaRegistrada, extrasDocumentoVenta(ventaRegistrada));
+            }}
+          >
+            Imprimir ticket
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<PictureAsPdfOutlinedIcon />}
+            onClick={() => {
+              if (ventaRegistrada) void generarNotaVentaPdf(ventaRegistrada, extrasDocumentoVenta(ventaRegistrada));
+            }}
+          >
+            Descargar PDF
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Modal de producto: cantidad y precio */}
       <Dialog open={!!itemDialog} onClose={() => setItemDialog(null)} maxWidth="xs" fullWidth>
@@ -1521,6 +1796,8 @@ export default function RegistrarVenta() {
                 size="small"
                 type="number"
                 value={itemPrecio}
+                onFocus={seleccionarContenidoInput}
+                onClick={seleccionarContenidoInput}
                 onChange={(e) => {
                   setItemPrecio(e.target.value === "" ? "" : Number(e.target.value));
                   setItemError("");
@@ -1534,6 +1811,8 @@ export default function RegistrarVenta() {
                 size="small"
                 type="number"
                 value={itemCantidad}
+                onFocus={seleccionarContenidoInput}
+                onClick={seleccionarContenidoInput}
                 onChange={(e) => {
                   setItemCantidad(e.target.value === "" ? "" : Number(e.target.value));
                   setItemError("");

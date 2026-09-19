@@ -161,7 +161,6 @@ export async function imprimirTicketVenta(venta: Venta, extras: VentaDocExtras =
     lineasPorItem.reduce((a, b) => a + b, 0) * 3.2 +
     venta.detalles.length * 4 +
     42 +
-    (venta.clienteNumeroDocumento ? 4 : 0) +
     (Number(venta.costoEnvio) > 0 ? 4 : 0) +
     (Number(venta.montoRecibido) > 0 ? 4 : 0) +
     (Number(venta.vuelto) > 0 ? 4 : 0) +
@@ -212,25 +211,17 @@ export async function imprimirTicketVenta(venta: Venta, extras: VentaDocExtras =
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
-  doc.text("NOTA DE VENTA", margen, y);
-  doc.text(venta.codigo, ancho - margen, y, { align: "right" });
+  doc.text(`NOTA DE VENTA : ${venta.codigo}`, ancho / 2, y, { align: "center" });
   y += 5;
 
-  doc.setFontSize(8);
-  doc.text(venta.clienteNombre || "PÚBLICO GENERAL", ancho / 2, y, { align: "center" });
-  y += 3.5;
-
+  doc.setFontSize(7.5);
+  doc.text(venta.clienteNombre || "PÚBLICO GENERAL", margen, y);
   const docCliente = documentoClienteTexto(venta, extras);
   if (docCliente) {
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(7.5);
-    doc.text(docCliente, ancho / 2, y, { align: "center" });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    y += 4;
-  } else {
-    y += 0.5;
+    doc.text(docCliente, ancho - margen, y, { align: "right" });
   }
+  y += 4;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
@@ -273,12 +264,12 @@ export async function imprimirTicketVenta(venta: Venta, extras: VentaDocExtras =
   y += 4;
 
   const impuestoTotal = venta.detalles.reduce((acc, d) => acc + d.impuesto, 0);
-  const totalGravado = venta.total - impuestoTotal;
+  const subtotalProductos = venta.detalles.reduce((acc, d) => acc + d.subtotal, 0);
 
   doc.setFontSize(7.5);
-  doc.text("TOTAL GRAVADO", margen, y);
+  doc.text("SUBTOTAL", margen, y);
   doc.text("(S/)", ancho - 24, y, { align: "right" });
-  doc.text(totalGravado.toFixed(2), ancho - margen, y, { align: "right" });
+  doc.text(subtotalProductos.toFixed(2), ancho - margen, y, { align: "right" });
   y += 3.5;
   doc.text("I.G.V", margen, y);
   doc.text("(S/)", ancho - 24, y, { align: "right" });
@@ -450,18 +441,17 @@ export async function generarNotaVentaPdf(venta: Venta, extras: VentaDocExtras =
   startY = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 6;
 
   const impuestoTotal = venta.detalles.reduce((acc, d) => acc + d.impuesto, 0);
-  const totalGravado = venta.total - impuestoTotal;
+  const subtotalProductos = venta.detalles.reduce((acc, d) => acc + d.subtotal, 0);
   const pendiente = venta.total - venta.montoPagado;
 
   autoTable(doc, {
     startY,
     body: [
-      ["Total gravado", moneda(totalGravado)],
+      ["Subtotal", moneda(subtotalProductos)],
       ["I.G.V", moneda(impuestoTotal)],
       ...(venta.descuento > 0 ? [["Descuento", `-${moneda(venta.descuento)}`]] : []),
       ...(Number(venta.costoEnvio) > 0 ? [["Costo de envío", moneda(Number(venta.costoEnvio))]] : []),
       ["Total", moneda(venta.total)],
-      ["Monto pagado", moneda(venta.montoPagado)],
       ...(pendiente > 0.005 ? [["Pendiente", moneda(pendiente)]] : []),
       ...(Number(venta.montoRecibido) > 0 ? [["Monto recibido", moneda(Number(venta.montoRecibido))]] : []),
       ...(Number(venta.vuelto) > 0 ? [["Vuelto", moneda(Number(venta.vuelto))]] : []),

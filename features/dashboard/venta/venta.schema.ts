@@ -6,7 +6,7 @@ export const MEDIO_EFECTIVO = 1;
 export const MEDIO_DEPOSITO_BANCARIO = 2;
 export const MEDIO_CREDITO = 3;
 export const MODALIDAD_RECOJO_TIENDA = 1;
-export const MODALIDAD_ENVIO_EMPRESA = 2;
+export const MODALIDAD_ENVIO_DOMICILIO = 2;
 
 const optionalString = z
   .string()
@@ -84,17 +84,17 @@ export const ventaSchema = z
     pagos: z.array(pagoSchema).min(1, "Agregue al menos un pago"),
   })
   .superRefine((data, ctx) => {
-    if (data.modalidadEntrega === MODALIDAD_ENVIO_EMPRESA && !data.direccionEntrega) {
+    if (data.modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO && !data.direccionEntrega) {
       ctx.addIssue({
         code: "custom",
         path: ["direccionEntrega"],
-        message: "La dirección de entrega es obligatoria para envío por empresa",
+        message: "La dirección de entrega es obligatoria para envíos a domicilio",
       });
     }
 
     if (data.tipoPago === TIPO_PAGO_CONTADO) {
       const subtotal = data.detalles.reduce((acc, d) => acc + d.cantidad * d.precioUnitario - d.descuentoUnitario, 0);
-      const envio = data.modalidadEntrega === MODALIDAD_ENVIO_EMPRESA ? data.costoEnvio : 0;
+      const envio = data.modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO ? data.costoEnvio : 0;
       const total = Math.max(0, subtotal - data.descuento + envio);
       const pagado = data.pagos.reduce((acc, p) => acc + p.monto, 0);
 
