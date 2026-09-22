@@ -41,6 +41,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
 import SellIcon from "@mui/icons-material/Sell";
 import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -56,6 +58,7 @@ import {
 } from "@/features/dashboard/venta/hooks/useVenta";
 import { useTiendas } from "@/features/dashboard/tienda/hooks/useTiendas";
 import { Venta } from "@/features/dashboard/venta/venta.type";
+import { useDespachosCompletadosPorVentas } from "@/features/dashboard/despacho/hooks/useDespachos";
 import { generarNotaVentaPdf, imprimirTicketVenta } from "@/features/dashboard/venta/helpers/ventaPdf";
 import { CatalogoItem } from "@/features/dashboard/catalogo/catalogo.type";
 import { getAuthUser } from "@/shared/auth/auth.service";
@@ -94,6 +97,29 @@ function catalogoNombre(items: CatalogoItem[], id: number): string {
   return items.find((i) => i.id === id)?.nombre ?? `#${id}`;
 }
 
+function esEntregaInmediata(venta: Venta): boolean {
+  if (Number(venta.modalidadEntrega ?? venta.modalidad) === 3) return true;
+
+  return String(venta.modalidad ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z]/gi, "")
+    .toLowerCase()
+    .includes("inmediata");
+}
+
+function modalidadRowClass(venta: Venta): string {
+  const modalidad = String(venta.modalidad ?? "")
+    .toLowerCase()
+    .replaceAll("_", " ");
+
+  if (esEntregaInmediata(venta)) return "";
+  if (Number(venta.modalidadEntrega) === 2 || modalidad.includes("domicilio")) return "modalidad-envio";
+  if (Number(venta.modalidadEntrega) === 1 || modalidad.includes("recojo")) return "modalidad-recojo";
+  if (venta.direccionEntrega?.trim() || Number(venta.costoEnvio) > 0) return "modalidad-envio";
+  return "modalidad-recojo";
+}
+
 function estadoChipSx(positivo: boolean) {
   return (theme: { palette: { mode: string } }) => ({
     fontWeight: 500,
@@ -104,8 +130,8 @@ function estadoChipSx(positivo: boolean) {
           ? "#86efac"
           : "#2e7d32"
         : theme.palette.mode === "dark"
-          ? "#fbbf24"
-          : "#b45309",
+          ? "#c6ba9b"
+          : "#e3c1a7",
     },
     ...(positivo
       ? {
@@ -130,12 +156,12 @@ interface ColumnsContext {
 
 function getColumns(
   ctx: ColumnsContext,
+  despachosCompletados: Map<number, boolean>,
   onVer: (row: Venta) => void,
   onTicket: (row: Venta) => void,
   onPdf: (row: Venta) => void,
 ): GridColDef<Venta>[] {
   return [
-    { field: "id", headerName: "ID", width: 70, align: "center", headerAlign: "center" },
     {
       field: "codigo",
       headerName: "Código",
@@ -258,13 +284,9 @@ function getColumns(
         const nombre = catalogoNombre(ctx.estadosVenta, params.row.estado);
         const confirmada = !nombre.toLowerCase().includes("anul");
         return (
-          <Chip
-            size="small"
-            icon={confirmada ? <CheckCircleIcon /> : <CancelIcon />}
-            label={nombre}
-            variant="filled"
-            sx={estadoChipSx(confirmada)}
-          />
+          <Tooltip title={nombre}>
+            {confirmada ? <CheckCircleIcon color="warning" /> : <CancelIcon color="warning" />}
+          </Tooltip>
         );
       },
     },
@@ -284,14 +306,14 @@ function getColumns(
     {
       field: "acciones",
       headerName: "Acciones",
-      width: 140,
-      minWidth: 140,
-      headerAlign: "center",
-      align: "center",
+      width: 175,
+      minWidth: 175,
+      headerAlign: "left",
+      align: "left",
       sortable: false,
       filterable: false,
       renderCell: (params: GridRenderCellParams<Venta>) => (
-        <Stack direction="row" sx={{ alignItems: "center", justifyContent: "center", gap: 1, height: "100%" }}>
+        <Stack direction="row" sx={{ alignItems: "center", justifyContent: "flex-start", gap: 1, height: "100%" }}>
           <Tooltip title="Ver detalle">
             <VisibilityIcon
               fontSize="small"
@@ -300,6 +322,17 @@ function getColumns(
               onClick={() => onVer(params.row)}
             />
           </Tooltip>
+          {!esEntregaInmediata(params.row) && (
+            <Tooltip title={despachosCompletados.get(params.row.id) ? "Despacho completado" : "Ver despachos"}>
+              <Link href={`/dashboard/despachos?ventaId=${params.row.id}`} onClick={(event) => event.stopPropagation()}>
+                {despachosCompletados.get(params.row.id) ? (
+                  <LocalShippingIcon fontSize="small" color="secondary" sx={{ display: "block" }} />
+                ) : (
+                  <LocalShippingOutlinedIcon fontSize="small" color="secondary" sx={{ display: "block" }} />
+                )}
+              </Link>
+            </Tooltip>
+          )}
           <Tooltip title="Imprimir ticket">
             <LocalPrintshopOutlinedIcon
               fontSize="small"
@@ -379,6 +412,11 @@ export default function ListarVentas() {
   );
 
   const { ventas, totalRegistros, loading } = useVentas(params);
+  const ventaIdsDespacho = useMemo(
+    () => ventas.filter((venta) => !esEntregaInmediata(venta)).map((venta) => venta.id),
+    [ventas],
+  );
+  const { completados: despachosCompletados } = useDespachosCompletadosPorVentas(canAccess ? ventaIdsDespacho : []);
 
   const handleVer = useCallback((row: Venta) => {
     setSelectedRow(row);
@@ -422,8 +460,15 @@ export default function ListarVentas() {
   );
 
   const columns = useMemo(
-    () => getColumns({ tiposPago, estadosVenta, estadosPago, tiposDocumento }, handleVer, handleTicket, handlePdf),
-    [tiposPago, estadosVenta, estadosPago, tiposDocumento, handleVer, handleTicket, handlePdf],
+    () =>
+      getColumns(
+        { tiposPago, estadosVenta, estadosPago, tiposDocumento },
+        despachosCompletados,
+        handleVer,
+        handleTicket,
+        handlePdf,
+      ),
+    [tiposPago, estadosVenta, estadosPago, tiposDocumento, despachosCompletados, handleVer, handleTicket, handlePdf],
   );
 
   if (!canAccess) return <AccessDenied />;
@@ -600,9 +645,10 @@ export default function ListarVentas() {
               paginationMode="server"
               rowCount={totalRegistros}
               getRowId={(row) => row.id}
+              getRowClassName={(params) => modalidadRowClass(params.row)}
               disableRowSelectionOnClick
               localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-              sx={{
+              sx={(theme) => ({
                 border: 0,
                 mx: 1,
                 "& .MuiDataGrid-columnHeader": {
@@ -613,7 +659,33 @@ export default function ListarVentas() {
                   color: "#006064",
                   textTransform: "uppercase",
                 },
-              }}
+                "& .MuiDataGrid-row.modalidad-envio, & .MuiDataGrid-row.modalidad-envio .MuiDataGrid-cell": {
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(59, 130, 246, 0.03) !important"
+                      : "rgba(147, 197, 253, 0.07) !important",
+                },
+                "& .MuiDataGrid-row.modalidad-envio:hover, & .MuiDataGrid-row.modalidad-envio:hover .MuiDataGrid-cell":
+                  {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(59, 130, 246, 0.06) !important"
+                        : "rgba(147, 197, 253, 0.11) !important",
+                  },
+                "& .MuiDataGrid-row.modalidad-recojo, & .MuiDataGrid-row.modalidad-recojo .MuiDataGrid-cell": {
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(245, 158, 11, 0.025) !important"
+                      : "rgba(253, 230, 138, 0.075) !important",
+                },
+                "& .MuiDataGrid-row.modalidad-recojo:hover, & .MuiDataGrid-row.modalidad-recojo:hover .MuiDataGrid-cell":
+                  {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(245, 158, 11, 0.05) !important"
+                        : "rgba(253, 230, 138, 0.12) !important",
+                  },
+              })}
             />
           </Paper>
         </Paper>

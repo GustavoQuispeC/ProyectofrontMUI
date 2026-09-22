@@ -66,6 +66,9 @@ export interface Venta {
   montoRecibido: number;
   vuelto: number;
   observaciones: string | null;
+  modalidadEntrega?: number;
+  modalidad?: string | number;
+  direccionEntrega?: string | null;
   empleadoAtiendeId?: number;
   empleadoAtiendeNombre: string;
   fechaConfirmacion: string;
