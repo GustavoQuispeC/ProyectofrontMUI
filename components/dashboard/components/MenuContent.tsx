@@ -36,6 +36,7 @@ import FileOpenIcon from "@mui/icons-material/FileOpen";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import SellIcon from "@mui/icons-material/Sell";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 
 import React from "react";
 import Link from "next/link";
@@ -221,6 +222,12 @@ const mainListItems: MenuItemType[] = [
     icon: <SellIcon />,
     href: "/dashboard/ventas/listar",
     allowedRoles: [...permissions.registrarVenta, ...permissions.listarVentas],
+  },
+  {
+    text: "Amortizaciones",
+    icon: <AccountBalanceWalletIcon />,
+    href: "/dashboard/amortizaciones",
+    allowedRoles: [...permissions.listarAmortizaciones, ...permissions.registrarAmortizacion],
   },
   {
     text: "Kardex",
