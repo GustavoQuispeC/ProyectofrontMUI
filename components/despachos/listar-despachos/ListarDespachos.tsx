@@ -41,11 +41,13 @@ import {
   useAsignarConductorVehiculo,
   useCompletarDespacho,
   useConductoresDespacho,
+  useDespacharEnTienda,
   useDespachosPorVenta,
   useEstadosDespacho,
   useMarcarDespachoEnRuta,
 } from "@/features/dashboard/despacho/hooks/useDespachos";
 import { Despacho } from "@/features/dashboard/despacho/despacho.type";
+import { esEnvioDomicilio } from "@/features/dashboard/despacho/despacho.logic";
 import { imprimirTicketDespacho, ProductoPendienteDespacho } from "@/features/dashboard/despacho/despacho.ticket";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
@@ -73,19 +75,6 @@ function fecha(value: string | null) {
   return value ? dayjs(value).format("DD/MM/YYYY HH:mm") : "—";
 }
 
-function esEnvioDomicilio(modalidad: string | number | null | undefined) {
-  if (Number(modalidad) === 2) return true;
-  if (Number(modalidad) === 1) return false;
-
-  const valor = String(modalidad ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z]/gi, "")
-    .toLowerCase();
-
-  return valor.includes("envio") && valor.includes("domicilio");
-}
-
 function DespachoCard({
   despacho,
   estadoNombre,
@@ -108,7 +97,7 @@ function DespachoCard({
   const tienePendientes = despacho.detalles.some((detalle) => Number(detalle.cantidadPendiente) > 0);
   const envioDomicilio = esEnvioDomicilio(despacho.modalidad);
   const tieneAsignacion = Boolean(despacho.conductorEmpleadoId && despacho.vehiculoId);
-  const puedeSalir = !envioDomicilio || tieneAsignacion;
+  const puedeSalir = tieneAsignacion;
 
   return (
     <Paper variant="outlined" sx={{ overflow: "hidden", borderRadius: 2 }}>
@@ -217,34 +206,32 @@ function DespachoCard({
           )}
           {despacho.estado === 1 && (
             <>
+              {envioDomicilio && (
+                <Tooltip title={canAssign ? "" : "No tienes permisos para consultar conductores y vehículos"}>
+                  <span>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<AssignmentIndIcon />}
+                      disabled={!canAssign}
+                      onClick={() => onAsignar(despacho)}
+                    >
+                      Asignar conductor/vehículo
+                    </Button>
+                  </span>
+                </Tooltip>
+              )}
               <Tooltip
                 title={
-                  !envioDomicilio
-                    ? "El recojo en tienda no requiere conductor ni vehículo"
-                    : canAssign
-                      ? ""
-                      : "No tienes permisos para consultar conductores y vehículos"
+                  envioDomicilio && !puedeSalir ? "Asigne conductor y vehículo antes de poner el despacho en ruta" : ""
                 }
               >
                 <span>
                   <Button
                     size="small"
-                    variant="outlined"
-                    startIcon={<AssignmentIndIcon />}
-                    disabled={!envioDomicilio || !canAssign}
-                    onClick={() => onAsignar(despacho)}
-                  >
-                    Asignar conductor/vehículo
-                  </Button>
-                </span>
-              </Tooltip>
-              <Tooltip title={puedeSalir ? "" : "Asigne conductor y vehículo antes de poner el despacho en ruta"}>
-                <span>
-                  <Button
-                    size="small"
                     variant="contained"
                     startIcon={<LocalShippingOutlinedIcon />}
-                    disabled={!puedeSalir}
+                    disabled={envioDomicilio && !puedeSalir}
                     onClick={() => onEnRuta(despacho)}
                   >
                     Completar despacho
@@ -285,6 +272,7 @@ export default function ListarDespachos() {
   const { vehiculos, loading: loadingVehiculos, error: errorVehiculos } = useVehiculos(canAssign);
   const asignarMutation = useAsignarConductorVehiculo(ventaId);
   const enRutaMutation = useMarcarDespachoEnRuta(ventaId);
+  const despacharMutation = useDespacharEnTienda(ventaId);
   const completarMutation = useCompletarDespacho(ventaId);
   const [despachoAsignar, setDespachoAsignar] = useState<Despacho | null>(null);
   const [despachoEnRuta, setDespachoEnRuta] = useState<Despacho | null>(null);
@@ -342,7 +330,7 @@ export default function ListarDespachos() {
   };
 
   const cerrarEnRuta = () => {
-    if (enRutaMutation.loading) return;
+    if (enRutaMutation.loading || despacharMutation.loading) return;
     setDespachoEnRuta(null);
     setErrorEnRuta(null);
   };
@@ -382,26 +370,34 @@ export default function ListarDespachos() {
     }
 
     const esParcial = detalles.some((detalle) => detalle.cantidad !== detalle.maximo);
+    const data = {
+      detalles: detalles.map(({ despachoDetalleId, cantidad }) => ({
+        despachoDetalleId,
+        cantidad,
+      })),
+    };
+
+    const esDomicilio = esEnvioDomicilio(despachoEnRuta.modalidad);
 
     try {
       await toastPromise(
-        enRutaMutation.marcarEnRuta({
-          id: despachoEnRuta.id,
-          data: esParcial
-            ? {
-                detalles: detalles.map(({ despachoDetalleId, cantidad }) => ({
-                  despachoDetalleId,
-                  cantidad,
-                })),
-              }
-            : undefined,
-        }),
+        esDomicilio
+          ? enRutaMutation.marcarEnRuta({ despacho: despachoEnRuta, data: esParcial ? data : undefined })
+          : despacharMutation.despachar({ despacho: despachoEnRuta, data }),
         {
-          loading: esParcial ? "Procesando despacho parcial..." : "Poniendo despacho en ruta...",
+          loading: esParcial
+            ? "Procesando despacho parcial..."
+            : esDomicilio
+              ? "Poniendo despacho en ruta..."
+              : "Completando despacho...",
           success: esParcial
             ? "Despacho parcial procesado. Se creó el despacho pendiente complementario."
-            : "Despacho puesto en ruta correctamente",
-          error: (error) => error.message || "No se pudo poner el despacho en ruta",
+            : esDomicilio
+              ? "Despacho puesto en ruta correctamente"
+              : "Despacho marcado como entregado",
+          error: (error) =>
+            error.message ||
+            (esDomicilio ? "No se pudo poner el despacho en ruta" : "No se pudo completar el despacho"),
         },
       );
       setDespachoEnRuta(null);
@@ -413,7 +409,7 @@ export default function ListarDespachos() {
 
   const completarDespacho = async (despacho: Despacho) => {
     try {
-      await toastPromise(completarMutation.completar(despacho.id), {
+      await toastPromise(completarMutation.completar({ despacho }), {
         loading: `Completando despacho ${despacho.codigo}...`,
         success: "Despacho marcado como entregado",
         error: (error) => error.message || "No se pudo completar el despacho",
@@ -589,8 +585,8 @@ export default function ListarDespachos() {
               Confirme las cantidades que salen en este despacho. Si reduce alguna cantidad, el restante quedará en un
               nuevo despacho pendiente.
             </Alert>
-            {(errorEnRuta || enRutaMutation.error) && (
-              <Alert severity="error">{errorEnRuta || enRutaMutation.error}</Alert>
+            {(errorEnRuta || enRutaMutation.error || despacharMutation.error) && (
+              <Alert severity="error">{errorEnRuta || enRutaMutation.error || despacharMutation.error}</Alert>
             )}
             <TableContainer component={Paper} variant="outlined">
               <Table size="small">
@@ -642,19 +638,25 @@ export default function ListarDespachos() {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button size="small" onClick={cerrarEnRuta} disabled={enRutaMutation.loading}>
+          <Button size="small" onClick={cerrarEnRuta} disabled={enRutaMutation.loading || despacharMutation.loading}>
             Cancelar
           </Button>
           <Button
             size="small"
             variant="contained"
             onClick={() => void confirmarEnRuta()}
-            disabled={enRutaMutation.loading || despachoEnRuta?.detalles.length === 0}
+            disabled={enRutaMutation.loading || despacharMutation.loading || despachoEnRuta?.detalles.length === 0}
             startIcon={
-              enRutaMutation.loading ? <CircularProgress size={16} color="inherit" /> : <LocalShippingOutlinedIcon />
+              enRutaMutation.loading || despacharMutation.loading ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : despachoEnRuta && esEnvioDomicilio(despachoEnRuta.modalidad) ? (
+                <LocalShippingOutlinedIcon />
+              ) : (
+                <CheckCircleOutlineIcon />
+              )
             }
           >
-            Poner en ruta
+            {despachoEnRuta && esEnvioDomicilio(despachoEnRuta.modalidad) ? "Poner en ruta" : "Completar despacho"}
           </Button>
         </DialogActions>
       </Dialog>

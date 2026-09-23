@@ -28,6 +28,13 @@ export function marcarDespachoEnRutaApi(id: number, data?: EnRutaRequest): Promi
   });
 }
 
+export function despacharEnTiendaApi(id: number, data: EnRutaRequest): Promise<Despacho | null> {
+  return apiDespacho(`${apiUrl}/despachos/${id}/despachar`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
 export function completarDespachoApi(id: number): Promise<Despacho | null> {
   return apiDespacho(`${apiUrl}/despachos/${id}/completar`, { method: "PUT" });
 }

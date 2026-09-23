@@ -133,8 +133,9 @@ function getColumns(estadosPago: CatalogoItem[], onVer: (row: VentaCredito) => v
       field: "codigo",
       headerName: "Nota de venta",
       minWidth: 150,
+      display: "flex",
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontWeight: 700, alignSelf: "center" }}>
+        <Typography variant="body2" sx={{ fontWeight: 700 }}>
           {params.row.codigo}
         </Typography>
       ),
@@ -161,8 +162,9 @@ function getColumns(estadosPago: CatalogoItem[], onVer: (row: VentaCredito) => v
       align: "right",
       headerAlign: "center",
       sortable: false,
+      display: "flex",
       renderCell: (params) => (
-        <Typography variant="body2" color="error.main" sx={{ fontWeight: 700, alignSelf: "center" }}>
+        <Typography variant="body2" color="error.main" sx={{ fontWeight: 700 }}>
           {monedaFormatter.format(pendienteVenta(params.row))}
         </Typography>
       ),
@@ -511,6 +513,8 @@ export default function ListarAmortizaciones() {
                 paginationMode="server"
                 rowCount={totalRegistros}
                 getRowId={(row) => row.id}
+                rowHeight={40}
+                columnHeaderHeight={44}
                 checkboxSelection
                 disableMultipleRowSelection
                 rowSelectionModel={rowSelectionModel}

@@ -4,6 +4,7 @@ import { CatalogoItem } from "@/features/dashboard/catalogo/catalogo.type";
 import {
   asignarConductorVehiculo,
   completarDespacho,
+  despacharEnTienda,
   listarConductoresDespacho,
   listarDespachosPorVenta,
   marcarDespachoEnRuta,
@@ -62,7 +63,8 @@ export function useAsignarConductorVehiculo(ventaId: number | null) {
 export function useMarcarDespachoEnRuta(ventaId: number | null) {
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data?: EnRutaRequest }) => marcarDespachoEnRuta(id, data),
+    mutationFn: ({ despacho, data }: { despacho: Despacho; data?: EnRutaRequest }) =>
+      marcarDespachoEnRuta(despacho, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["despachos", "venta", ventaId] });
     },
@@ -75,10 +77,26 @@ export function useMarcarDespachoEnRuta(ventaId: number | null) {
   };
 }
 
+export function useDespacharEnTienda(ventaId: number | null) {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: ({ despacho, data }: { despacho: Despacho; data: EnRutaRequest }) => despacharEnTienda(despacho, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["despachos", "venta", ventaId] });
+    },
+  });
+
+  return {
+    despachar: mutation.mutateAsync,
+    loading: mutation.isPending,
+    error: mutation.error instanceof Error ? mutation.error.message : null,
+  };
+}
+
 export function useCompletarDespacho(ventaId: number | null) {
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: (id: number) => completarDespacho(id),
+    mutationFn: ({ despacho }: { despacho: Despacho }) => completarDespacho(despacho),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["despachos", "venta", ventaId] });
     },
@@ -86,7 +104,7 @@ export function useCompletarDespacho(ventaId: number | null) {
 
   return {
     completar: mutation.mutateAsync,
-    completandoId: mutation.isPending ? (mutation.variables ?? null) : null,
+    completandoId: mutation.isPending ? (mutation.variables?.despacho.id ?? null) : null,
     loading: mutation.isPending,
     error: mutation.error instanceof Error ? mutation.error.message : null,
   };
