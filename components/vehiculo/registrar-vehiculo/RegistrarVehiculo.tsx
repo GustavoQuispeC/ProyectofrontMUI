@@ -133,7 +133,14 @@ export default function RegistrarVehiculo() {
               name="placa"
               control={control}
               render={({ field }) => (
-                <InputCard {...field} label="Placa *" error={!!errors.placa} helperText={errors.placa?.message} />
+                <InputCard
+                  {...field}
+                  label="Placa *"
+                  slotProps={{ htmlInput: { style: { textTransform: "uppercase" } } }}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  error={!!errors.placa}
+                  helperText={errors.placa?.message}
+                />
               )}
             />
           </Grid>
@@ -146,7 +153,17 @@ export default function RegistrarVehiculo() {
                   {...field}
                   label="Año *"
                   type="number"
-                  onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                  value={field.value ?? ""}
+                  slotProps={{
+                    htmlInput: {
+                      min: 1900,
+                      max: new Date().getFullYear() + 1,
+                      inputMode: "numeric",
+                      pattern: "[0-9]*",
+                    },
+                  }}
+                  onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                  onFocus={(e) => e.target.select()}
                   error={!!errors.anio}
                   helperText={errors.anio?.message}
                 />
@@ -158,7 +175,14 @@ export default function RegistrarVehiculo() {
               name="marca"
               control={control}
               render={({ field }) => (
-                <InputCard {...field} label="Marca *" error={!!errors.marca} helperText={errors.marca?.message} />
+                <InputCard
+                  {...field}
+                  label="Marca *"
+                  slotProps={{ htmlInput: { style: { textTransform: "uppercase" } } }}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  error={!!errors.marca}
+                  helperText={errors.marca?.message}
+                />
               )}
             />
           </Grid>
@@ -167,7 +191,14 @@ export default function RegistrarVehiculo() {
               name="modelo"
               control={control}
               render={({ field }) => (
-                <InputCard {...field} label="Modelo *" error={!!errors.modelo} helperText={errors.modelo?.message} />
+                <InputCard
+                  {...field}
+                  label="Modelo *"
+                  slotProps={{ htmlInput: { style: { textTransform: "uppercase" } } }}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  error={!!errors.modelo}
+                  helperText={errors.modelo?.message}
+                />
               )}
             />
           </Grid>

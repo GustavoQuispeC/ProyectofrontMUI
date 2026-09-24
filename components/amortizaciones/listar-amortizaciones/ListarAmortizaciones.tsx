@@ -149,7 +149,7 @@ function getColumns(estadosPago: CatalogoItem[], onVer: (row: VentaCredito) => v
     },
     {
       field: "total",
-      headerName: "Monto nota",
+      headerName: "Importe",
       width: 125,
       align: "right",
       headerAlign: "center",
@@ -157,7 +157,7 @@ function getColumns(estadosPago: CatalogoItem[], onVer: (row: VentaCredito) => v
     },
     {
       field: "pendiente",
-      headerName: "Deuda",
+      headerName: "Saldo",
       width: 125,
       align: "right",
       headerAlign: "center",

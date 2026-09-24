@@ -18,11 +18,11 @@ import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import GroupIcon from "@mui/icons-material/Group";
+import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
 import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import SummarizeIcon from "@mui/icons-material/Summarize";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import CategoryIcon from "@mui/icons-material/Category";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
@@ -113,19 +113,6 @@ const mainListItems: MenuItemType[] = [
   },
 
   {
-    text: "Empleados",
-    icon: <AnalyticsRoundedIcon />,
-    href: "/dashboard/empleados/listar",
-    allowedRoles: [
-      ...permissions.registrarEmpleado,
-      ...permissions.listarEmpleados,
-      ...permissions.detalleEmpleado,
-      ...permissions.eliminarEmpleado,
-      ...permissions.editarEmpleado,
-    ],
-  },
-
-  {
     text: "Clientes",
     icon: <AccountBoxIcon />,
     allowedRoles: [...permissions.listarClientes, ...permissions.registrarCliente],
@@ -140,21 +127,19 @@ const mainListItems: MenuItemType[] = [
   },
 
   {
-    text: "Permisos",
-    icon: <PendingActionsIcon />,
-    href: "/dashboard/permisos/pendiente",
+    text: "RRHH",
+    icon: <PeopleAltRoundedIcon />,
     allowedRoles: [
+      ...permissions.registrarEmpleado,
+      ...permissions.listarEmpleados,
+      ...permissions.detalleEmpleado,
+      ...permissions.eliminarEmpleado,
+      ...permissions.editarEmpleado,
       ...permissions.registrarPermiso,
       ...permissions.listarPermisosPendientes,
       ...permissions.aprobarPermiso,
       ...permissions.cancelarPermiso,
       ...permissions.listarPermisosMensual,
-    ],
-  },
-  {
-    text: "Vacaciones",
-    icon: <AssignmentRoundedIcon />,
-    allowedRoles: [
       ...permissions.listarVacacionesGenerales,
       ...permissions.listarVacacionesPendientes,
       ...permissions.registrarVacaciones,
@@ -163,11 +148,40 @@ const mainListItems: MenuItemType[] = [
       ...permissions.listarVacacionesResumen,
       ...permissions.cancelarVacacionesPendientes,
       ...permissions.listarVacacionesById,
+      ...permissions.registrarFalta,
+      ...permissions.listarFaltasPendientes,
+      ...permissions.aprobarFalta,
+      ...permissions.cancelarFalta,
+      ...permissions.listarFaltaMensual,
     ],
     children: [
       {
-        text: "Resumen",
-        icon: <SummarizeIcon />,
+        text: "Empleados",
+        icon: <AnalyticsRoundedIcon />,
+        href: "/dashboard/empleados/listar",
+        allowedRoles: [
+          ...permissions.registrarEmpleado,
+          ...permissions.listarEmpleados,
+          ...permissions.detalleEmpleado,
+          ...permissions.eliminarEmpleado,
+          ...permissions.editarEmpleado,
+        ],
+      },
+      {
+        text: "Permisos",
+        icon: <PendingActionsIcon />,
+        href: "/dashboard/permisos/pendiente",
+        allowedRoles: [
+          ...permissions.registrarPermiso,
+          ...permissions.listarPermisosPendientes,
+          ...permissions.aprobarPermiso,
+          ...permissions.cancelarPermiso,
+          ...permissions.listarPermisosMensual,
+        ],
+      },
+      {
+        text: "Vacaciones",
+        icon: <AssignmentRoundedIcon />,
         href: "/dashboard/vacaciones/resumen",
         allowedRoles: [
           ...permissions.listarVacacionesGenerales,
@@ -185,18 +199,18 @@ const mainListItems: MenuItemType[] = [
         href: "/dashboard/vacaciones/resumen-id",
         allowedRoles: permissions.listarVacacionesById,
       },
-    ],
-  },
-  {
-    text: "Faltas",
-    icon: <EventBusyIcon />,
-    href: "/dashboard/faltas/pendientes",
-    allowedRoles: [
-      ...permissions.registrarFalta,
-      ...permissions.listarFaltasPendientes,
-      ...permissions.aprobarFalta,
-      ...permissions.cancelarFalta,
-      ...permissions.listarFaltaMensual,
+      {
+        text: "Faltas",
+        icon: <EventBusyIcon />,
+        href: "/dashboard/faltas/pendientes",
+        allowedRoles: [
+          ...permissions.registrarFalta,
+          ...permissions.listarFaltasPendientes,
+          ...permissions.aprobarFalta,
+          ...permissions.cancelarFalta,
+          ...permissions.listarFaltaMensual,
+        ],
+      },
     ],
   },
   {
