@@ -130,23 +130,26 @@ const defaultValues: VentaForm = {
 interface SectionProps {
   title: string;
   children: React.ReactNode;
+  style?: React.CSSProperties;
+  contentStyle?: React.CSSProperties;
 }
 
 const sectionColors: Record<string, string> = {
-  "Fecha y tienda": "#536f82",
-  "Catálogo de productos": "#4f7477",
-  "Detalle de la venta": "#826f55",
-  "Datos del cliente y condiciones de venta": "#6d6878",
+  "Fecha y tienda": "#5586a7",
+  "Catálogo de productos": "#458085",
+  "Detalle de la venta": "#946f3b",
+  "Datos del cliente y condiciones de venta": "#584e6e",
   Pagos: "#5d7564",
   "Resumen de la venta": "#526f6d",
 };
 
-function Section({ title, children }: SectionProps) {
+function Section({ title, children, style, contentStyle }: SectionProps) {
   const color = sectionColors[title] ?? "#006064";
 
   return (
     <Paper
       elevation={0}
+      style={style}
       sx={(theme) => ({
         border: "1px solid",
         borderColor: alpha(color, theme.palette.mode === "dark" ? 0.35 : 0.18),
@@ -173,7 +176,9 @@ function Section({ title, children }: SectionProps) {
           {title.toUpperCase()}
         </Typography>
       </Box>
-      <Box sx={{ p: 2.5 }}>{children}</Box>
+      <Box sx={{ p: 2.5 }} style={contentStyle}>
+        {children}
+      </Box>
     </Paper>
   );
 }
@@ -556,7 +561,7 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
       {
         field: "codigoInterno",
         headerName: "Código",
-        width: 110,
+        width: 140,
         valueGetter: (_value, row) => row.codigoInterno || row.codigoBarras || "—",
       },
       { field: "nombre", headerName: "Nombre", flex: 1, minWidth: 220 },
@@ -728,817 +733,854 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
 
         <DialogContent sx={{ p: { xs: 1.5, md: 2.5 } }}>
           <Stack sx={{ gap: 2, maxWidth: 1400, mx: "auto" }}>
-            <Section title="Fecha y tienda">
-              <Stack sx={{ gap: 2 }}>
-                <Stack
-                  sx={{
-                    flexDirection: { xs: "column", sm: "row" },
-                    gap: 2,
-                    alignItems: { xs: "stretch", sm: "flex-start" },
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Controller
-                    name="tiendaId"
-                    control={control}
-                    render={({ field }) => (
-                      <Autocomplete
-                        options={tiendas}
-                        loading={loadingTiendas}
-                        size="small"
-                        value={tiendas.find((t) => t.id === field.value) ?? null}
-                        onChange={(_, value) => field.onChange(value?.id ?? 0)}
-                        getOptionLabel={(option) => option.nombre}
-                        isOptionEqualToValue={(option, value) => option.id === value.id}
-                        noOptionsText="Sin resultados"
-                        loadingText="Cargando..."
-                        sx={{ minWidth: 280, width: { xs: "100%", sm: 360 } }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Tienda *"
-                            placeholder="Seleccione una tienda"
-                            error={!!errors.tiendaId}
-                            helperText={errors.tiendaId?.message}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 0.7fr) minmax(0, 0.3fr)" },
+                gridTemplateAreas: {
+                  xs: '"leftTop" "rightTop" "leftBottom" "rightBottom" "alert"',
+                  lg: '"leftTop rightTop" "leftBottom rightBottom" "alert alert"',
+                },
+                gap: 2,
+                alignItems: "start",
+              }}
+            >
+              <Stack sx={{ gridArea: "leftTop", gap: 2, minWidth: 0, alignSelf: "stretch" }}>
+                <Section title="Fecha y tienda">
+                  <Stack sx={{ gap: 2 }}>
+                    <Stack
+                      sx={{
+                        flexDirection: { xs: "column", sm: "row" },
+                        gap: 2,
+                        alignItems: { xs: "stretch", sm: "flex-start" },
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Controller
+                        name="tiendaId"
+                        control={control}
+                        render={({ field }) => (
+                          <Autocomplete
+                            options={tiendas}
+                            loading={loadingTiendas}
+                            size="small"
+                            value={tiendas.find((t) => t.id === field.value) ?? null}
+                            onChange={(_, value) => field.onChange(value?.id ?? 0)}
+                            getOptionLabel={(option) => option.nombre}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            noOptionsText="Sin resultados"
+                            loadingText="Cargando..."
+                            sx={{ minWidth: 280, flex: 1 }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Tienda *"
+                                placeholder="Seleccione una tienda"
+                                error={!!errors.tiendaId}
+                                helperText={errors.tiendaId?.message}
+                              />
+                            )}
                           />
                         )}
                       />
+
+                      <TextField
+                        label="Fecha"
+                        size="small"
+                        value={dayjs().format("DD/MM/YYYY")}
+                        slotProps={{ input: { readOnly: true } }}
+                        sx={{ minWidth: 180, width: { xs: "100%", sm: 220 } }}
+                      />
+                    </Stack>
+
+                    {!!tiendaIdNum && loadingSesion && (
+                      <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+                        <CircularProgress size={18} />
+                        <Typography variant="body2" color="text.secondary">
+                          Verificando sesión de caja...
+                        </Typography>
+                      </Stack>
                     )}
-                  />
 
-                  <TextField
-                    label="Fecha"
-                    size="small"
-                    value={dayjs().format("DD/MM/YYYY")}
-                    slotProps={{ input: { readOnly: true } }}
-                    sx={{ minWidth: 180, width: { xs: "100%", sm: 220 } }}
-                  />
-                </Stack>
-
-                {!!tiendaIdNum && loadingSesion && (
-                  <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-                    <CircularProgress size={18} />
-                    <Typography variant="body2" color="text.secondary">
-                      Verificando sesión de caja...
-                    </Typography>
+                    {cajaCerrada && (
+                      <Alert
+                        severity="warning"
+                        icon={<PointOfSaleIcon />}
+                        action={
+                          <Button color="inherit" size="small" onClick={() => router.push("/dashboard/caja")}>
+                            Ir a Caja
+                          </Button>
+                        }
+                      >
+                        La caja de esta tienda está cerrada. Debe abrir una sesión de caja antes de registrar una venta.
+                      </Alert>
+                    )}
                   </Stack>
-                )}
+                </Section>
 
-                {cajaCerrada && (
-                  <Alert
-                    severity="warning"
-                    icon={<PointOfSaleIcon />}
-                    action={
-                      <Button color="inherit" size="small" onClick={() => router.push("/dashboard/caja")}>
-                        Ir a Caja
-                      </Button>
-                    }
-                  >
-                    La caja de esta tienda está cerrada. Debe abrir una sesión de caja antes de registrar una venta.
-                  </Alert>
-                )}
-              </Stack>
-            </Section>
-
-            {/* TABLA 1: Catálogo de productos */}
-            <Section title="Catálogo de productos">
-              <Stack sx={{ gap: 2 }}>
-                <Stack
-                  direction={{ xs: "column", md: "row" }}
-                  sx={{ gap: 2, alignItems: { xs: "stretch", md: "center" } }}
+                {/* TABLA 1: Catálogo de productos */}
+                <Section
+                  title="Catálogo de productos"
+                  style={{ flex: 1, display: "flex", flexDirection: "column" }}
+                  contentStyle={{ flex: 1, minHeight: 0 }}
                 >
-                  <TextField
-                    inputRef={busquedaProductoRef}
-                    placeholder="Buscar por nombre, código o código de barras"
-                    size="small"
-                    value={busquedaProducto}
-                    onChange={(e) => {
-                      setBusquedaProducto(e.target.value);
-                      setCatalogoPagination((prev) => ({ ...prev, page: 0 }));
-                    }}
-                    disabled={!tiendaIdNum}
-                    slotProps={{
-                      input: {
-                        startAdornment: <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />,
-                      },
-                    }}
-                    sx={{ minWidth: 260, flex: 1 }}
-                  />
-
-                  <FormControl size="small">
-                    <RadioGroup row value={listaPrecioId} onChange={(e) => setListaPrecioId(Number(e.target.value))}>
-                      {opcionesPrecio.map((l) => (
-                        <FormControlLabel key={l.id} value={l.id} control={<Radio size="small" />} label={l.nombre} />
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                </Stack>
-
-                {!tiendaIdNum ? (
-                  <Alert severity="info">Seleccione una tienda para ver el catálogo de productos.</Alert>
-                ) : (
-                  <Box sx={{ height: 380, width: "100%" }}>
-                    <DataGrid
-                      rows={productosCatalogo}
-                      columns={catalogoColumns}
-                      loading={loadingCatalogo}
-                      slots={{ loadingOverlay: LoadingOverlay }}
-                      onRowDoubleClick={(params) => {
-                        if (params.row.stockDisponible > 0) handleSelectProducto(params.row);
-                      }}
-                      paginationModel={catalogoPagination}
-                      onPaginationModelChange={setCatalogoPagination}
-                      pageSizeOptions={catalogoPageSizeOptions}
-                      paginationMode="server"
-                      rowCount={catalogoPaginacion?.totalRegistros ?? 0}
-                      getRowId={(row) => row.id}
-                      getRowClassName={(params) => (params.row.stockDisponible <= 0 ? "fila-sin-stock" : "")}
-                      disableRowSelectionOnClick
-                      density="compact"
-                      localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                      sx={{
-                        border: 0,
-                        "& .fila-sin-stock .MuiDataGrid-cell": {
-                          color: "error.main",
-                        },
-                        "& .fila-sin-stock .MuiTypography-root": {
-                          color: "error.main",
-                        },
-                        "& .MuiDataGrid-columnHeader": {
-                          backgroundColor: (theme) => alpha("#4f7477", theme.palette.mode === "dark" ? 0.15 : 0.07),
-                          borderBottomColor: alpha("#4f7477", 0.18),
-                        },
-                        "& .MuiDataGrid-columnHeaderTitle": {
-                          fontWeight: 700,
-                          color: (theme) => (theme.palette.mode === "dark" ? "#a9c4c6" : "#3f6265"),
-                          textTransform: "uppercase",
-                        },
-                      }}
-                    />
-                  </Box>
-                )}
-              </Stack>
-            </Section>
-
-            {/* TABLA 2: Detalle de la venta */}
-            <Section title="Detalle de la venta">
-              <Stack sx={{ gap: 2 }}>
-                <TableContainer component={Paper} variant="outlined">
-                  <Table size="small">
-                    <TableHead
-                      sx={(theme) => ({
-                        backgroundColor: alpha("#826f55", theme.palette.mode === "dark" ? 0.14 : 0.065),
-                        "& .MuiTableCell-root": {
-                          color: theme.palette.mode === "dark" ? "#cfc4b3" : "#695a46",
-                          fontWeight: 700,
-                          borderBottomColor: alpha("#826f55", 0.18),
-                        },
-                      })}
+                  <Stack sx={{ gap: 2, height: "100%" }}>
+                    <Stack
+                      direction={{ xs: "column", md: "row" }}
+                      sx={{ gap: 2, alignItems: { xs: "stretch", md: "center" } }}
                     >
-                      <TableRow>
-                        <TableCell>Producto</TableCell>
-                        <TableCell align="center" sx={{ width: 130 }}>
-                          Cantidad
-                        </TableCell>
-                        <TableCell align="right">P. Unit.</TableCell>
-                        <TableCell align="center" sx={{ width: 120 }}>
-                          Desc. unit.
-                        </TableCell>
-                        <TableCell align="right">Subtotal</TableCell>
-                        <TableCell align="center" sx={{ width: 80 }}>
-                          Acciones
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {fields.map((item, index) => {
-                        const detalle = detalles?.[index];
-                        const linea =
-                          (Number(detalle?.cantidad) || 0) * (Number(detalle?.precioUnitario) || 0) -
-                          (Number(detalle?.descuentoUnitario) || 0);
+                      <TextField
+                        inputRef={busquedaProductoRef}
+                        placeholder="Buscar por nombre, código o código de barras"
+                        size="small"
+                        value={busquedaProducto}
+                        onChange={(e) => {
+                          setBusquedaProducto(e.target.value);
+                          setCatalogoPagination((prev) => ({ ...prev, page: 0 }));
+                        }}
+                        disabled={!tiendaIdNum}
+                        slotProps={{
+                          input: {
+                            startAdornment: <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />,
+                          },
+                        }}
+                        sx={{ minWidth: 260, flex: 1 }}
+                      />
 
-                        return (
-                          <TableRow
-                            key={item.id}
-                            hover
-                            onDoubleClick={() => handleEditItem(index)}
-                            sx={{ cursor: "pointer" }}
-                          >
-                            <TableCell>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                {detalle?.productoCodigo}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {detalle?.productoNombre}
-                              </Typography>
+                      <FormControl size="small" sx={{ ml: { md: "auto" } }}>
+                        <RadioGroup
+                          row
+                          value={listaPrecioId}
+                          onChange={(e) => setListaPrecioId(Number(e.target.value))}
+                        >
+                          {opcionesPrecio.map((l) => (
+                            <FormControlLabel
+                              key={l.id}
+                              value={l.id}
+                              control={<Radio size="small" />}
+                              label={l.nombre}
+                            />
+                          ))}
+                        </RadioGroup>
+                      </FormControl>
+                    </Stack>
+
+                    {!tiendaIdNum ? (
+                      <Alert severity="info">Seleccione una tienda para ver el catálogo de productos.</Alert>
+                    ) : (
+                      <Box sx={{ flex: 1, minHeight: 260, width: "100%" }}>
+                        <DataGrid
+                          rows={productosCatalogo}
+                          columns={catalogoColumns}
+                          loading={loadingCatalogo}
+                          slots={{ loadingOverlay: LoadingOverlay }}
+                          onRowDoubleClick={(params) => {
+                            if (params.row.stockDisponible > 0) handleSelectProducto(params.row);
+                          }}
+                          paginationModel={catalogoPagination}
+                          onPaginationModelChange={setCatalogoPagination}
+                          pageSizeOptions={catalogoPageSizeOptions}
+                          paginationMode="server"
+                          rowCount={catalogoPaginacion?.totalRegistros ?? 0}
+                          getRowId={(row) => row.id}
+                          getRowClassName={(params) => (params.row.stockDisponible <= 0 ? "fila-sin-stock" : "")}
+                          disableRowSelectionOnClick
+                          density="compact"
+                          rowHeight={34}
+                          columnHeaderHeight={38}
+                          localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                          sx={{
+                            border: 0,
+                            "& .fila-sin-stock .MuiDataGrid-cell": {
+                              color: "error.main",
+                            },
+                            "& .fila-sin-stock .MuiTypography-root": {
+                              color: "error.main",
+                            },
+                            "& .MuiDataGrid-columnHeader": {
+                              backgroundColor: (theme) => alpha("#4f7477", theme.palette.mode === "dark" ? 0.15 : 0.07),
+                              borderBottomColor: alpha("#4f7477", 0.18),
+                            },
+                            "& .MuiDataGrid-columnHeaderTitle": {
+                              fontWeight: 700,
+                              color: (theme) => (theme.palette.mode === "dark" ? "#a9c4c6" : "#3f6265"),
+                              textTransform: "uppercase",
+                            },
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </Stack>
+                </Section>
+              </Stack>
+
+              <Box sx={{ gridArea: "leftBottom", minWidth: 0, alignSelf: "stretch" }}>
+                {/* TABLA 2: Detalle de la venta */}
+                <Section
+                  title="Detalle de la venta"
+                  style={{ height: "100%", display: "flex", flexDirection: "column" }}
+                  contentStyle={{ flex: 1, minHeight: 0 }}
+                >
+                  <Stack sx={{ gap: 2, height: "100%" }}>
+                    <TableContainer
+                      component={Paper}
+                      variant="outlined"
+                      sx={{ maxHeight: 240, minHeight: 160, overflow: "auto" }}
+                    >
+                      <Table
+                        size="small"
+                        sx={{
+                          "& .MuiTableCell-root": {
+                            py: 0.5,
+                            px: 1.25,
+                          },
+                        }}
+                      >
+                        <TableHead
+                          sx={(theme) => ({
+                            backgroundColor: alpha("#826f55", theme.palette.mode === "dark" ? 0.14 : 0.065),
+                            "& .MuiTableCell-root": {
+                              color: theme.palette.mode === "dark" ? "#cfc4b3" : "#695a46",
+                              fontWeight: 700,
+                              borderBottomColor: alpha("#826f55", 0.18),
+                            },
+                          })}
+                        >
+                          <TableRow>
+                            <TableCell>Producto</TableCell>
+                            <TableCell align="center" sx={{ width: 130 }}>
+                              Cantidad
                             </TableCell>
-                            <TableCell align="center">
-                              <Controller
-                                name={`detalles.${index}.cantidad`}
-                                control={control}
-                                render={({ field }) => (
-                                  <TextField
-                                    size="small"
-                                    type="number"
-                                    value={field.value}
-                                    onChange={(e) =>
-                                      field.onChange(e.target.value === "" ? "" : Number(e.target.value))
-                                    }
-                                    onFocus={seleccionarContenidoInput}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      seleccionarContenidoInput(e);
-                                    }}
-                                    onDoubleClick={(e) => e.stopPropagation()}
-                                    slotProps={{
-                                      htmlInput: {
-                                        min: 0.01,
-                                        step: 0.01,
-                                        max: detalle?.stockDisponible,
-                                        style: { textAlign: "center" },
-                                      },
-                                    }}
-                                    error={!!errors.detalles?.[index]?.cantidad}
-                                    helperText={errors.detalles?.[index]?.cantidad?.message}
-                                    sx={{ width: 110 }}
-                                  />
-                                )}
-                              />
+                            <TableCell align="right">P. Unit.</TableCell>
+                            <TableCell align="center" sx={{ width: 120 }}>
+                              Desc. unit.
                             </TableCell>
-                            <TableCell align="right">
-                              {monedaFormatter.format(Number(detalle?.precioUnitario) || 0)}
-                            </TableCell>
-                            <TableCell align="center">
-                              <Controller
-                                name={`detalles.${index}.descuentoUnitario`}
-                                control={control}
-                                render={({ field }) => (
-                                  <TextField
-                                    size="small"
-                                    type="number"
-                                    value={field.value}
-                                    onChange={(e) =>
-                                      field.onChange(e.target.value === "" ? "" : Number(e.target.value))
-                                    }
-                                    onFocus={seleccionarContenidoInput}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      seleccionarContenidoInput(e);
-                                    }}
-                                    onDoubleClick={(e) => e.stopPropagation()}
-                                    slotProps={{
-                                      htmlInput: { min: 0, step: 0.01, style: { textAlign: "center" } },
-                                    }}
-                                    error={!!errors.detalles?.[index]?.descuentoUnitario}
-                                    sx={{ width: 100 }}
-                                  />
-                                )}
-                              />
-                            </TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 600 }}>
-                              {monedaFormatter.format(linea > 0 ? linea : 0)}
-                            </TableCell>
-                            <TableCell align="center">
-                              <Tooltip title="Quitar producto">
-                                <IconButton size="small" color="error" onClick={() => remove(index)}>
-                                  <DeleteForeverIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
+                            <TableCell align="right">Subtotal</TableCell>
+                            <TableCell align="center" sx={{ width: 80 }}>
+                              Acciones
                             </TableCell>
                           </TableRow>
-                        );
-                      })}
-                      {fields.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                            <Typography variant="body2" color="text.secondary">
-                              Sin productos. Haga doble clic o use el botón de agregar en el catálogo.
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                          {fields.map((item, index) => {
+                            const detalle = detalles?.[index];
+                            const linea =
+                              (Number(detalle?.cantidad) || 0) * (Number(detalle?.precioUnitario) || 0) -
+                              (Number(detalle?.descuentoUnitario) || 0);
 
-                {errors.detalles?.root?.message && (
-                  <FormHelperText error>{errors.detalles.root.message}</FormHelperText>
-                )}
-                {typeof errors.detalles?.message === "string" && (
-                  <FormHelperText error>{errors.detalles.message}</FormHelperText>
-                )}
-
-                <Typography variant="h6" sx={{ alignSelf: "flex-end", fontWeight: 700, color: "primary.main" }}>
-                  Total venta: {monedaFormatter.format(Math.max(0, subtotal))}
-                </Typography>
-              </Stack>
-            </Section>
-
-            <Section title="Datos del cliente y condiciones de venta">
-              <Stack sx={{ gap: 2 }}>
-                <Stack
-                  sx={{
-                    flexDirection: { xs: "column", md: "row" },
-                    gap: 2,
-                    alignItems: { xs: "stretch", md: "flex-start" },
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    sx={{
-                      flex: { md: "0 1 36%" },
-                      minWidth: { xs: "100%", md: 224 },
-                      maxWidth: { md: 480 },
-                      gap: 0.5,
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Controller
-                      name="clienteId"
-                      control={control}
-                      render={({ field }) => (
-                        <Autocomplete
-                          options={clientes}
-                          loading={loadingClientes}
-                          size="small"
-                          value={clientes.find((c) => c.id === field.value) ?? null}
-                          onChange={(_, value) => field.onChange(value?.id ?? 0)}
-                          getOptionLabel={(option) =>
-                            option.nombreCompleto || option.razonSocial || `Cliente #${option.id}`
-                          }
-                          isOptionEqualToValue={(option, value) => option.id === value.id}
-                          noOptionsText="Sin resultados"
-                          loadingText="Cargando..."
-                          fullWidth
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Cliente *"
-                              placeholder="Seleccione un cliente"
-                              error={!!errors.clienteId}
-                              helperText={errors.clienteId?.message}
-                            />
+                            return (
+                              <TableRow
+                                key={item.id}
+                                hover
+                                onDoubleClick={() => handleEditItem(index)}
+                                sx={{ cursor: "pointer" }}
+                              >
+                                <TableCell>
+                                  <Tooltip
+                                    title={`${detalle?.productoCodigo ?? ""} - ${detalle?.productoNombre ?? ""}`}
+                                  >
+                                    <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+                                      {detalle?.productoCodigo} - {detalle?.productoNombre}
+                                    </Typography>
+                                  </Tooltip>
+                                </TableCell>
+                                <TableCell align="center">
+                                  <Controller
+                                    name={`detalles.${index}.cantidad`}
+                                    control={control}
+                                    render={({ field }) => (
+                                      <TextField
+                                        size="small"
+                                        type="number"
+                                        value={field.value}
+                                        onChange={(e) =>
+                                          field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                                        }
+                                        onFocus={seleccionarContenidoInput}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          seleccionarContenidoInput(e);
+                                        }}
+                                        onDoubleClick={(e) => e.stopPropagation()}
+                                        slotProps={{
+                                          htmlInput: {
+                                            min: 0.01,
+                                            step: 0.01,
+                                            max: detalle?.stockDisponible,
+                                            style: { textAlign: "center", padding: "4px 8px" },
+                                          },
+                                        }}
+                                        error={!!errors.detalles?.[index]?.cantidad}
+                                        helperText={errors.detalles?.[index]?.cantidad?.message}
+                                        sx={{ width: 110 }}
+                                      />
+                                    )}
+                                  />
+                                </TableCell>
+                                <TableCell align="right">
+                                  {monedaFormatter.format(Number(detalle?.precioUnitario) || 0)}
+                                </TableCell>
+                                <TableCell align="center">
+                                  <Controller
+                                    name={`detalles.${index}.descuentoUnitario`}
+                                    control={control}
+                                    render={({ field }) => (
+                                      <TextField
+                                        size="small"
+                                        type="number"
+                                        value={field.value}
+                                        onChange={(e) =>
+                                          field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                                        }
+                                        onFocus={seleccionarContenidoInput}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          seleccionarContenidoInput(e);
+                                        }}
+                                        onDoubleClick={(e) => e.stopPropagation()}
+                                        slotProps={{
+                                          htmlInput: {
+                                            min: 0,
+                                            step: 0.01,
+                                            style: { textAlign: "center", padding: "4px 8px" },
+                                          },
+                                        }}
+                                        error={!!errors.detalles?.[index]?.descuentoUnitario}
+                                        sx={{ width: 100 }}
+                                      />
+                                    )}
+                                  />
+                                </TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 600 }}>
+                                  {monedaFormatter.format(linea > 0 ? linea : 0)}
+                                </TableCell>
+                                <TableCell align="center">
+                                  <Tooltip title="Quitar producto">
+                                    <IconButton size="small" color="error" onClick={() => remove(index)}>
+                                      <DeleteForeverIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                          {fields.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  Sin productos. Haga doble clic o use el botón de agregar en el catálogo.
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
                           )}
-                        />
-                      )}
-                    />
-                    <Tooltip title="Agregar cliente">
-                      <span>
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => setClienteDialogOpen(true)}
-                          disabled={!canRegistrarCliente}
-                          sx={{ mt: 0.25 }}
-                        >
-                          <PersonAddIcon />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+
+                    {errors.detalles?.root?.message && (
+                      <FormHelperText error>{errors.detalles.root.message}</FormHelperText>
+                    )}
+                    {typeof errors.detalles?.message === "string" && (
+                      <FormHelperText error>{errors.detalles.message}</FormHelperText>
+                    )}
+
+                    <Typography variant="body1" sx={{ alignSelf: "flex-end", fontWeight: 700, mt: "auto" }}>
+                      Total venta: {monedaFormatter.format(Math.max(0, subtotal))}
+                    </Typography>
                   </Stack>
+                </Section>
+              </Box>
 
-                  <Controller
-                    name="clienteTipoDocumento"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControl size="small" error={!!errors.clienteTipoDocumento} sx={{ minWidth: 340, flex: 1 }}>
-                        <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-                          <FormLabel sx={{ fontSize: 12, whiteSpace: "nowrap" }}>Tipo de documento</FormLabel>
-                          <RadioGroup
-                            row
-                            value={field.value ? String(field.value) : ""}
-                            onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
-                            sx={{ flexWrap: "nowrap" }}
-                          >
-                            {tiposDocumento.map((t) => (
-                              <FormControlLabel
-                                key={t.id}
-                                value={String(t.id)}
-                                control={<Radio size="small" />}
-                                label={t.nombre}
-                                disabled={loadingTiposDocumento}
-                                sx={{ mr: 1 }}
-                              />
-                            ))}
-                          </RadioGroup>
-                        </Stack>
-                        {errors.clienteTipoDocumento && (
-                          <FormHelperText>{errors.clienteTipoDocumento.message}</FormHelperText>
-                        )}
-                      </FormControl>
-                    )}
-                  />
-
-                  <TextField
-                    label="Documento"
-                    size="small"
-                    value={documentoCliente}
-                    placeholder="—"
-                    slotProps={{ input: { readOnly: true } }}
-                    helperText={
-                      !clienteSel
-                        ? "Seleccione un cliente"
-                        : tipoDocumentoSel && !documentoCliente
-                          ? "El cliente no tiene este documento registrado"
-                          : undefined
-                    }
-                    error={!!tipoDocumentoSel && !!clienteSel && !documentoCliente}
-                    sx={{ minWidth: 180, width: { xs: "100%", md: 200 } }}
-                  />
-
-                  <TextField
-                    label="Teléfono"
-                    size="small"
-                    value={clienteSel?.telefono || ""}
-                    placeholder="—"
-                    slotProps={{ input: { readOnly: true } }}
-                    helperText={
-                      !clienteSel
-                        ? "Seleccione un cliente"
-                        : !clienteSel.telefono
-                          ? "Sin teléfono registrado"
-                          : undefined
-                    }
-                    sx={{ minWidth: 170, width: { xs: "100%", md: 190 } }}
-                  />
-                </Stack>
-
-                <Stack
-                  sx={{
-                    flexDirection: { xs: "column", sm: "row" },
-                    gap: 2,
-                    alignItems: { xs: "stretch", sm: "flex-start" },
-                  }}
-                >
-                  <Controller
-                    name="modalidadEntrega"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControl
-                        fullWidth
-                        size="small"
-                        error={!!errors.modalidadEntrega}
-                        sx={{ minWidth: 210, width: { xs: "100%", sm: 240 } }}
-                      >
-                        <InputLabel id="modalidad-entrega-label">Modalidad de entrega *</InputLabel>
-                        <Select
-                          labelId="modalidad-entrega-label"
-                          label="Modalidad de entrega *"
-                          value={field.value ? String(field.value) : ""}
-                          onChange={(e) => {
-                            const value = e.target.value ? Number(e.target.value) : 0;
-                            field.onChange(value);
-                            if (value !== MODALIDAD_ENVIO_DOMICILIO) {
-                              setValue("direccionEntrega", "");
-                              clearErrors("direccionEntrega");
-                            }
-                          }}
-                          disabled={loadingModalidades}
-                        >
-                          {modalidadesEntrega.map((m) => (
-                            <MenuItem key={m.id} value={String(m.id)}>
-                              {m.nombre}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        {errors.modalidadEntrega && <FormHelperText>{errors.modalidadEntrega.message}</FormHelperText>}
-                      </FormControl>
-                    )}
-                  />
-
-                  <Controller
-                    name="direccionEntrega"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        value={field.value ?? ""}
-                        label={
-                          modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
-                            ? "Dirección de entrega *"
-                            : "Dirección de entrega"
-                        }
-                        size="small"
-                        placeholder="Dirección de entrega"
-                        disabled={modalidadEntrega !== MODALIDAD_ENVIO_DOMICILIO}
-                        error={!!errors.direccionEntrega}
-                        helperText={
-                          errors.direccionEntrega?.message ??
-                          (modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
-                            ? "Obligatorio para envio a domicilio"
-                            : "Solo aplica para envio a domicilio")
-                        }
-                        sx={{ flex: 1 }}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="costoEnvio"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label="Costo de envío"
-                        size="small"
-                        type="number"
-                        onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
-                        onFocus={seleccionarContenidoInput}
-                        onClick={seleccionarContenidoInput}
-                        disabled={modalidadEntrega !== MODALIDAD_ENVIO_DOMICILIO}
-                        slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
-                        error={!!errors.costoEnvio}
-                        helperText={
-                          errors.costoEnvio?.message ??
-                          (modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
-                            ? "Se suma al total de la venta"
-                            : "Solo aplica para envío a domicilio")
-                        }
-                        sx={{ minWidth: 150, width: { xs: "100%", sm: 180 } }}
-                      />
-                    )}
-                  />
-                </Stack>
-
-                <Controller
-                  name="observaciones"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      value={field.value ?? ""}
-                      label="Observaciones"
-                      size="small"
-                      fullWidth
-                      multiline
-                      minRows={1}
-                      placeholder="Observaciones de la venta (opcional)"
-                      error={!!errors.observaciones}
-                      helperText={errors.observaciones?.message}
-                    />
-                  )}
-                />
-              </Stack>
-            </Section>
-
-            {Number(modalidadEntrega) === MODALIDAD_ENVIO_DOMICILIO && (
-              <Alert severity="info" sx={{ alignItems: "center" }}>
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  sx={{ gap: { xs: 0.5, sm: 1.5 }, alignItems: { xs: "flex-start", sm: "center" } }}
-                >
-                  <Typography variant="body2">
-                    Total de productos: <strong>{monedaFormatter.format(totalProductos)}</strong>
-                  </Typography>
-                  <Typography variant="body2">+</Typography>
-                  <Typography variant="body2">
-                    Envío: <strong>{monedaFormatter.format(costoEnvioNum)}</strong>
-                  </Typography>
-                  <Typography variant="body2">=</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    Total de la venta: {monedaFormatter.format(totalVenta)}
-                  </Typography>
-                </Stack>
-              </Alert>
-            )}
-
-            <Section title="Pagos">
-              <Stack sx={{ gap: 2 }}>
-                {pagoFields.map((item, index) => {
-                  const esDeposito = Number(pagos?.[index]?.tipoMedio) === MEDIO_DEPOSITO_BANCARIO;
-                  const mediosDisponibles = mediosPagoFiltrados.filter(
-                    (medio) =>
-                      medio.id === Number(pagos?.[index]?.tipoMedio) ||
-                      !pagos?.some((pago, pagoIndex) => pagoIndex !== index && Number(pago.tipoMedio) === medio.id),
-                  );
-
-                  return (
-                    <Stack key={item.id} sx={{ gap: 2 }}>
+              <Box sx={{ gridArea: "rightTop", minWidth: 0 }}>
+                <Section title="Datos del cliente y condiciones de venta">
+                  <Stack sx={{ gap: 2 }}>
+                    <Stack
+                      sx={{
+                        flexDirection: "column",
+                        gap: 2,
+                        alignItems: "stretch",
+                      }}
+                    >
                       <Stack
+                        direction="row"
                         sx={{
-                          display: { xs: "flex", sm: "grid" },
-                          flexDirection: "column",
-                          gridTemplateColumns: "minmax(220px, 1fr) minmax(220px, 1fr) 180px 40px",
-                          gap: 2,
+                          minWidth: 0,
+                          width: "100%",
+                          gap: 0.5,
                           alignItems: "flex-start",
                         }}
                       >
-                        {index === 0 ? (
-                          <Controller
-                            name="tipoPago"
-                            control={control}
-                            render={({ field }) => (
-                              <FormControl
-                                fullWidth
-                                size="small"
-                                error={!!errors.tipoPago}
-                                sx={{ flex: 1, minWidth: 220 }}
-                              >
-                                <InputLabel id="tipo-pago-label">Tipo de pago *</InputLabel>
-                                <Select
-                                  labelId="tipo-pago-label"
-                                  label="Tipo de pago *"
-                                  value={field.value ? String(field.value) : ""}
-                                  onChange={(e) => {
-                                    const value = e.target.value ? Number(e.target.value) : 0;
-                                    field.onChange(value);
-                                    if (value === TIPO_PAGO_CREDITO) {
-                                      if (pagoFields.length > 1) {
-                                        removePago(pagoFields.slice(1).map((_, pagoIndex) => pagoIndex + 1));
-                                      }
-                                      setValue("pagos.0.tipoMedio", MEDIO_CREDITO);
-                                    }
-                                  }}
-                                  disabled={loadingTiposPago}
-                                >
-                                  {tiposPago.map((t) => (
-                                    <MenuItem key={t.id} value={String(t.id)}>
-                                      {t.nombre}
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                                {errors.tipoPago && <FormHelperText>{errors.tipoPago.message}</FormHelperText>}
-                              </FormControl>
-                            )}
-                          />
-                        ) : (
-                          <Box sx={{ display: { xs: "none", sm: "block" } }} />
-                        )}
-
                         <Controller
-                          name={`pagos.${index}.tipoMedio`}
+                          name="clienteId"
                           control={control}
                           render={({ field }) => (
-                            <FormControl
+                            <Autocomplete
+                              options={clientes}
+                              loading={loadingClientes}
+                              size="small"
+                              value={clientes.find((c) => c.id === field.value) ?? null}
+                              onChange={(_, value) => field.onChange(value?.id ?? 0)}
+                              getOptionLabel={(option) =>
+                                option.nombreCompleto || option.razonSocial || `Cliente #${option.id}`
+                              }
+                              isOptionEqualToValue={(option, value) => option.id === value.id}
+                              noOptionsText="Sin resultados"
+                              loadingText="Cargando..."
                               fullWidth
-                              size="small"
-                              error={!!errors.pagos?.[index]?.tipoMedio}
-                              sx={{ flex: 1, minWidth: 200 }}
-                            >
-                              <InputLabel id={`medio-pago-label-${index}`}>Medio de pago *</InputLabel>
-                              <Select
-                                labelId={`medio-pago-label-${index}`}
-                                label="Medio de pago *"
-                                value={field.value ? String(field.value) : ""}
-                                onChange={(e) => {
-                                  const value = e.target.value ? Number(e.target.value) : 0;
-                                  field.onChange(value);
-                                  if (value === MEDIO_DEPOSITO_BANCARIO && !pagos?.[index]?.fechaDeposito) {
-                                    setValue(`pagos.${index}.fechaDeposito`, dayjs().format("YYYY-MM-DD"));
-                                  }
-                                }}
-                                disabled={loadingMediosPago || !Number(tipoPago)}
-                              >
-                                {mediosDisponibles.map((m) => (
-                                  <MenuItem key={m.id} value={String(m.id)}>
-                                    {m.nombre}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                              {errors.pagos?.[index]?.tipoMedio && (
-                                <FormHelperText>{errors.pagos[index].tipoMedio.message}</FormHelperText>
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Cliente *"
+                                  placeholder="Seleccione un cliente"
+                                  error={!!errors.clienteId}
+                                  helperText={errors.clienteId?.message}
+                                />
                               )}
-                            </FormControl>
-                          )}
-                        />
-
-                        <Controller
-                          name={`pagos.${index}.monto`}
-                          control={control}
-                          render={({ field }) => (
-                            <TextField
-                              label="Monto"
-                              size="small"
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
-                              onFocus={seleccionarContenidoInput}
-                              onClick={seleccionarContenidoInput}
-                              slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
-                              error={!!errors.pagos?.[index]?.monto}
-                              helperText={errors.pagos?.[index]?.monto?.message}
-                              sx={{ minWidth: 140, width: { xs: "100%", sm: 180 } }}
                             />
                           )}
                         />
-
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => removePago(index)}
-                          disabled={pagoFields.length === 1}
-                          sx={{ mt: { sm: 0.5 } }}
-                        >
-                          <DeleteForeverIcon fontSize="small" />
-                        </IconButton>
+                        <Tooltip title="Agregar cliente">
+                          <span>
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => setClienteDialogOpen(true)}
+                              disabled={!canRegistrarCliente}
+                              sx={{ mt: 0.25 }}
+                            >
+                              <PersonAddIcon />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
                       </Stack>
 
-                      {esDeposito && (
-                        <Box
-                          sx={{
-                            display: { xs: "flex", sm: "grid" },
-                            flexDirection: "column",
-                            gridTemplateColumns: "minmax(220px, 1fr) minmax(220px, 1fr) 180px 40px",
-                            gap: 2,
-                          }}
-                        >
-                          <Stack
-                            direction="row"
-                            sx={{
-                              gridColumn: { sm: "2 / 5" },
-                              gap: 2,
-                              alignItems: "flex-start",
-                              flexDirection: { xs: "column", sm: "row" },
-                            }}
+                      <Controller
+                        name="clienteTipoDocumento"
+                        control={control}
+                        render={({ field }) => (
+                          <FormControl
+                            size="small"
+                            error={!!errors.clienteTipoDocumento}
+                            sx={{ minWidth: 0, width: "100%" }}
                           >
-                            <Controller
-                              name={`pagos.${index}.banco`}
-                              control={control}
-                              render={({ field }) => (
-                                <TextField
-                                  {...field}
-                                  value={field.value ?? ""}
-                                  label="Banco *"
-                                  size="small"
-                                  placeholder="Ej: BCP, Interbank"
-                                  error={!!errors.pagos?.[index]?.banco}
-                                  helperText={errors.pagos?.[index]?.banco?.message}
-                                  sx={{ flex: 1, minWidth: 180 }}
-                                />
-                              )}
-                            />
-
-                            <Controller
-                              name={`pagos.${index}.numeroOperacion`}
-                              control={control}
-                              render={({ field }) => (
-                                <TextField
-                                  {...field}
-                                  value={field.value ?? ""}
-                                  label="N° de operación"
-                                  size="small"
-                                  placeholder="Opcional"
-                                  error={!!errors.pagos?.[index]?.numeroOperacion}
-                                  helperText={errors.pagos?.[index]?.numeroOperacion?.message}
-                                  sx={{ flex: 1, minWidth: 160 }}
-                                />
-                              )}
-                            />
-
-                            <Controller
-                              name={`pagos.${index}.fechaDeposito`}
-                              control={control}
-                              render={({ field }) => (
-                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-                                  <DatePicker
-                                    label="Fecha de depósito"
-                                    value={field.value ? dayjs(field.value) : dayjs()}
-                                    onChange={(value) => field.onChange(value?.format("YYYY-MM-DD") ?? null)}
-                                    format="DD/MM/YYYY"
-                                    slotProps={{
-                                      textField: {
-                                        size: "small",
-                                        error: !!errors.pagos?.[index]?.fechaDeposito,
-                                        helperText: errors.pagos?.[index]?.fechaDeposito?.message,
-                                        sx: { flex: 1, minWidth: 180 },
-                                      },
-                                    }}
+                            <Stack sx={{ alignItems: "flex-start", gap: 0.5 }}>
+                              <FormLabel sx={{ fontSize: 12 }}>Tipo de documento</FormLabel>
+                              <RadioGroup
+                                row
+                                value={field.value ? String(field.value) : ""}
+                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
+                                sx={{ flexWrap: "nowrap" }}
+                              >
+                                {tiposDocumento.map((t) => (
+                                  <FormControlLabel
+                                    key={t.id}
+                                    value={String(t.id)}
+                                    control={<Radio size="small" />}
+                                    label={t.nombre}
+                                    disabled={loadingTiposDocumento}
+                                    sx={{ mr: 1 }}
                                   />
-                                </LocalizationProvider>
+                                ))}
+                              </RadioGroup>
+                            </Stack>
+                            {errors.clienteTipoDocumento && (
+                              <FormHelperText>{errors.clienteTipoDocumento.message}</FormHelperText>
+                            )}
+                          </FormControl>
+                        )}
+                      />
+
+                      <TextField
+                        label="Documento"
+                        size="small"
+                        value={documentoCliente}
+                        placeholder="—"
+                        slotProps={{ input: { readOnly: true } }}
+                        helperText={
+                          !clienteSel
+                            ? "Seleccione un cliente"
+                            : tipoDocumentoSel && !documentoCliente
+                              ? "El cliente no tiene este documento registrado"
+                              : undefined
+                        }
+                        error={!!tipoDocumentoSel && !!clienteSel && !documentoCliente}
+                        sx={{ width: "100%" }}
+                      />
+
+                      <TextField
+                        label="Teléfono"
+                        size="small"
+                        value={clienteSel?.telefono || ""}
+                        placeholder="—"
+                        slotProps={{ input: { readOnly: true } }}
+                        helperText={
+                          !clienteSel
+                            ? "Seleccione un cliente"
+                            : !clienteSel.telefono
+                              ? "Sin teléfono registrado"
+                              : undefined
+                        }
+                        sx={{ width: "100%" }}
+                      />
+                    </Stack>
+
+                    <Stack
+                      sx={{
+                        flexDirection: "column",
+                        gap: 2,
+                        alignItems: "stretch",
+                      }}
+                    >
+                      <Controller
+                        name="modalidadEntrega"
+                        control={control}
+                        render={({ field }) => (
+                          <FormControl fullWidth size="small" error={!!errors.modalidadEntrega} sx={{ width: "100%" }}>
+                            <InputLabel id="modalidad-entrega-label">Modalidad de entrega *</InputLabel>
+                            <Select
+                              labelId="modalidad-entrega-label"
+                              label="Modalidad de entrega *"
+                              value={field.value ? String(field.value) : ""}
+                              onChange={(e) => {
+                                const value = e.target.value ? Number(e.target.value) : 0;
+                                field.onChange(value);
+                                if (value !== MODALIDAD_ENVIO_DOMICILIO) {
+                                  setValue("direccionEntrega", "");
+                                  clearErrors("direccionEntrega");
+                                }
+                              }}
+                              disabled={loadingModalidades}
+                            >
+                              {modalidadesEntrega.map((m) => (
+                                <MenuItem key={m.id} value={String(m.id)}>
+                                  {m.nombre}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                            {errors.modalidadEntrega && (
+                              <FormHelperText>{errors.modalidadEntrega.message}</FormHelperText>
+                            )}
+                          </FormControl>
+                        )}
+                      />
+
+                      <Controller
+                        name="direccionEntrega"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            value={field.value ?? ""}
+                            label={
+                              modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
+                                ? "Dirección de entrega *"
+                                : "Dirección de entrega"
+                            }
+                            size="small"
+                            placeholder="Dirección de entrega"
+                            disabled={modalidadEntrega !== MODALIDAD_ENVIO_DOMICILIO}
+                            error={!!errors.direccionEntrega}
+                            helperText={
+                              errors.direccionEntrega?.message ??
+                              (modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
+                                ? "Obligatorio para envio a domicilio"
+                                : "Solo aplica para envio a domicilio")
+                            }
+                            sx={{ width: "100%" }}
+                          />
+                        )}
+                      />
+
+                      <Controller
+                        name="costoEnvio"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            label="Costo de envío"
+                            size="small"
+                            type="number"
+                            onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                            onFocus={seleccionarContenidoInput}
+                            onClick={seleccionarContenidoInput}
+                            disabled={modalidadEntrega !== MODALIDAD_ENVIO_DOMICILIO}
+                            slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                            error={!!errors.costoEnvio}
+                            helperText={
+                              errors.costoEnvio?.message ??
+                              (modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO
+                                ? "Se suma al total de la venta"
+                                : "Solo aplica para envío a domicilio")
+                            }
+                            sx={{ width: "100%" }}
+                          />
+                        )}
+                      />
+                    </Stack>
+
+                    <Controller
+                      name="observaciones"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          value={field.value ?? ""}
+                          label="Observaciones"
+                          size="small"
+                          fullWidth
+                          multiline
+                          minRows={1}
+                          placeholder="Observaciones de la venta (opcional)"
+                          error={!!errors.observaciones}
+                          helperText={errors.observaciones?.message}
+                        />
+                      )}
+                    />
+                  </Stack>
+                </Section>
+              </Box>
+
+              {Number(modalidadEntrega) === MODALIDAD_ENVIO_DOMICILIO && (
+                <Alert severity="info" sx={{ alignItems: "center", gridArea: "alert", py: 1.5 }}>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    sx={{
+                      gap: { xs: 1, sm: 2 },
+                      alignItems: { xs: "flex-start", sm: "center" },
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <Typography variant="body1">
+                      Total de productos:{" "}
+                      <Box component="span" sx={{ fontWeight: 700, fontSize: "1.1rem", color: "text.primary" }}>
+                        {monedaFormatter.format(totalProductos)}
+                      </Box>
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: "text.secondary" }}>
+                      +
+                    </Typography>
+                    <Typography variant="body1">
+                      Envío:{" "}
+                      <Box component="span" sx={{ fontWeight: 700, fontSize: "1.1rem", color: "text.primary" }}>
+                        {monedaFormatter.format(costoEnvioNum)}
+                      </Box>
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: "text.secondary" }}>
+                      =
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 800, fontSize: "1.25rem", color: "primary.main" }}>
+                      Total a cobrar: {monedaFormatter.format(totalVenta)}
+                    </Typography>
+                  </Stack>
+                </Alert>
+              )}
+
+              <Box sx={{ gridArea: "rightBottom", minWidth: 0 }}>
+                <Section title="Pagos">
+                  <Stack sx={{ gap: 1.5 }}>
+                    {pagoFields.map((item, index) => {
+                      const esDeposito = Number(pagos?.[index]?.tipoMedio) === MEDIO_DEPOSITO_BANCARIO;
+                      const mediosDisponibles = mediosPagoFiltrados.filter(
+                        (medio) =>
+                          medio.id === Number(pagos?.[index]?.tipoMedio) ||
+                          !pagos?.some((pago, pagoIndex) => pagoIndex !== index && Number(pago.tipoMedio) === medio.id),
+                      );
+
+                      return (
+                        <Stack key={item.id} sx={{ gap: 1.5 }}>
+                          <Stack sx={{ gap: 1.5 }}>
+                            {index === 0 ? (
+                              <Controller
+                                name="tipoPago"
+                                control={control}
+                                render={({ field }) => (
+                                  <FormControl fullWidth size="small" error={!!errors.tipoPago}>
+                                    <InputLabel id="tipo-pago-label">Tipo de pago *</InputLabel>
+                                    <Select
+                                      labelId="tipo-pago-label"
+                                      label="Tipo de pago *"
+                                      value={field.value ? String(field.value) : ""}
+                                      onChange={(e) => {
+                                        const value = e.target.value ? Number(e.target.value) : 0;
+                                        field.onChange(value);
+                                        if (value === TIPO_PAGO_CREDITO) {
+                                          if (pagoFields.length > 1) {
+                                            removePago(pagoFields.slice(1).map((_, pagoIndex) => pagoIndex + 1));
+                                          }
+                                          setValue("pagos.0.tipoMedio", MEDIO_CREDITO);
+                                        }
+                                      }}
+                                      disabled={loadingTiposPago}
+                                    >
+                                      {tiposPago.map((t) => (
+                                        <MenuItem key={t.id} value={String(t.id)}>
+                                          {t.nombre}
+                                        </MenuItem>
+                                      ))}
+                                    </Select>
+                                    {errors.tipoPago && <FormHelperText>{errors.tipoPago.message}</FormHelperText>}
+                                  </FormControl>
+                                )}
+                              />
+                            ) : null}
+
+                            <Controller
+                              name={`pagos.${index}.tipoMedio`}
+                              control={control}
+                              render={({ field }) => (
+                                <FormControl fullWidth size="small" error={!!errors.pagos?.[index]?.tipoMedio}>
+                                  <InputLabel id={`medio-pago-label-${index}`}>Medio de pago *</InputLabel>
+                                  <Select
+                                    labelId={`medio-pago-label-${index}`}
+                                    label="Medio de pago *"
+                                    value={field.value ? String(field.value) : ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value ? Number(e.target.value) : 0;
+                                      field.onChange(value);
+                                      if (value === MEDIO_DEPOSITO_BANCARIO && !pagos?.[index]?.fechaDeposito) {
+                                        setValue(`pagos.${index}.fechaDeposito`, dayjs().format("YYYY-MM-DD"));
+                                      }
+                                    }}
+                                    disabled={loadingMediosPago || !Number(tipoPago)}
+                                  >
+                                    {mediosDisponibles.map((m) => (
+                                      <MenuItem key={m.id} value={String(m.id)}>
+                                        {m.nombre}
+                                      </MenuItem>
+                                    ))}
+                                  </Select>
+                                  {errors.pagos?.[index]?.tipoMedio && (
+                                    <FormHelperText>{errors.pagos[index].tipoMedio.message}</FormHelperText>
+                                  )}
+                                </FormControl>
                               )}
                             />
+
+                            <Stack direction="row" sx={{ gap: 0.5, alignItems: "flex-start" }}>
+                              <Controller
+                                name={`pagos.${index}.monto`}
+                                control={control}
+                                render={({ field }) => (
+                                  <TextField
+                                    label="Monto"
+                                    size="small"
+                                    type="number"
+                                    value={field.value}
+                                    onChange={(e) =>
+                                      field.onChange(e.target.value === "" ? "" : Number(e.target.value))
+                                    }
+                                    onFocus={seleccionarContenidoInput}
+                                    onClick={seleccionarContenidoInput}
+                                    slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                                    error={!!errors.pagos?.[index]?.monto}
+                                    helperText={errors.pagos?.[index]?.monto?.message}
+                                    sx={{ flex: 1, minWidth: 0 }}
+                                  />
+                                )}
+                              />
+                              <IconButton
+                                color="error"
+                                size="small"
+                                onClick={() => removePago(index)}
+                                disabled={pagoFields.length === 1}
+                                sx={{ mt: 0.5 }}
+                              >
+                                <DeleteForeverIcon fontSize="small" />
+                              </IconButton>
+                            </Stack>
                           </Stack>
-                        </Box>
-                      )}
-                    </Stack>
-                  );
-                })}
 
-                {errors.pagos?.root?.message && <FormHelperText error>{errors.pagos.root.message}</FormHelperText>}
+                          {esDeposito && (
+                            <Stack sx={{ gap: 1.5 }}>
+                              <Controller
+                                name={`pagos.${index}.banco`}
+                                control={control}
+                                render={({ field }) => (
+                                  <TextField
+                                    {...field}
+                                    value={field.value ?? ""}
+                                    label="Banco *"
+                                    size="small"
+                                    placeholder="Ej: BCP, Interbank"
+                                    error={!!errors.pagos?.[index]?.banco}
+                                    helperText={errors.pagos?.[index]?.banco?.message}
+                                    fullWidth
+                                  />
+                                )}
+                              />
 
-                {Number(tipoPago) !== TIPO_PAGO_CREDITO && pagoFields.length < 2 && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<AddIcon />}
-                    onClick={() =>
-                      appendPago({
-                        tipoMedio: 0,
-                        monto: 0,
-                        montoRecibido: null,
-                        banco: "",
-                        numeroOperacion: "",
-                        fechaDeposito: "",
-                      })
-                    }
-                    disabled={!Number(pagos?.[0]?.tipoMedio)}
-                    sx={{ alignSelf: "flex-start" }}
-                  >
-                    Agregar pago
-                  </Button>
-                )}
-              </Stack>
-            </Section>
+                              <Controller
+                                name={`pagos.${index}.numeroOperacion`}
+                                control={control}
+                                render={({ field }) => (
+                                  <TextField
+                                    {...field}
+                                    value={field.value ?? ""}
+                                    label="N° de operación"
+                                    size="small"
+                                    placeholder="Opcional"
+                                    error={!!errors.pagos?.[index]?.numeroOperacion}
+                                    helperText={errors.pagos?.[index]?.numeroOperacion?.message}
+                                    fullWidth
+                                  />
+                                )}
+                              />
+
+                              <Controller
+                                name={`pagos.${index}.fechaDeposito`}
+                                control={control}
+                                render={({ field }) => (
+                                  <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                                    <DatePicker
+                                      label="Fecha de depósito"
+                                      value={field.value ? dayjs(field.value) : dayjs()}
+                                      onChange={(value) => field.onChange(value?.format("YYYY-MM-DD") ?? null)}
+                                      format="DD/MM/YYYY"
+                                      slotProps={{
+                                        textField: {
+                                          size: "small",
+                                          error: !!errors.pagos?.[index]?.fechaDeposito,
+                                          helperText: errors.pagos?.[index]?.fechaDeposito?.message,
+                                          fullWidth: true,
+                                        },
+                                      }}
+                                    />
+                                  </LocalizationProvider>
+                                )}
+                              />
+                            </Stack>
+                          )}
+                        </Stack>
+                      );
+                    })}
+
+                    {errors.pagos?.root?.message && <FormHelperText error>{errors.pagos.root.message}</FormHelperText>}
+
+                    {Number(tipoPago) !== TIPO_PAGO_CREDITO && pagoFields.length < 2 && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AddIcon />}
+                        onClick={() =>
+                          appendPago({
+                            tipoMedio: 0,
+                            monto: 0,
+                            montoRecibido: null,
+                            banco: "",
+                            numeroOperacion: "",
+                            fechaDeposito: "",
+                          })
+                        }
+                        disabled={!Number(pagos?.[0]?.tipoMedio)}
+                        sx={{ alignSelf: "flex-start" }}
+                      >
+                        Agregar pago
+                      </Button>
+                    )}
+                  </Stack>
+                </Section>
+              </Box>
+            </Box>
 
             <Section title="Resumen de la venta">
               <Stack
@@ -1630,15 +1672,16 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
             }}
           >
             <Typography
-              variant="body2"
+              variant="h5"
               sx={(theme) => ({
                 mr: { sm: "auto" },
-                px: 2,
-                py: 1,
+                px: 3,
+                py: 1.5,
                 borderRadius: 2,
-                fontWeight: 700,
-                color: theme.palette.mode === "dark" ? "#b0c6c4" : "#486563",
-                backgroundColor: alpha("#526f6d", theme.palette.mode === "dark" ? 0.14 : 0.07),
+                fontWeight: 800,
+                fontSize: "1.5rem",
+                color: "success.main",
+                backgroundColor: alpha("#c06e2b", theme.palette.mode === "dark" ? 0.14 : 0.07),
               })}
             >
               Total: {monedaFormatter.format(totalVenta)}
