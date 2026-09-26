@@ -33,6 +33,7 @@ import AssignmentReturnIcon from "@mui/icons-material/AssignmentReturn";
 import SwapHorizontalCircleIcon from "@mui/icons-material/SwapHorizontalCircle";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
 import FileOpenIcon from "@mui/icons-material/FileOpen";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import SellIcon from "@mui/icons-material/Sell";
@@ -228,8 +229,25 @@ const mainListItems: MenuItemType[] = [
   {
     text: "Caja",
     icon: <PointOfSaleIcon />,
-    href: "/dashboard/caja",
     allowedRoles: [...permissions.listarCajaSesiones, ...permissions.abrirCajaSesion, ...permissions.cerrarCajaSesion],
+    children: [
+      {
+        text: "Gestionar",
+        icon: <PointOfSaleIcon />,
+        href: "/dashboard/caja",
+        allowedRoles: [
+          ...permissions.listarCajaSesiones,
+          ...permissions.abrirCajaSesion,
+          ...permissions.cerrarCajaSesion,
+        ],
+      },
+      {
+        text: "Ingresos",
+        icon: <VisibilityIcon />,
+        href: "/dashboard/caja/ingresos",
+        allowedRoles: [...permissions.listarCajaSesiones, ...permissions.listarVentas],
+      },
+    ],
   },
   {
     text: "Ventas",
@@ -317,7 +335,7 @@ export default function MenuContent({ open = true }: MenuContentProps) {
 
   const toggleGroup = (text: string) => setOpenGroups((prev) => ({ ...prev, [text]: !prev[text] }));
 
-  const isActive = (href: string) => pathname.startsWith(href);
+  const isActive = (href: string) => pathname === href;
 
   const filteredMainItems = mainListItems.filter((item) => {
     // Sin restricción

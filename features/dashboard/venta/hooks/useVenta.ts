@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { listarVentas, registrarVenta } from "../venta.logic";
-import { ListarVentasRequest, RegistrarVentaRequest } from "../venta.type";
+import { listarVentas, obtenerVenta, registrarVenta } from "../venta.logic";
+import { ListarVentasRequest, RegistrarVentaRequest, Venta } from "../venta.type";
 import {
   listarTiposPago,
   listarModalidadesEntrega,
@@ -26,6 +26,26 @@ export function useVentas(params: ListarVentasRequest) {
   return {
     ventas: response?.ventas ?? [],
     totalRegistros: response?.totalRegistros ?? 0,
+    loading,
+    error: error instanceof Error ? error.message : null,
+  };
+}
+
+export function useVentaById(id: number | null, canAccess: boolean) {
+  const {
+    data: venta,
+    isLoading: loading,
+    error,
+  } = useQuery<Venta>({
+    queryKey: ["venta", id],
+    queryFn: () => obtenerVenta(id!),
+    enabled: canAccess && !!id,
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+
+  return {
+    venta,
     loading,
     error: error instanceof Error ? error.message : null,
   };
