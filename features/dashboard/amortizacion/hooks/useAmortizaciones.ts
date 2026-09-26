@@ -1,9 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { amortizarCliente, amortizarVenta, listarVentasCredito } from "../amortizacion.logic";
+import {
+  amortizarCliente,
+  amortizarVenta,
+  descargarReporteDeudasPdf,
+  listarVentasCredito,
+} from "../amortizacion.logic";
 import {
   AmortizarClienteRequest,
   AmortizarVentaRequest,
   ListarVentasCreditoRequest,
+  ReporteDeudasPdfRequest,
   VentaCredito,
 } from "../amortizacion.type";
 
@@ -92,6 +98,18 @@ export function useAmortizarCliente() {
 
   return {
     amortizar: mutation.mutateAsync,
+    loading: mutation.isPending,
+    error: mutation.error instanceof Error ? mutation.error.message : null,
+  };
+}
+
+export function useReporteDeudasPdf() {
+  const mutation = useMutation({
+    mutationFn: (params: ReporteDeudasPdfRequest) => descargarReporteDeudasPdf(params),
+  });
+
+  return {
+    descargar: mutation.mutateAsync,
     loading: mutation.isPending,
     error: mutation.error instanceof Error ? mutation.error.message : null,
   };

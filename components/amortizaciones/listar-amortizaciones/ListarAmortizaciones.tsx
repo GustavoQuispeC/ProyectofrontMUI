@@ -36,6 +36,7 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import CloseIcon from "@mui/icons-material/Close";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import PersonIcon from "@mui/icons-material/Person";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -53,6 +54,7 @@ import {
   useAmortizarCliente,
   useAmortizarVenta,
   useDeudaCliente,
+  useReporteDeudasPdf,
   useVentasCredito,
 } from "@/features/dashboard/amortizacion/hooks/useAmortizaciones";
 import { VentaCredito } from "@/features/dashboard/amortizacion/amortizacion.type";
@@ -273,6 +275,7 @@ export default function ListarAmortizaciones() {
   const { ventas, totalRegistros, loading, error } = useVentasCredito(params, canAccess);
   const amortizarVentaMutation = useAmortizarVenta();
   const amortizarClienteMutation = useAmortizarCliente();
+  const reporteMutation = useReporteDeudasPdf();
   const {
     totalDeuda: deudaTotalCliente,
     loading: loadingDeudaCliente,
@@ -302,6 +305,29 @@ export default function ListarAmortizaciones() {
   const limpiarSeleccion = () => {
     setVentaSeleccionada(null);
     setRowSelectionModel({ type: "include", ids: new Set() });
+  };
+
+  const descargarReporte = async () => {
+    const clienteSeleccionado = clientes.find((cliente) => cliente.id === Number(clienteId));
+    const nombreCliente = clienteSeleccionado ? clienteNombre(clienteSeleccionado) : clienteBusqueda || undefined;
+
+    try {
+      await toastPromise(
+        reporteMutation.descargar({
+          clienteNombreORazonSocial: nombreCliente,
+          tiendaId: tiendaId ? Number(tiendaId) : undefined,
+          fechaDesde: fechaDesde || undefined,
+          fechaHasta: fechaHasta || undefined,
+        }),
+        {
+          loading: "Generando reporte de deudas...",
+          success: "Reporte de deudas descargado",
+          error: (error: Error) => error.message || "No se pudo descargar el reporte",
+        },
+      );
+    } catch {
+      return;
+    }
   };
 
   const abrirAmortizacion = (tipo: "venta" | "cliente") => {
@@ -490,6 +516,18 @@ export default function ListarAmortizaciones() {
                 }}
                 slotProps={{ textField: { size: "small", sx: { minWidth: 160 } } }}
               />
+
+              <Button
+                variant="outlined"
+                size="small"
+                color="primary"
+                startIcon={<PictureAsPdfOutlinedIcon />}
+                disabled={reporteMutation.loading}
+                onClick={descargarReporte}
+                sx={{ minWidth: 170 }}
+              >
+                {reporteMutation.loading ? "Generando..." : "Reporte de deudas"}
+              </Button>
             </Stack>
           </Box>
 

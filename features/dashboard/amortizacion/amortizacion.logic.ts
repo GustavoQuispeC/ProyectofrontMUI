@@ -4,12 +4,14 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import {
   amortizarClienteApi,
   amortizarVentaApi,
+  descargarReporteDeudasPdfApi,
   listarVentasCreditoApi,
 } from "./amortizacion.service";
 import {
   AmortizarClienteRequest,
   AmortizarVentaRequest,
   ListarVentasCreditoRequest,
+  ReporteDeudasPdfRequest,
 } from "./amortizacion.type";
 
 export async function listarVentasCredito(params: ListarVentasCreditoRequest) {
@@ -43,4 +45,16 @@ export async function amortizarCliente(clienteId: number, data: AmortizarCliente
   }
 
   return amortizarClienteApi(clienteId, data);
+}
+
+//! Descargar reporte de deudas en PDF
+export async function descargarReporteDeudasPdf(params: ReporteDeudasPdfRequest) {
+  const user = getAuthUser();
+
+  if (!user) throw new Error("No autenticado");
+  if (!hasPermission(user.rol, permissions.listarAmortizaciones)) {
+    throw new Error("No tienes privilegios para descargar el reporte de deudas");
+  }
+
+  return descargarReporteDeudasPdfApi(params);
 }

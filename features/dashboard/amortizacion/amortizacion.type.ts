@@ -54,3 +54,10 @@ export interface AmortizarClienteRequest {
   tiendaId: number;
   pagos: AmortizacionPago[];
 }
+
+export interface ReporteDeudasPdfRequest {
+  clienteNombreORazonSocial?: string;
+  tiendaId?: number;
+  fechaDesde?: string;
+  fechaHasta?: string;
+}

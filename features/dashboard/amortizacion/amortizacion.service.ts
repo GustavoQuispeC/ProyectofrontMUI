@@ -1,10 +1,13 @@
 import dayjs from "dayjs";
 import { apiVenta } from "@/lib/api-venta";
+import { getAuthUser } from "@/shared/auth/auth.service";
+import { getApiErrorMessage } from "@/lib/api-error";
 import {
   AmortizarClienteRequest,
   AmortizarVentaRequest,
   ListarVentasCreditoRequest,
   ListarVentasCreditoResponse,
+  ReporteDeudasPdfRequest,
   VentaCredito,
 } from "./amortizacion.type";
 
@@ -54,4 +57,48 @@ export function amortizarClienteApi(clienteId: number, data: AmortizarClienteReq
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+//! Descargar reporte de deudas en PDF
+export async function descargarReporteDeudasPdfApi(
+  params: ReporteDeudasPdfRequest,
+  filename = "reporte-deudas.pdf",
+): Promise<void> {
+  const searchParams = new URLSearchParams();
+
+  if (params.clienteNombreORazonSocial?.trim()) {
+    searchParams.set("clienteNombreORazonSocial", params.clienteNombreORazonSocial.trim());
+  }
+  if (params.tiendaId) searchParams.set("tiendaId", String(params.tiendaId));
+  if (params.fechaDesde) {
+    searchParams.set("fechaDesde", dayjs(params.fechaDesde).startOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS"));
+  }
+  if (params.fechaHasta) {
+    searchParams.set("fechaHasta", dayjs(params.fechaHasta).endOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS"));
+  }
+
+  const auth = getAuthUser();
+  const response = await fetch(`${apiUrl}/venta/reporte-deudas-pdf?${searchParams.toString()}`, {
+    method: "GET",
+    headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : {},
+  });
+
+  if (response.status === 401) {
+    window.location.href = "/";
+    throw new Error("Sesión expirada");
+  }
+
+  if (!response.ok) {
+    throw new Error(await getApiErrorMessage(response));
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
 }
