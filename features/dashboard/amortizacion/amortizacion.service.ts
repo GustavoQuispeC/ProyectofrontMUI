@@ -23,10 +23,10 @@ export async function listarVentasCreditoApi(params: ListarVentasCreditoRequest)
   if (params.clienteId) searchParams.set("clienteId", String(params.clienteId));
   if (params.estadoPago) searchParams.set("estadoPago", String(params.estadoPago));
   if (params.fechaDesde) {
-    searchParams.set("fechaDesde", dayjs(params.fechaDesde).startOf("day").toISOString());
+    searchParams.set("fechaDesde", dayjs(params.fechaDesde).startOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS"));
   }
   if (params.fechaHasta) {
-    searchParams.set("fechaHasta", dayjs(params.fechaHasta).endOf("day").toISOString());
+    searchParams.set("fechaHasta", dayjs(params.fechaHasta).endOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS"));
   }
 
   const query = searchParams.toString();

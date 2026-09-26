@@ -1,18 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/es";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridPaginationModel } from "@mui/x-data-grid";
 import {
   Autocomplete,
   Box,
   Button,
   Card,
   CardContent,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -32,7 +33,6 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -40,11 +40,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { esES } from "@mui/x-data-grid/locales";
 
 import { useTiendas } from "@/features/dashboard/tienda/hooks/useTiendas";
-import { useCajaSesionesPorTienda } from "@/features/dashboard/caja/hooks/useCajaSesion";
 import { useClientesListado } from "@/features/dashboard/cliente/hooks/useClientesListado";
 import { useReporteCajaPagos } from "@/features/dashboard/reportecaja/hooks/useReporteCaja";
 import { useVentaById } from "@/features/dashboard/venta/hooks/useVenta";
-import { ReporteCajaPago, NotaAfectada } from "@/features/dashboard/reportecaja/reportecaja.type";
+import { ReporteCajaPago } from "@/features/dashboard/reportecaja/reportecaja.type";
 import { Venta } from "@/features/dashboard/venta/venta.type";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
@@ -64,6 +63,27 @@ const formaPagoTexto: Record<number, string> = {
   1: "Efectivo",
   2: "Depósito bancario",
 };
+
+const estadoVentaTexto: Record<number, string> = {
+  1: "Confirmada",
+  2: "Anulada",
+};
+
+const tipoPagoTexto: Record<number, string> = {
+  1: "Contado",
+  2: "Crédito",
+};
+
+const modalidadEntregaTexto: Record<number, string> = {
+  1: "Recojo en tienda",
+  2: "Envío a domicilio",
+  3: "Entrega inmediata",
+};
+
+function catalogoTexto(valor: string | number | null | undefined, opciones: Record<number, string>) {
+  if (valor === null || valor === undefined || valor === "") return "-";
+  return opciones[Number(valor)] ?? String(valor).replaceAll("_", " ");
+}
 
 function LoadingOverlay() {
   return (
@@ -88,9 +108,12 @@ function formatFecha(fecha: string | null | undefined) {
   return dayjs(fecha).format("DD/MM/YYYY HH:mm");
 }
 
-function notasTexto(notas: NotaAfectada[]) {
-  if (!notas || notas.length === 0) return "-";
-  return notas.map((n) => n.ventaCodigo).join(", ");
+function formatCliente(cliente: { id: number; nombre?: string; apellido?: string; razonSocial?: string | null }) {
+  return (
+    cliente.razonSocial?.trim() ||
+    `${cliente.nombre ?? ""} ${cliente.apellido ?? ""}`.trim() ||
+    `Cliente #${cliente.id}`
+  );
 }
 
 interface NotasAfectadasModalProps {
@@ -117,9 +140,9 @@ function NotasAfectadasModal({ open, onClose, pago, onVerVenta }: NotasAfectadas
               </TableRow>
             </TableHead>
             <TableBody>
-              {pago.notasAfectadas.map((nota) => (
+              {pago.notasAfectadas.map((nota, index) => (
                 <TableRow
-                  key={nota.ventaId}
+                  key={`${pago.pagoMedioId}-${nota.ventaId}-${index}`}
                   hover
                   onDoubleClick={() => onVerVenta(nota.ventaId)}
                   sx={{ cursor: "pointer" }}
@@ -203,25 +226,32 @@ function VentaDetalleModal({ open, onClose, venta, loading }: VentaDetalleModalP
                 <Typography variant="body2" color="text.secondary">
                   Estado
                 </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  {venta.estado}
-                </Typography>
+                <Chip
+                  size="small"
+                  color={Number(venta.estado) === 1 ? "success" : "warning"}
+                  label={catalogoTexto(venta.estado, estadoVentaTexto)}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Tipo de pago
                 </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  {venta.tipoPago}
-                </Typography>
+                <Chip
+                  size="small"
+                  color={Number(venta.tipoPago) === 2 ? "warning" : "primary"}
+                  label={catalogoTexto(venta.tipoPago, tipoPagoTexto)}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="body2" color="text.secondary">
                   Modalidad de entrega
                 </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  {venta.modalidadEntrega ?? venta.modalidad ?? "-"}
-                </Typography>
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color="info"
+                  label={catalogoTexto(venta.modalidadEntrega ?? venta.modalidad, modalidadEntregaTexto)}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="body2" color="text.secondary">
@@ -286,29 +316,34 @@ export default function IngresosCaja() {
   const canAccess = user ? hasPermission(user.rol, permissions.listarCajaSesiones) : false;
 
   const [tiendaId, setTiendaId] = useState<number | "">("");
-  const [cajaSesionId, setCajaSesionId] = useState<number | "">("");
   const [clienteId, setClienteId] = useState<number | null>(null);
+  const [clienteBusqueda, setClienteBusqueda] = useState("");
+  const [clienteBusquedaDebounced, setClienteBusquedaDebounced] = useState("");
   const [formaPago, setFormaPago] = useState<number | "">("");
   const [fechaDesde, setFechaDesde] = useState<dayjs.Dayjs | null>(dayjs());
   const [fechaHasta, setFechaHasta] = useState<dayjs.Dayjs | null>(dayjs());
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
-    pageSize: 50,
+    pageSize: 20,
   });
 
   const [pagoSeleccionado, setPagoSeleccionado] = useState<ReporteCajaPago | null>(null);
   const [ventaIdSeleccionada, setVentaIdSeleccionada] = useState<number | null>(null);
 
   const { tiendas, loading: loadingTiendas } = useTiendas(canAccess);
-  const { sesiones } = useCajaSesionesPorTienda(tiendaId ? Number(tiendaId) : null, canAccess);
+  useEffect(() => {
+    const timer = setTimeout(() => setClienteBusquedaDebounced(clienteBusqueda.trim()), 400);
+    return () => clearTimeout(timer);
+  }, [clienteBusqueda]);
+
   const { clientes, loading: loadingClientes } = useClientesListado({
+    busqueda: clienteBusquedaDebounced || undefined,
     pagina: 1,
     tamanoPagina: 200,
   });
   const { pagos, totalRegistros, loading, refetch } = useReporteCajaPagos(
     {
       tiendaId: tiendaId ? Number(tiendaId) : null,
-      cajaSesionId: cajaSesionId ? Number(cajaSesionId) : null,
       clienteId,
       formaPago: formaPago ? Number(formaPago) : null,
       fechaDesde: fechaDesde?.format("YYYY-MM-DD") ?? null,
@@ -351,35 +386,16 @@ export default function IngresosCaja() {
       minWidth: 160,
     },
     {
-      field: "notasAfectadas",
-      headerName: "Nota(s) afectada(s)",
-      flex: 1,
-      minWidth: 180,
-      renderCell: (params: GridRenderCellParams<ReporteCajaPago, NotaAfectada[]>) => (
-        <Tooltip title="Doble clic para ver detalle">
-          <Typography variant="body2" noWrap>
-            {notasTexto(params.value ?? [])}
-          </Typography>
-        </Tooltip>
-      ),
+      field: "tiendaNombre",
+      headerName: "Tienda",
+      width: 160,
     },
+
     {
       field: "formaPago",
       headerName: "Forma de pago",
       width: 150,
       valueGetter: (_value, row) => formaPagoTexto[row.formaPago] ?? "-",
-    },
-    {
-      field: "banco",
-      headerName: "Banco",
-      width: 120,
-      valueGetter: (_value, row) => row.banco ?? "-",
-    },
-    {
-      field: "numeroOperacion",
-      headerName: "N° Operación",
-      width: 130,
-      valueGetter: (_value, row) => row.numeroOperacion ?? "-",
     },
     {
       field: "importe",
@@ -390,27 +406,23 @@ export default function IngresosCaja() {
       valueGetter: (_value, row) => monedaFormatter.format(row.importe),
     },
     {
-      field: "tiendaNombre",
-      headerName: "Tienda",
-      width: 140,
+      field: "banco",
+      headerName: "Banco",
+      width: 120,
+      valueGetter: (_value, row) => row.banco ?? "-",
     },
     {
-      field: "cajaSesionId",
-      headerName: "Caja",
-      width: 100,
-      valueGetter: (_value, row) => `Caja #${row.cajaSesionId}`,
+      field: "numeroOperacion",
+      headerName: "N° Operación",
+      width: 120,
+      valueGetter: (_value, row) => row.numeroOperacion ?? "-",
     },
     {
       field: "usuarioNombre",
-      headerName: "Usuario",
-      width: 150,
+      headerName: "Amortizado por:",
+      width: 240,
     },
   ];
-
-  const handleTiendaChange = (value: number | "") => {
-    setTiendaId(value);
-    setCajaSesionId("");
-  };
 
   const handleBuscar = () => {
     refetch();
@@ -429,7 +441,7 @@ export default function IngresosCaja() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-      <Box sx={{ p: 3, maxWidth: 1600, mx: "auto" }}>
+      <Box sx={{ width: "100%" }}>
         <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
           Reporte de ingresos de caja
         </Typography>
@@ -443,7 +455,10 @@ export default function IngresosCaja() {
                   labelId="tienda-label"
                   label="Tienda"
                   value={tiendaId}
-                  onChange={(e) => handleTiendaChange(e.target.value as number | "")}
+                  onChange={(e) => {
+                    setTiendaId(e.target.value as number | "");
+                    setPaginationModel((prev) => ({ ...prev, page: 0 }));
+                  }}
                   disabled={loadingTiendas}
                 >
                   <MenuItem value="">Todas</MenuItem>
@@ -456,34 +471,26 @@ export default function IngresosCaja() {
               </FormControl>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 4, lg: 2 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="caja-label">Caja</InputLabel>
-                <Select
-                  labelId="caja-label"
-                  label="Caja"
-                  value={cajaSesionId}
-                  onChange={(e) => setCajaSesionId(e.target.value as number | "")}
-                >
-                  <MenuItem value="">Todas</MenuItem>
-                  {sesiones.map((s) => (
-                    <MenuItem key={s.id} value={s.id}>
-                      Caja #{s.id} - {s.empleadoAperturaNombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
             <Grid size={{ xs: 12, md: 4, lg: 3 }}>
               <Autocomplete
                 size="small"
                 options={clientes}
                 loading={loadingClientes}
-                getOptionLabel={(option) => `${option.nombre ?? ""} ${option.apellido ?? ""}`.trim() || `#${option.id}`}
-                value={clientes.find((c) => c.id === clienteId) ?? null}
-                onChange={(_e, value) => setClienteId(value?.id ?? null)}
-                renderInput={(params) => <TextField {...params} label="Cliente" />}
+                filterOptions={(options) => options}
+                getOptionLabel={formatCliente}
+                getOptionKey={(option) => option.id}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                value={clientes.find((cliente) => cliente.id === clienteId) ?? null}
+                inputValue={clienteBusqueda}
+                onInputChange={(_event, value, reason) => {
+                  if (reason !== "reset") setClienteBusqueda(value);
+                }}
+                onChange={(_event, value) => {
+                  setClienteId(value?.id ?? null);
+                  setClienteBusqueda(value ? formatCliente(value) : "");
+                  setPaginationModel((prev) => ({ ...prev, page: 0 }));
+                }}
+                renderInput={(params) => <TextField {...params} label="Buscar cliente" />}
               />
             </Grid>
 
@@ -494,7 +501,10 @@ export default function IngresosCaja() {
                   labelId="forma-pago-label"
                   label="Forma de pago"
                   value={formaPago}
-                  onChange={(e) => setFormaPago(e.target.value as number | "")}
+                  onChange={(e) => {
+                    setFormaPago(e.target.value as number | "");
+                    setPaginationModel((prev) => ({ ...prev, page: 0 }));
+                  }}
                 >
                   <MenuItem value="">Todos</MenuItem>
                   <MenuItem value={1}>Efectivo</MenuItem>
@@ -507,7 +517,10 @@ export default function IngresosCaja() {
               <DatePicker
                 label="Fecha desde"
                 value={fechaDesde}
-                onChange={setFechaDesde}
+                onChange={(value) => {
+                  setFechaDesde(value);
+                  setPaginationModel((prev) => ({ ...prev, page: 0 }));
+                }}
                 slotProps={{ textField: { size: "small", fullWidth: true } }}
               />
             </Grid>
@@ -516,7 +529,10 @@ export default function IngresosCaja() {
               <DatePicker
                 label="Fecha hasta"
                 value={fechaHasta}
-                onChange={setFechaHasta}
+                onChange={(value) => {
+                  setFechaHasta(value);
+                  setPaginationModel((prev) => ({ ...prev, page: 0 }));
+                }}
                 slotProps={{ textField: { size: "small", fullWidth: true } }}
               />
             </Grid>
@@ -531,36 +547,36 @@ export default function IngresosCaja() {
 
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Card>
+            <Card sx={{ bgcolor: "success.main", color: "success.contrastText" }}>
               <CardContent>
-                <Typography color="text.secondary" variant="body2">
+                <Typography sx={{ opacity: 0.85 }} variant="body2">
                   Total efectivo
                 </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
                   {monedaFormatter.format(resumen.efectivo)}
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Card>
+            <Card sx={{ bgcolor: "info.main", color: "info.contrastText" }}>
               <CardContent>
-                <Typography color="text.secondary" variant="body2">
+                <Typography sx={{ opacity: 0.85 }} variant="body2">
                   Total depósitos
                 </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
                   {monedaFormatter.format(resumen.depositos)}
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Card>
+            <Card sx={{ bgcolor: "warning.main", color: "warning.contrastText" }}>
               <CardContent>
-                <Typography color="text.secondary" variant="body2">
+                <Typography sx={{ opacity: 0.85 }} variant="body2">
                   Total ingresos
                 </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
                   {monedaFormatter.format(resumen.total)}
                 </Typography>
               </CardContent>
@@ -568,10 +584,12 @@ export default function IngresosCaja() {
           </Grid>
         </Grid>
 
-        <Paper sx={{ height: 520 }} variant="outlined">
+        <Paper sx={{ height: "auto", width: "100%", p: 2, borderRadius: 0 }}>
           <DataGrid
             rows={pagos}
             columns={columns}
+            rowHeight={38}
+            columnHeaderHeight={42}
             loading={loading}
             slots={{ loadingOverlay: LoadingOverlay }}
             onRowDoubleClick={(params) => handleRowDoubleClick(params.row as ReporteCajaPago)}
@@ -580,9 +598,21 @@ export default function IngresosCaja() {
             pageSizeOptions={pageSizeOptions}
             paginationMode="server"
             rowCount={totalRegistros}
-            getRowId={(row) => row.pagoId}
+            getRowId={(row) => row.pagoMedioId}
             disableRowSelectionOnClick
             localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+            sx={{
+              border: 0,
+              mx: 1,
+              "& .MuiDataGrid-columnHeader": {
+                backgroundColor: "#e4eaeb",
+              },
+              "& .MuiDataGrid-columnHeaderTitle": {
+                fontWeight: 700,
+                color: "#006064",
+                textTransform: "uppercase",
+              },
+            }}
           />
         </Paper>
 

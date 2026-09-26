@@ -11,7 +11,7 @@ export function useReporteCajaPagos(params: ListarReporteCajaPagosRequest, canAc
   } = useQuery({
     queryKey: ["reporte-caja-pagos", params],
     queryFn: () => listarReporteCajaPagos(params),
-    enabled: canAccess && !!params.tiendaId && !!params.fechaDesde && !!params.fechaHasta,
+    enabled: canAccess && !!params.fechaDesde && !!params.fechaHasta,
     staleTime: 1000 * 60 * 2,
     retry: 1,
   });

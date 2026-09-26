@@ -5,6 +5,7 @@ export interface NotaAfectada {
 }
 
 export interface ReporteCajaPago {
+  pagoMedioId: number;
   pagoId: number;
   pagoCodigo: string;
   fechaPago: string;

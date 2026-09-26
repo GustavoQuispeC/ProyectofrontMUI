@@ -36,6 +36,13 @@ const detalleSchema = z
         message: `Stock disponible: ${detalle.stockDisponible}`,
       });
     }
+    if (detalle.descuentoUnitario > detalle.precioUnitario) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["descuentoUnitario"],
+        message: "El descuento unitario no puede superar el precio unitario",
+      });
+    }
   });
 
 const montoRecibidoSchema = z.preprocess(
@@ -93,7 +100,7 @@ export const ventaSchema = z
     }
 
     if (data.tipoPago === TIPO_PAGO_CONTADO) {
-      const subtotal = data.detalles.reduce((acc, d) => acc + d.cantidad * d.precioUnitario - d.descuentoUnitario, 0);
+      const subtotal = data.detalles.reduce((acc, d) => acc + d.cantidad * (d.precioUnitario - d.descuentoUnitario), 0);
       const envio = data.modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO ? data.costoEnvio : 0;
       const total = Math.max(0, subtotal - data.descuento + envio);
       const pagado = data.pagos.reduce((acc, p) => acc + p.monto, 0);

@@ -41,7 +41,7 @@ export async function listarVentasApi(params: ListarVentasRequest): Promise<{
 
 //! Obtener venta por id
 export function obtenerVentaApi(id: number): Promise<VentaRegistrada> {
-  return apiVenta(`${apiUrl}/ventas/${id}`, {
+  return apiVenta(`${apiUrl}/venta/${id}`, {
     method: "GET",
   });
 }

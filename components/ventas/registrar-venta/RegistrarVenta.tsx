@@ -155,7 +155,7 @@ function Section({ title, children, style, contentStyle }: SectionProps) {
         borderColor: alpha(color, theme.palette.mode === "dark" ? 0.35 : 0.18),
         borderRadius: 2,
         overflow: "hidden",
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: alpha(color, theme.palette.mode === "dark" ? 0.09 : 0.035),
         boxShadow: `0 2px 8px ${alpha("#263238", theme.palette.mode === "dark" ? 0.14 : 0.06)}`,
       })}
     >
@@ -357,9 +357,15 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
   );
 
   const subtotal = (detalles ?? []).reduce(
-    (acc, d) => acc + (Number(d.cantidad) || 0) * (Number(d.precioUnitario) || 0) - (Number(d.descuentoUnitario) || 0),
+    (acc, d) =>
+      acc + (Number(d.cantidad) || 0) * ((Number(d.precioUnitario) || 0) - (Number(d.descuentoUnitario) || 0)),
     0,
   );
+  const descuentoUnitarioTotal = (detalles ?? []).reduce(
+    (acc, d) => acc + (Number(d.cantidad) || 0) * (Number(d.descuentoUnitario) || 0),
+    0,
+  );
+  const descuentoTotal = descuentoUnitarioTotal + (Number(descuento) || 0);
   //! Medios de pago permitidos según el tipo de pago: Contado → Efectivo/Depósito; Crédito → solo Crédito
   const mediosPagoFiltrados = useMemo(() => {
     if (Number(tipoPago) === TIPO_PAGO_CREDITO) return mediosPago.filter((m) => m.id === MEDIO_CREDITO);
@@ -965,8 +971,8 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
                           {fields.map((item, index) => {
                             const detalle = detalles?.[index];
                             const linea =
-                              (Number(detalle?.cantidad) || 0) * (Number(detalle?.precioUnitario) || 0) -
-                              (Number(detalle?.descuentoUnitario) || 0);
+                              (Number(detalle?.cantidad) || 0) *
+                              ((Number(detalle?.precioUnitario) || 0) - (Number(detalle?.descuentoUnitario) || 0));
 
                             return (
                               <TableRow
@@ -1606,7 +1612,7 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
                 <TextField
                   label="Descuento"
                   size="small"
-                  value={monedaFormatter.format(Number(descuento) || 0)}
+                  value={monedaFormatter.format(descuentoTotal)}
                   slotProps={{ input: { readOnly: true } }}
                 />
                 <TextField
