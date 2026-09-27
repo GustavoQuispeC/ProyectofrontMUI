@@ -4,6 +4,7 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import {
   amortizarClienteApi,
   amortizarVentaApi,
+  descargarReporteDeudasExcelApi,
   descargarReporteDeudasPdfApi,
   listarVentasCreditoApi,
 } from "./amortizacion.service";
@@ -11,6 +12,7 @@ import {
   AmortizarClienteRequest,
   AmortizarVentaRequest,
   ListarVentasCreditoRequest,
+  ReporteDeudasExcelRequest,
   ReporteDeudasPdfRequest,
 } from "./amortizacion.type";
 
@@ -57,4 +59,16 @@ export async function descargarReporteDeudasPdf(params: ReporteDeudasPdfRequest)
   }
 
   return descargarReporteDeudasPdfApi(params);
+}
+
+//! Descargar reporte de deudas en Excel
+export async function descargarReporteDeudasExcel(params: ReporteDeudasExcelRequest) {
+  const user = getAuthUser();
+
+  if (!user) throw new Error("No autenticado");
+  if (!hasPermission(user.rol, permissions.listarAmortizaciones)) {
+    throw new Error("No tienes privilegios para descargar el reporte de deudas");
+  }
+
+  return descargarReporteDeudasExcelApi(params);
 }

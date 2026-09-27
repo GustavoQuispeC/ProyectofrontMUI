@@ -35,7 +35,8 @@ export default function Dashboard({ children }: DashboardProps) {
     pathname?.startsWith("/dashboard/despachos") ||
     pathname?.startsWith("/dashboard/inventario/listar") ||
     pathname?.startsWith("/dashboard/clientes/listar") ||
-    pathname?.startsWith("/dashboard/caja/ingresos");
+    pathname?.startsWith("/dashboard/caja/ingresos") ||
+    pathname?.startsWith("/dashboard/amortizaciones");
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <SideMenu />

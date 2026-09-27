@@ -61,3 +61,10 @@ export interface ReporteDeudasPdfRequest {
   fechaDesde?: string;
   fechaHasta?: string;
 }
+
+export interface ReporteDeudasExcelRequest {
+  clienteNombreORazonSocial?: string;
+  tiendaId?: number;
+  fechaDesde?: string;
+  fechaHasta?: string;
+}

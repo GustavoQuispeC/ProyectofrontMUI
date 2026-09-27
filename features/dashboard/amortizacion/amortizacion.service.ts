@@ -7,6 +7,7 @@ import {
   AmortizarVentaRequest,
   ListarVentasCreditoRequest,
   ListarVentasCreditoResponse,
+  ReporteDeudasExcelRequest,
   ReporteDeudasPdfRequest,
   VentaCredito,
 } from "./amortizacion.type";
@@ -79,6 +80,50 @@ export async function descargarReporteDeudasPdfApi(
 
   const auth = getAuthUser();
   const response = await fetch(`${apiUrl}/venta/reporte-deudas-pdf?${searchParams.toString()}`, {
+    method: "GET",
+    headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : {},
+  });
+
+  if (response.status === 401) {
+    window.location.href = "/";
+    throw new Error("Sesión expirada");
+  }
+
+  if (!response.ok) {
+    throw new Error(await getApiErrorMessage(response));
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+//! Descargar reporte de deudas en Excel
+export async function descargarReporteDeudasExcelApi(
+  params: ReporteDeudasExcelRequest,
+  filename = "reporte-deudas.xlsx",
+): Promise<void> {
+  const searchParams = new URLSearchParams();
+
+  if (params.clienteNombreORazonSocial?.trim()) {
+    searchParams.set("clienteNombreORazonSocial", params.clienteNombreORazonSocial.trim());
+  }
+  if (params.tiendaId) searchParams.set("tiendaId", String(params.tiendaId));
+  if (params.fechaDesde) {
+    searchParams.set("fechaDesde", dayjs(params.fechaDesde).startOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS"));
+  }
+  if (params.fechaHasta) {
+    searchParams.set("fechaHasta", dayjs(params.fechaHasta).endOf("day").format("YYYY-MM-DDTHH:mm:ss.SSS"));
+  }
+
+  const auth = getAuthUser();
+  const response = await fetch(`${apiUrl}/venta/reporte-deudas-excel?${searchParams.toString()}`, {
     method: "GET",
     headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : {},
   });

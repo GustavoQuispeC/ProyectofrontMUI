@@ -36,6 +36,7 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import CloseIcon from "@mui/icons-material/Close";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import PersonIcon from "@mui/icons-material/Person";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -54,6 +55,7 @@ import {
   useAmortizarCliente,
   useAmortizarVenta,
   useDeudaCliente,
+  useReporteDeudasExcel,
   useReporteDeudasPdf,
   useVentasCredito,
 } from "@/features/dashboard/amortizacion/hooks/useAmortizaciones";
@@ -226,7 +228,7 @@ export default function ListarAmortizaciones() {
   const mediosPago = mediosPagoCatalogo.length > 0 ? mediosPagoCatalogo : mediosPagoFallback;
 
   const [tiendaId, setTiendaId] = useState("");
-  const [clienteId, setClienteId] = useState("");
+  const [clienteSeleccionadoFiltro, setClienteSeleccionadoFiltro] = useState<ListarCliente | null>(null);
   const [clienteBusqueda, setClienteBusqueda] = useState("");
   const [clienteBusquedaDebounced, setClienteBusquedaDebounced] = useState("");
   const [estadoPago, setEstadoPago] = useState("");
@@ -255,27 +257,30 @@ export default function ListarAmortizaciones() {
   const { clientes, loading: loadingClientes } = useClientesListado({
     pagina: 1,
     tamanoPagina: 50,
-    busqueda: clienteBusquedaDebounced || undefined,
+    busqueda: clienteSeleccionadoFiltro ? undefined : clienteBusquedaDebounced || undefined,
     isActive: true,
   });
+
+  const clienteIdFiltro = clienteSeleccionadoFiltro?.id ?? undefined;
 
   const params = useMemo(
     () => ({
       pagina: paginationModel.page + 1,
       tamanoPagina: paginationModel.pageSize,
       tiendaId: tiendaId ? Number(tiendaId) : undefined,
-      clienteId: clienteId ? Number(clienteId) : undefined,
+      clienteId: clienteIdFiltro ? Number(clienteIdFiltro) : undefined,
       estadoPago: estadoPago ? Number(estadoPago) : undefined,
       fechaDesde: fechaDesde || undefined,
       fechaHasta: fechaHasta || undefined,
     }),
-    [paginationModel.page, paginationModel.pageSize, tiendaId, clienteId, estadoPago, fechaDesde, fechaHasta],
+    [paginationModel.page, paginationModel.pageSize, tiendaId, clienteIdFiltro, estadoPago, fechaDesde, fechaHasta],
   );
 
   const { ventas, totalRegistros, loading, error } = useVentasCredito(params, canAccess);
   const amortizarVentaMutation = useAmortizarVenta();
   const amortizarClienteMutation = useAmortizarCliente();
   const reporteMutation = useReporteDeudasPdf();
+  const reporteExcelMutation = useReporteDeudasExcel();
   const {
     totalDeuda: deudaTotalCliente,
     loading: loadingDeudaCliente,
@@ -308,8 +313,7 @@ export default function ListarAmortizaciones() {
   };
 
   const descargarReporte = async () => {
-    const clienteSeleccionado = clientes.find((cliente) => cliente.id === Number(clienteId));
-    const nombreCliente = clienteSeleccionado ? clienteNombre(clienteSeleccionado) : clienteBusqueda || undefined;
+    const nombreCliente = clienteSeleccionadoFiltro ? clienteNombre(clienteSeleccionadoFiltro) : undefined;
 
     try {
       await toastPromise(
@@ -322,6 +326,28 @@ export default function ListarAmortizaciones() {
         {
           loading: "Generando reporte de deudas...",
           success: "Reporte de deudas descargado",
+          error: (error: Error) => error.message || "No se pudo descargar el reporte",
+        },
+      );
+    } catch {
+      return;
+    }
+  };
+
+  const descargarReporteExcel = async () => {
+    const nombreCliente = clienteSeleccionadoFiltro ? clienteNombre(clienteSeleccionadoFiltro) : undefined;
+
+    try {
+      await toastPromise(
+        reporteExcelMutation.descargar({
+          clienteNombreORazonSocial: nombreCliente,
+          tiendaId: tiendaId ? Number(tiendaId) : undefined,
+          fechaDesde: fechaDesde || undefined,
+          fechaHasta: fechaHasta || undefined,
+        }),
+        {
+          loading: "Generando reporte Excel...",
+          success: "Reporte Excel descargado",
           error: (error: Error) => error.message || "No se pudo descargar el reporte",
         },
       );
@@ -463,15 +489,25 @@ export default function ListarAmortizaciones() {
 
               <Autocomplete
                 size="small"
-                options={clientes}
+                options={
+                  clienteSeleccionadoFiltro && !clientes.some((c) => c.id === clienteSeleccionadoFiltro.id)
+                    ? [clienteSeleccionadoFiltro, ...clientes]
+                    : clientes
+                }
                 loading={loadingClientes}
-                value={clientes.find((cliente) => cliente.id === Number(clienteId)) ?? null}
+                value={clienteSeleccionadoFiltro}
                 inputValue={clienteBusqueda}
                 getOptionLabel={clienteNombre}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
-                onInputChange={(_event, value) => setClienteBusqueda(value)}
+                onInputChange={(_event, value, reason) => {
+                  setClienteBusqueda(value);
+                  if (reason === "clear") {
+                    setClienteSeleccionadoFiltro(null);
+                    resetPagina();
+                  }
+                }}
                 onChange={(_event, value) => {
-                  setClienteId(value ? String(value.id) : "");
+                  setClienteSeleccionadoFiltro(value);
                   resetPagina();
                 }}
                 sx={{ minWidth: 260, flex: 1 }}
@@ -516,18 +552,6 @@ export default function ListarAmortizaciones() {
                 }}
                 slotProps={{ textField: { size: "small", sx: { minWidth: 160 } } }}
               />
-
-              <Button
-                variant="outlined"
-                size="small"
-                color="primary"
-                startIcon={<PictureAsPdfOutlinedIcon />}
-                disabled={reporteMutation.loading}
-                onClick={descargarReporte}
-                sx={{ minWidth: 170 }}
-              >
-                {reporteMutation.loading ? "Generando..." : "Reporte de deudas"}
-              </Button>
             </Stack>
           </Box>
 
@@ -572,6 +596,25 @@ export default function ListarAmortizaciones() {
             </Paper>
 
             <Stack direction="row" sx={{ justifyContent: "flex-end", gap: 1.5, mt: 2, flexWrap: "wrap" }}>
+              <Button
+                variant="outlined"
+                startIcon={<PictureAsPdfOutlinedIcon />}
+                disabled={reporteMutation.loading}
+                onClick={descargarReporte}
+                sx={{ minWidth: 170 }}
+              >
+                {reporteMutation.loading ? "Generando..." : "Reporte PDF"}
+              </Button>
+              <Button
+                variant="outlined"
+                color="success"
+                startIcon={<FileDownloadOutlinedIcon />}
+                disabled={reporteExcelMutation.loading}
+                onClick={descargarReporteExcel}
+                sx={{ minWidth: 170, mr: "auto" }}
+              >
+                {reporteExcelMutation.loading ? "Generando..." : "Reporte Excel"}
+              </Button>
               <Tooltip title={ventaSeleccionada ? "Amortizar la nota seleccionada" : "Seleccione una nota de venta"}>
                 <span>
                   <Button
