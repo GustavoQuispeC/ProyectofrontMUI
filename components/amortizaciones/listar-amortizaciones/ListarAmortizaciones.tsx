@@ -561,7 +561,19 @@ export default function ListarAmortizaciones() {
                 {error}
               </Alert>
             )}
-            <Paper sx={{ height: 720, width: "100%", p: 2 }} variant="outlined">
+            <Paper
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                height: "calc(100vh - 420px)",
+                maxHeight: 600,
+                minHeight: 320,
+                width: "100%",
+                p: 2,
+                overflow: "hidden",
+              }}
+              variant="outlined"
+            >
               <DataGrid
                 rows={ventas}
                 columns={columns}
@@ -583,6 +595,8 @@ export default function ListarAmortizaciones() {
                 onRowSelectionModelChange={handleSeleccion}
                 localeText={esES.components.MuiDataGrid.defaultProps.localeText}
                 sx={{
+                  flex: 1,
+                  minHeight: 0,
                   border: 0,
                   mx: 1,
                   "& .MuiDataGrid-columnHeader": { backgroundColor: "#e4eaeb" },
