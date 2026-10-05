@@ -53,7 +53,7 @@ export async function obtenerCajaSesion(id: number) {
 }
 
 //! Obtener sesión abierta de una tienda
-export async function obtenerCajaSesionActiva(tiendaId: number) {
+export async function obtenerCajaSesionActiva(terminalId: number) {
   const user = getAuthUser();
 
   if (!user) {
@@ -63,7 +63,7 @@ export async function obtenerCajaSesionActiva(tiendaId: number) {
     throw new Error("No tienes privilegios para ver la sesión de caja");
   }
 
-  return obtenerCajaSesionActivaApi(tiendaId);
+  return obtenerCajaSesionActivaApi(terminalId);
 }
 
 //! Historial de sesiones de una tienda

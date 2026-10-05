@@ -15,7 +15,7 @@ const montoField = (label: string) =>
     .min(0, `${label} no puede ser negativo`);
 
 export const abrirCajaSchema = z.object({
-  tiendaId: z.coerce.number().int().min(1, "Seleccione una tienda"),
+  terminalId: z.coerce.number().int().min(1, "Seleccione una terminal"),
   montoApertura: montoField("El monto de apertura"),
   observaciones: optionalString,
 });

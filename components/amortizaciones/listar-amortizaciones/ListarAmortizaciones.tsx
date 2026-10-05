@@ -69,6 +69,8 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { useMounted } from "@/shared/hooks/useMounted";
+import { useTerminalSeleccionada } from "@/shared/hooks/useTerminalSeleccionada";
+import { useCajaSesionActiva } from "@/features/dashboard/caja/hooks/useCajaSesion";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 import { toastPromise } from "@/shared/utils/toast";
 
@@ -217,6 +219,7 @@ function getColumns(estadosPago: CatalogoItem[], onVer: (row: VentaCredito) => v
 
 export default function ListarAmortizaciones() {
   const mounted = useMounted();
+  const { terminal } = useTerminalSeleccionada();
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.listarAmortizaciones) : false;
   const canAmortizar = user ? hasPermission(user.rol, permissions.registrarAmortizacion) : false;
@@ -279,6 +282,7 @@ export default function ListarAmortizaciones() {
   const { ventas, totalRegistros, loading, error } = useVentasCredito(params, canAccess);
   const amortizarVentaMutation = useAmortizarVenta();
   const amortizarClienteMutation = useAmortizarCliente();
+  const { sesion: sesionCaja, loading: loadingSesionCaja } = useCajaSesionActiva(terminal?.id ?? null, canAccess);
   const reporteMutation = useReporteDeudasPdf();
   const reporteExcelMutation = useReporteDeudasExcel();
   const {
@@ -293,7 +297,7 @@ export default function ListarAmortizaciones() {
   const estadosPagoCredito = estadosPago.filter((item) => item.id === 1 || item.id === 2);
   const medioSeleccionado = mediosPago.find((medio) => medio.id === Number(tipoMedio));
   const requiereBanco = esDeposito(medioSeleccionado);
-  const puedeAmortizarCliente = Boolean(ventaSeleccionada?.clienteId && ventaSeleccionada?.tiendaId);
+  const puedeAmortizarCliente = Boolean(ventaSeleccionada?.clienteId && terminal?.id && sesionCaja);
 
   const resetPagina = () => setPaginationModel((prev) => ({ ...prev, page: 0 }));
 
@@ -376,6 +380,14 @@ export default function ListarAmortizaciones() {
 
   const guardarAmortizacion = async () => {
     if (!ventaSeleccionada || !tipoAmortizacion) return;
+    if (!terminal?.id) {
+      setErrorAmortizacion("Seleccione una terminal antes de registrar la amortización.");
+      return;
+    }
+    if (!sesionCaja) {
+      setErrorAmortizacion("La caja de la terminal seleccionada está cerrada. Abra caja primero.");
+      return;
+    }
 
     const montoNumero = Number(monto);
     if (!Number.isFinite(montoNumero) || montoNumero <= 0) {
@@ -404,7 +416,10 @@ export default function ListarAmortizaciones() {
     try {
       if (tipoAmortizacion === "venta") {
         await toastPromise(
-          amortizarVentaMutation.amortizar({ ventaId: ventaSeleccionada.id, data: { pagos: [pago] } }),
+          amortizarVentaMutation.amortizar({
+            ventaId: ventaSeleccionada.id,
+            data: { terminalId: terminal.id, pagos: [pago] },
+          }),
           {
             loading: "Registrando amortización de la nota de venta...",
             success: "Amortización registrada correctamente",
@@ -412,15 +427,15 @@ export default function ListarAmortizaciones() {
           },
         );
       } else {
-        if (!ventaSeleccionada.clienteId || !ventaSeleccionada.tiendaId) {
-          setErrorAmortizacion("La venta seleccionada no contiene clienteId y tiendaId para amortizar por cliente.");
+        if (!ventaSeleccionada.clienteId) {
+          setErrorAmortizacion("La venta seleccionada no contiene clienteId para amortizar por cliente.");
           return;
         }
 
         await toastPromise(
           amortizarClienteMutation.amortizar({
             clienteId: ventaSeleccionada.clienteId,
-            data: { tiendaId: ventaSeleccionada.tiendaId, pagos: [pago] },
+            data: { terminalId: terminal.id, pagos: [pago] },
           }),
           {
             loading: "Registrando amortización del cliente...",
@@ -634,7 +649,7 @@ export default function ListarAmortizaciones() {
                   <Button
                     variant="contained"
                     startIcon={<ReceiptLongIcon />}
-                    disabled={!ventaSeleccionada || !canAmortizar}
+                    disabled={!ventaSeleccionada || !canAmortizar || !terminal?.id || !sesionCaja || loadingSesionCaja}
                     onClick={() => abrirAmortizacion("venta")}
                   >
                     Amortizar por nota de venta
@@ -647,7 +662,7 @@ export default function ListarAmortizaciones() {
                     ? "Seleccione una nota de venta"
                     : puedeAmortizarCliente
                       ? "Amortizar la deuda total del cliente"
-                      : "La API no devolvió clienteId y tiendaId para esta venta"
+                      : "Seleccione una venta y asegúrese de que la terminal tenga una caja abierta"
                 }
               >
                 <span>

@@ -27,8 +27,8 @@ export function obtenerCajaSesionApi(id: number): Promise<CajaSesion | null> {
 }
 
 //! Obtener sesión abierta de una tienda
-export function obtenerCajaSesionActivaApi(tiendaId: number): Promise<CajaSesion | null> {
-  return apiCajaSesion(`${apiUrl}/cajasesion/activa/${tiendaId}`, {
+export function obtenerCajaSesionActivaApi(terminalId: number): Promise<CajaSesion | null> {
+  return apiCajaSesion(`${apiUrl}/cajasesion/activa/${terminalId}`, {
     method: "GET",
   });
 }

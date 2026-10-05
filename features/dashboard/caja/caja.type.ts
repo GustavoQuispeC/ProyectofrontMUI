@@ -1,5 +1,5 @@
 export interface AbrirCajaSesionRequest {
-  tiendaId: number;
+  terminalId: number;
   montoApertura: number;
   observaciones?: string | null;
 }
@@ -12,6 +12,8 @@ export interface CerrarCajaSesionRequest {
 
 export interface CajaSesion {
   id: number;
+  terminalId: number;
+  terminalNombre?: string | null;
   tiendaId: number;
   tiendaNombre?: string | null;
   empleadoAperturaId: number;

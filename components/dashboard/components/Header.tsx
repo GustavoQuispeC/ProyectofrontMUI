@@ -1,4 +1,7 @@
+"use client";
+
 import Stack from "@mui/material/Stack";
+import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import Tooltip from "@mui/material/Tooltip";
@@ -6,12 +9,19 @@ import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import NavbarBreadcrumbs from "./NavbarBreadcrumbs";
 import ColorModeToggleButton from "@/components/ui/theme/ColorModeToggleButton";
 import dayjs from "dayjs";
+import { useTerminalSeleccionada } from "@/shared/hooks/useTerminalSeleccionada";
+import { useCajaSesionActiva } from "@/features/dashboard/caja/hooks/useCajaSesion";
+import { getAuthUser } from "@/shared/auth/auth.service";
 
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 export default function Header() {
+  const { terminal } = useTerminalSeleccionada();
+  const user = getAuthUser();
+  const { sesion, loading } = useCajaSesionActiva(terminal?.id ?? null, Boolean(user));
+
   return (
     <Stack
       direction="row"
@@ -31,6 +41,14 @@ export default function Header() {
       <NavbarBreadcrumbs />
 
       <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
+        {terminal && (
+          <Chip
+            size="small"
+            variant="outlined"
+            color={sesion ? "success" : "warning"}
+            label={`${terminal.nombre} · ${loading ? "Verificando caja" : sesion ? "Caja abierta" : "Caja cerrada"}`}
+          />
+        )}
         {/* DatePicker alineado visualmente con los IconButtons */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker

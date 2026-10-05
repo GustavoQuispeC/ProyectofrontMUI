@@ -46,6 +46,7 @@ export default function LoginUsuario({
 
       if (typeof window !== "undefined") {
         localStorage.setItem(storageKey, JSON.stringify(payload));
+        localStorage.removeItem("terminal_seleccionada");
       }
 
       toastSuccess("Bienvenido a Grupo Famet SAC");

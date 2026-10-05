@@ -9,16 +9,16 @@ import {
 import { AbrirCajaSesionRequest, CerrarCajaSesionRequest, CajaSesion } from "../caja.type";
 
 //! Sesión abierta de una tienda
-export function useCajaSesionActiva(tiendaId: number | null, canAccess: boolean) {
+export function useCajaSesionActiva(terminalId: number | null, canAccess: boolean) {
   const {
     data: sesion = null,
     isLoading: loading,
     error,
     refetch,
   } = useQuery<CajaSesion | null>({
-    queryKey: ["caja-sesion-activa", tiendaId],
-    queryFn: () => obtenerCajaSesionActiva(tiendaId!),
-    enabled: canAccess && !!tiendaId,
+    queryKey: ["caja-sesion-activa", terminalId],
+    queryFn: () => obtenerCajaSesionActiva(terminalId!),
+    enabled: canAccess && !!terminalId,
     retry: 1,
   });
 
@@ -84,8 +84,8 @@ export function useAbrirCajaSesion() {
   } = useMutation({
     mutationFn: (data: AbrirCajaSesionRequest) => abrirCajaSesion(data),
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["caja-sesion-activa", variables.tiendaId] });
-      queryClient.invalidateQueries({ queryKey: ["caja-sesiones", variables.tiendaId] });
+      queryClient.invalidateQueries({ queryKey: ["caja-sesion-activa", variables.terminalId] });
+      queryClient.invalidateQueries({ queryKey: ["caja-sesiones"] });
     },
   });
 

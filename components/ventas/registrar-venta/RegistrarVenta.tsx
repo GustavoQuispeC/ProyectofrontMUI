@@ -91,6 +91,7 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
 import { useMounted } from "@/shared/hooks/useMounted";
+import { useTerminalSeleccionada } from "@/shared/hooks/useTerminalSeleccionada";
 import { toastPromise } from "@/shared/utils/toast";
 import AccessDenied from "@/shared/components/access-denied/AccessDenied";
 
@@ -220,6 +221,7 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
   const user = getAuthUser();
   const canAccess = user ? hasPermission(user.rol, permissions.registrarVenta) : false;
   const mounted = useMounted();
+  const { terminal } = useTerminalSeleccionada();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [minimized, setMinimized] = useState(false);
@@ -313,8 +315,8 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
     loading: loadingCatalogo,
   } = useProductosCatalogoVenta(catalogoParams, canAccess && !!tiendaIdNum);
 
-  const { sesion: sesionCaja, loading: loadingSesion } = useCajaSesionActiva(tiendaIdNum, canAccess);
-  const cajaCerrada = !!tiendaIdNum && !loadingSesion && !sesionCaja;
+  const { sesion: sesionCaja, loading: loadingSesion } = useCajaSesionActiva(terminal?.id ?? null, canAccess);
+  const cajaCerrada = !!terminal?.id && !loadingSesion && !sesionCaja;
 
   //! ---- Documento del cliente según tipo seleccionado ----
   const clienteSel = useMemo(() => clientes.find((c) => c.id === Number(clienteId)), [clientes, clienteId]);
@@ -516,8 +518,15 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
   );
 
   const onSubmit = async (data: VentaForm) => {
+    if (!terminal) {
+      setError("tiendaId", { type: "manual", message: "Seleccione una terminal antes de registrar la venta." });
+      return;
+    }
     if (cajaCerrada) {
-      setError("tiendaId", { type: "manual", message: "La caja de esta tienda está cerrada. Abra caja primero." });
+      setError("tiendaId", {
+        type: "manual",
+        message: "La caja de la terminal seleccionada está cerrada. Abra caja primero.",
+      });
       return;
     }
 
@@ -525,6 +534,7 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
       clienteId: data.clienteId,
       clienteTipoDocumento: data.clienteTipoDocumento,
       tiendaId: data.tiendaId,
+      terminalId: terminal.id,
       tipoPago: data.tipoPago,
       descuento: data.descuento,
       costoEnvio: data.modalidadEntrega === MODALIDAD_ENVIO_DOMICILIO ? data.costoEnvio : 0,

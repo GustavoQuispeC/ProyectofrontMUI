@@ -14,12 +14,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   TextField,
   Typography,
@@ -47,7 +43,7 @@ import {
   cerrarCajaSchema,
 } from "@/features/dashboard/caja/caja.schema";
 import { AbrirCajaSesionRequest, CerrarCajaSesionRequest, CajaSesion } from "@/features/dashboard/caja/caja.type";
-import { useTiendas } from "@/features/dashboard/tienda/hooks/useTiendas";
+import { useTerminalSeleccionada } from "@/shared/hooks/useTerminalSeleccionada";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
@@ -188,25 +184,25 @@ export default function GestionCaja() {
   const canAbrir = user ? hasPermission(user.rol, permissions.abrirCajaSesion) : false;
   const canCerrar = user ? hasPermission(user.rol, permissions.cerrarCajaSesion) : false;
 
-  const [tiendaId, setTiendaId] = useState<number | null>(null);
   const [abrirOpen, setAbrirOpen] = useState(false);
   const [cerrarOpen, setCerrarOpen] = useState(false);
+  const { terminal } = useTerminalSeleccionada();
+  const terminalId = terminal?.id ?? null;
+  const tiendaId = terminal?.tiendaId ?? null;
 
-  const { tiendas, loading: loadingTiendas } = useTiendas(canAccess);
-  const { sesion, loading: loadingSesion } = useCajaSesionActiva(tiendaId, canAccess);
+  const { sesion, loading: loadingSesion } = useCajaSesionActiva(terminalId, canAccess);
   const { sesiones, loading: loadingSesiones } = useCajaSesionesPorTienda(tiendaId, canAccess);
   const abrirMutation = useAbrirCajaSesion();
-  const cerrarMutation = useCerrarCajaSesion(tiendaId);
+  const cerrarMutation = useCerrarCajaSesion(terminalId);
 
   const {
     control: controlAbrir,
     handleSubmit: handleSubmitAbrir,
     reset: resetAbrir,
-    setValue: setValueAbrir,
     formState: { errors: errorsAbrir },
   } = useForm<AbrirCajaForm>({
     resolver: standardSchemaResolver(abrirCajaSchema),
-    defaultValues: { tiendaId: 0, montoApertura: 0, observaciones: "" },
+    defaultValues: { terminalId: 0, montoApertura: 0, observaciones: "" },
     mode: "onSubmit",
     reValidateMode: "onChange",
     shouldFocusError: true,
@@ -230,7 +226,7 @@ export default function GestionCaja() {
 
   const handleOpenAbrir = () => {
     resetAbrir({
-      tiendaId: tiendaId ?? 0,
+      terminalId: terminalId ?? 0,
       montoApertura: 0,
       observaciones: "",
     });
@@ -248,7 +244,7 @@ export default function GestionCaja() {
   const onSubmitAbrir = async (data: AbrirCajaForm) => {
     try {
       const payload: AbrirCajaSesionRequest = {
-        tiendaId: data.tiendaId,
+        terminalId: data.terminalId,
         montoApertura: data.montoApertura,
         observaciones: data.observaciones,
       };
@@ -296,7 +292,7 @@ export default function GestionCaja() {
   if (!canAccess) return <AccessDenied />;
   if (!mounted) return null;
 
-  const tiendaNombre = tiendas.find((t) => t.id === tiendaId)?.nombre;
+  const tiendaNombre = terminal?.tiendaNombre;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -337,21 +333,10 @@ export default function GestionCaja() {
               </Box>
             </Stack>
 
-            <FormControl size="small" sx={{ minWidth: 220 }} disabled={loadingTiendas}>
-              <InputLabel id="tienda-select-label">Tienda</InputLabel>
-              <Select
-                labelId="tienda-select-label"
-                label="Tienda"
-                value={tiendaId != null ? String(tiendaId) : ""}
-                onChange={(e) => setTiendaId(e.target.value ? Number(e.target.value) : null)}
-              >
-                {tiendas.map((t) => (
-                  <MenuItem key={t.id} value={String(t.id)}>
-                    {t.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Chip
+              color={sesion ? "success" : "default"}
+              label={`${terminal?.nombre ?? "Sin terminal"} · ${sesion ? "Caja abierta" : "Caja cerrada"}`}
+            />
           </Stack>
         </Box>
 
@@ -447,31 +432,14 @@ export default function GestionCaja() {
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ pt: 1 }}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="tiendaId"
-                control={controlAbrir}
-                render={({ field }) => (
-                  <FormControl fullWidth size="small" error={!!errorsAbrir.tiendaId} disabled={loadingTiendas}>
-                    <InputLabel id="abrir-tienda-label">Tienda *</InputLabel>
-                    <Select
-                      labelId="abrir-tienda-label"
-                      label="Tienda *"
-                      value={field.value ? String(field.value) : ""}
-                      onChange={(e) => {
-                        const value = e.target.value ? Number(e.target.value) : 0;
-                        field.onChange(value);
-                        setTiendaId(value || null);
-                        setValueAbrir("tiendaId", value);
-                      }}
-                    >
-                      {tiendas.map((t) => (
-                        <MenuItem key={t.id} value={String(t.id)}>
-                          {t.nombre}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
+              <TextField
+                fullWidth
+                size="small"
+                label="Terminal"
+                value={terminal?.nombre ?? ""}
+                slotProps={{ input: { readOnly: true } }}
+                error={!!errorsAbrir.terminalId}
+                helperText={errorsAbrir.terminalId?.message}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>

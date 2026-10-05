@@ -47,11 +47,12 @@ export interface AmortizacionPago {
 }
 
 export interface AmortizarVentaRequest {
+  terminalId: number;
   pagos: AmortizacionPago[];
 }
 
 export interface AmortizarClienteRequest {
-  tiendaId: number;
+  terminalId: number;
   pagos: AmortizacionPago[];
 }
 

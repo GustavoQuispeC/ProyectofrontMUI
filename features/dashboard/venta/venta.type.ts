@@ -19,6 +19,7 @@ export interface RegistrarVentaRequest {
   clienteId: number;
   clienteTipoDocumento: number;
   tiendaId: number;
+  terminalId: number;
   tipoPago: number;
   descuento: number;
   costoEnvio: number;

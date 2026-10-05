@@ -128,4 +128,5 @@ export const getToken = (): string | null => {
 export const logout = (): void => {
   if (!isClient()) return;
   localStorage.removeItem(AUTH_KEY);
+  localStorage.removeItem("terminal_seleccionada");
 };
