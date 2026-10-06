@@ -132,8 +132,8 @@ function getColumns(estadosPago: CatalogoItem[], onVer: (row: VentaCredito) => v
     {
       field: "tiendaNombre",
       headerName: "Tienda",
-      minWidth: 170,
-      flex: 0.9,
+      minWidth: 140,
+      
     },
     {
       field: "codigo",

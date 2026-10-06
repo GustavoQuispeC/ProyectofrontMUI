@@ -165,7 +165,7 @@ function getColumns(
     {
       field: "codigo",
       headerName: "Código",
-      minWidth: 140,
+      minWidth: 120,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
@@ -188,7 +188,7 @@ function getColumns(
       field: "clienteNombre",
       headerName: "Cliente",
       flex: 1,
-      minWidth: 180,
+      minWidth: 250,
       valueGetter: (_value, row) => row.clienteNombre || "—",
     },
     {
@@ -203,7 +203,7 @@ function getColumns(
     {
       field: "clienteNumeroDocumento",
       headerName: "Documento",
-      width: 130,
+      width: 110,
       align: "center",
       headerAlign: "center",
       valueGetter: (_value, row) => row.clienteNumeroDocumento || "—",
@@ -211,7 +211,7 @@ function getColumns(
     {
       field: "tiendaNombre",
       headerName: "Tienda",
-      minWidth: 160,
+      minWidth: 140,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
@@ -233,7 +233,7 @@ function getColumns(
     {
       field: "tipoPago",
       headerName: "Tipo pago",
-      width: 110,
+      width: 90,
       align: "center",
       headerAlign: "center",
       valueGetter: (_value, row) => catalogoNombre(ctx.tiposPago, row.tipoPago),
@@ -241,7 +241,7 @@ function getColumns(
     {
       field: "estadoPago",
       headerName: "Pago",
-      width: 130,
+      width: 110,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => {
@@ -261,7 +261,7 @@ function getColumns(
     {
       field: "total",
       headerName: "Total",
-      width: 110,
+      width: 100,
       align: "right",
       headerAlign: "center",
       valueGetter: (_value, row) => monedaFormatter.format(row.total),
@@ -269,7 +269,7 @@ function getColumns(
     {
       field: "montoPagado",
       headerName: "Pagado",
-      width: 110,
+      width: 100,
       align: "right",
       headerAlign: "center",
       valueGetter: (_value, row) => monedaFormatter.format(row.montoPagado),
@@ -277,7 +277,7 @@ function getColumns(
     {
       field: "estado",
       headerName: "Estado",
-      width: 140,
+      width: 80,
       align: "center",
       headerAlign: "center",
       renderCell: (params) => {
@@ -293,14 +293,14 @@ function getColumns(
     {
       field: "fechaConfirmacion",
       headerName: "Fecha",
-      minWidth: 160,
+      minWidth: 140,
       valueGetter: (_value, row) =>
         row.fechaConfirmacion ? dayjs(row.fechaConfirmacion).format("DD/MM/YYYY HH:mm") : "—",
     },
     {
       field: "empleadoAtiendeNombre",
       headerName: "Atendido por",
-      minWidth: 180,
+      minWidth: 200,
       valueGetter: (_value, row) => row.empleadoAtiendeNombre || "—",
     },
     {

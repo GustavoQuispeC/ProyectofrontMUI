@@ -36,6 +36,7 @@ import {
   Typography,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import CloseIcon from "@mui/icons-material/Close";
 import { esES } from "@mui/x-data-grid/locales";
 
@@ -341,7 +342,7 @@ export default function IngresosCaja() {
     pagina: 1,
     tamanoPagina: 200,
   });
-  const { pagos, totalRegistros, loading, refetch } = useReporteCajaPagos(
+  const { pagos, totalRegistros, loading } = useReporteCajaPagos(
     {
       tiendaId: tiendaId ? Number(tiendaId) : null,
       clienteId,
@@ -424,10 +425,6 @@ export default function IngresosCaja() {
     },
   ];
 
-  const handleBuscar = () => {
-    refetch();
-  };
-
   const handleRowDoubleClick = (pago: ReporteCajaPago) => {
     setPagoSeleccionado(pago);
   };
@@ -442,9 +439,12 @@ export default function IngresosCaja() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
       <Box sx={{ width: "100%" }}>
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
-          Reporte de ingresos de caja
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
+          <AssessmentIcon color="primary" fontSize="large" />
+          <Typography variant="h4" sx={{ fontWeight: 600 }}>
+            Reporte de ingresos de caja
+          </Typography>
+        </Box>
 
         <Paper sx={{ p: 2, mb: 3 }} variant="outlined">
           <Grid container spacing={2} sx={{ alignItems: "center" }}>
@@ -537,11 +537,6 @@ export default function IngresosCaja() {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 4, lg: 2 }} sx={{ display: "flex", alignItems: "center" }}>
-              <Button variant="contained" onClick={handleBuscar} fullWidth>
-                Buscar
-              </Button>
-            </Grid>
           </Grid>
         </Paper>
 

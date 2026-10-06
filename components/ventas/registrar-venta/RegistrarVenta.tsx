@@ -18,6 +18,7 @@ import {
   Avatar,
   Box,
   Button,
+  ButtonGroup,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -727,23 +728,41 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
               </Typography>
             </Box>
           </Stack>
-          <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
-            <Tooltip title="Minimizar">
-              <IconButton
-                size="small"
+          <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+            {terminal && (
+              <Alert
+                variant="filled"
+                severity={loadingSesion ? "info" : sesionCaja ? "success" : "warning"}
+                sx={{
+                  py: 0,
+                  alignItems: "center",
+                  "& .MuiAlert-message": { py: 0.5, fontSize: "0.8125rem" },
+                }}
+              >
+                {terminal.nombre} · {loadingSesion ? "Verificando caja" : sesionCaja ? "Caja abierta" : "Caja cerrada"}
+              </Alert>
+            )}
+            <ButtonGroup variant="outlined" size="small" aria-label="Acciones de venta">
+              <Button
+                color="info"
+                title="Minimizar"
+                aria-label="Minimizar"
                 onClick={() => {
                   onMinimize();
                   setMinimized(true);
                 }}
               >
                 <MinimizeIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Cerrar">
-              <IconButton size="small" onClick={handleClose}>
+              </Button>
+              <Button
+                color="error"
+                title="Cerrar"
+                aria-label="Cerrar"
+                onClick={handleClose}
+              >
                 <CloseIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+              </Button>
+            </ButtonGroup>
           </Stack>
         </Box>
 
