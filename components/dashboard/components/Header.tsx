@@ -1,7 +1,7 @@
 "use client";
 
 import Stack from "@mui/material/Stack";
-import Chip from "@mui/material/Chip";
+import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import Tooltip from "@mui/material/Tooltip";
@@ -42,12 +42,13 @@ export default function Header() {
 
       <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
         {terminal && (
-          <Chip
-            size="small"
-            variant="outlined"
-            color={sesion ? "success" : "warning"}
-            label={`${terminal.nombre} · ${loading ? "Verificando caja" : sesion ? "Caja abierta" : "Caja cerrada"}`}
-          />
+          <Alert
+            variant="filled"
+            severity={loading ? "info" : sesion ? "success" : "warning"}
+            sx={{ py: 0, alignItems: "center", "& .MuiAlert-message": { py: 0.5, fontSize: "0.8125rem" } }}
+          >
+            {terminal.nombre} · {loading ? "Verificando caja" : sesion ? "Caja abierta" : "Caja cerrada"}
+          </Alert>
         )}
         {/* DatePicker alineado visualmente con los IconButtons */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>

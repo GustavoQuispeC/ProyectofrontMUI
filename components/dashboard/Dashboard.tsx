@@ -108,12 +108,14 @@ export default function Dashboard({ children }: DashboardProps) {
         </Stack>
       </Box>
       <RegistrarVenta open={ventaOpen} onClose={handleCloseVenta} onMinimize={() => setVentaPersistente(true)} />
+
+      {/* Dialog para requerir terminal */}
       <Dialog open={requiereTerminal} maxWidth="xs" fullWidth>
-        <DialogTitle>Seleccionar terminal de caja</DialogTitle>
+        <DialogTitle>Seleccionar caja</DialogTitle>
         <DialogContent>
           <Stack sx={{ gap: 2, pt: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              Seleccione la terminal que utilizará durante esta sesión. Para cambiarla deberá cerrar sesión.
+              Seleccione la caja que utilizará durante esta sesión. Para cambiarla deberá cerrar sesión.
             </Typography>
             {seleccionandoTerminal ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
