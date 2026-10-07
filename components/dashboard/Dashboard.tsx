@@ -15,6 +15,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { usePathname, useRouter } from "next/navigation";
 import RegistrarVenta from "@/components/ventas/registrar-venta/RegistrarVenta";
 import AppNavbar from "./components/AppNavbar";
@@ -111,7 +112,12 @@ export default function Dashboard({ children }: DashboardProps) {
 
       {/* Dialog para requerir terminal */}
       <Dialog open={requiereTerminal} maxWidth="xs" fullWidth>
-        <DialogTitle>Seleccionar caja</DialogTitle>
+        <DialogTitle sx={{ bgcolor: "primary.main", color: "primary.contrastText" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <MonetizationOnIcon />
+            <span>Seleccionar caja</span>
+          </Box>
+        </DialogTitle>
         <DialogContent>
           <Stack sx={{ gap: 2, pt: 1 }}>
             <Typography variant="body2" color="text.secondary">

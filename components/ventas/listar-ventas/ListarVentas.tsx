@@ -43,7 +43,6 @@ import SellIcon from "@mui/icons-material/Sell";
 import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
@@ -59,7 +58,7 @@ import {
 import { useTiendas } from "@/features/dashboard/tienda/hooks/useTiendas";
 import { Venta } from "@/features/dashboard/venta/venta.type";
 import { useDespachosCompletadosPorVentas } from "@/features/dashboard/despacho/hooks/useDespachos";
-import { generarNotaVentaPdf, imprimirTicketVenta } from "@/features/dashboard/venta/helpers/ventaPdf";
+import { imprimirTicketVenta } from "@/features/dashboard/venta/helpers/ventaPdf";
 import { CatalogoItem } from "@/features/dashboard/catalogo/catalogo.type";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
@@ -159,7 +158,6 @@ function getColumns(
   despachosCompletados: Map<number, boolean>,
   onVer: (row: Venta) => void,
   onTicket: (row: Venta) => void,
-  onPdf: (row: Venta) => void,
 ): GridColDef<Venta>[] {
   return [
     {
@@ -341,14 +339,6 @@ function getColumns(
               onClick={() => onTicket(params.row)}
             />
           </Tooltip>
-          <Tooltip title="Descargar nota de venta (PDF)">
-            <PictureAsPdfOutlinedIcon
-              fontSize="small"
-              color="error"
-              sx={{ cursor: "pointer" }}
-              onClick={() => onPdf(params.row)}
-            />
-          </Tooltip>
         </Stack>
       ),
     },
@@ -452,13 +442,6 @@ export default function ListarVentas() {
     [extrasVenta],
   );
 
-  const handlePdf = useCallback(
-    (row: Venta) => {
-      void generarNotaVentaPdf(row, extrasVenta(row));
-    },
-    [extrasVenta],
-  );
-
   const columns = useMemo(
     () =>
       getColumns(
@@ -466,9 +449,8 @@ export default function ListarVentas() {
         despachosCompletados,
         handleVer,
         handleTicket,
-        handlePdf,
       ),
-    [tiposPago, estadosVenta, estadosPago, tiposDocumento, despachosCompletados, handleVer, handleTicket, handlePdf],
+    [tiposPago, estadosVenta, estadosPago, tiposDocumento, despachosCompletados, handleVer, handleTicket],
   );
 
   if (!canAccess) return <AccessDenied />;
@@ -805,14 +787,6 @@ export default function ListarVentas() {
                   startIcon={<LocalPrintshopOutlinedIcon />}
                 >
                   Imprimir ticket
-                </Button>
-                <Button
-                  onClick={() => handlePdf(selectedRow)}
-                  variant="outlined"
-                  color="error"
-                  startIcon={<PictureAsPdfOutlinedIcon />}
-                >
-                  Descargar PDF
                 </Button>
               </>
             )}

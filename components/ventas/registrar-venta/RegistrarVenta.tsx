@@ -53,7 +53,6 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import MinimizeIcon from "@mui/icons-material/Minimize";
 import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
-import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -85,7 +84,7 @@ import {
   ventaSchema,
 } from "@/features/dashboard/venta/venta.schema";
 import { RegistrarVentaRequest, Venta } from "@/features/dashboard/venta/venta.type";
-import { generarNotaVentaPdf, imprimirTicketVenta } from "@/features/dashboard/venta/helpers/ventaPdf";
+import { imprimirTicketVenta } from "@/features/dashboard/venta/helpers/ventaPdf";
 import { Cliente } from "@/features/dashboard/cliente/cliente.type";
 import RegistrarCliente from "@/components/clientes/registrar-cliente/RegistrarCliente";
 import { getAuthUser } from "@/shared/auth/auth.service";
@@ -1836,16 +1835,7 @@ export default function RegistrarVenta({ open, onClose, onMinimize }: RegistrarV
           >
             Imprimir ticket
           </Button>
-          <Button
-            size="small"
-            variant="contained"
-            startIcon={<PictureAsPdfOutlinedIcon />}
-            onClick={() => {
-              if (ventaRegistrada) void generarNotaVentaPdf(ventaRegistrada, extrasDocumentoVenta(ventaRegistrada));
-            }}
-          >
-            Descargar PDF
-          </Button>
+
         </DialogActions>
       </Dialog>
 
