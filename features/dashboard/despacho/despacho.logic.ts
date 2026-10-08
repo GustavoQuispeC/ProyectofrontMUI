@@ -4,6 +4,8 @@ import { getAuthUser } from "@/shared/auth/auth.service";
 import {
   asignarConductorVehiculoApi,
   completarDespachoApi,
+  descargarPdfEnvioDomicilioApi,
+  descargarPdfRecojoTiendaApi,
   despacharEnTiendaApi,
   listarConductoresDespachoApi,
   listarDespachosPorVentaApi,
@@ -22,6 +24,18 @@ export function esEnvioDomicilio(modalidad: ModalidadDespacho | null | undefined
     .toLowerCase();
 
   return valor === "enviodomicilio" || (valor.includes("envio") && valor.includes("domicilio"));
+}
+
+export function esRecojoTienda(modalidad: ModalidadDespacho | null | undefined) {
+  if (Number(modalidad) === 1) return true;
+
+  const valor = String(modalidad ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z]/gi, "")
+    .toLowerCase();
+
+  return valor === "recojotienda" || (valor.includes("recojo") && valor.includes("tienda"));
 }
 
 export async function listarDespachosPorVenta(ventaId: number) {
@@ -94,4 +108,29 @@ export async function completarDespacho(despacho: Despacho) {
   }
 
   return completarDespachoApi(despacho.id);
+}
+
+export async function descargarPdfDespacho(despacho: Despacho) {
+  const user = getAuthUser();
+
+  if (!user) throw new Error("No autenticado");
+  if (!hasPermission(user.rol, permissions.listarVentas)) {
+    throw new Error("No tienes privilegios para descargar el acta de entrega");
+  }
+
+  if (esRecojoTienda(despacho.modalidad)) {
+    if (despacho.estado !== 3) {
+      throw new Error("El despacho debe estar completado para descargar el acta de entrega");
+    }
+    return descargarPdfRecojoTiendaApi(despacho.id, `acta-recojo-${despacho.codigo}.pdf`);
+  }
+
+  if (esEnvioDomicilio(despacho.modalidad)) {
+    if (despacho.estado !== 2 && despacho.estado !== 3) {
+      throw new Error("El despacho debe estar en ruta o entregado para descargar el PDF");
+    }
+    return descargarPdfEnvioDomicilioApi(despacho.id, `acta-envio-${despacho.codigo}.pdf`);
+  }
+
+  throw new Error("La modalidad del despacho no permite descargar un acta de entrega");
 }

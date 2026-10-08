@@ -157,7 +157,7 @@ export default function LoginUsuario({
                 {isLoading ? (
                   <>
                     <AutorenewIcon style={{ fontSize: 18 }} className="animate-spin" />
-                    <span>Validando credenciales...</span>
+                    <span>Validando accesos...</span>
                   </>
                 ) : (
                   <>

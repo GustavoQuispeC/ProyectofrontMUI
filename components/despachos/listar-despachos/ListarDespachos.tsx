@@ -32,7 +32,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
-import LocalPrintshopOutlinedIcon from "@mui/icons-material/LocalPrintshopOutlined";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
@@ -43,12 +43,12 @@ import {
   useConductoresDespacho,
   useDespacharEnTienda,
   useDespachosPorVenta,
+  useDescargarPdfDespacho,
   useEstadosDespacho,
   useMarcarDespachoEnRuta,
 } from "@/features/dashboard/despacho/hooks/useDespachos";
 import { Despacho } from "@/features/dashboard/despacho/despacho.type";
-import { esEnvioDomicilio } from "@/features/dashboard/despacho/despacho.logic";
-import { imprimirTicketDespacho, ProductoPendienteDespacho } from "@/features/dashboard/despacho/despacho.ticket";
+import { esEnvioDomicilio, esRecojoTienda } from "@/features/dashboard/despacho/despacho.logic";
 import { getAuthUser } from "@/shared/auth/auth.service";
 import { hasPermission } from "@/shared/auth/auth.helper";
 import { permissions } from "@/shared/auth/auth.permissions";
@@ -83,7 +83,8 @@ function DespachoCard({
   onAsignar,
   onEnRuta,
   onCompletar,
-  onImprimir,
+  onDescargarPdf,
+  descargandoPdf,
 }: {
   despacho: Despacho;
   estadoNombre: string;
@@ -92,12 +93,16 @@ function DespachoCard({
   onAsignar: (despacho: Despacho) => void;
   onEnRuta: (despacho: Despacho) => void;
   onCompletar: (despacho: Despacho) => void;
-  onImprimir: (despacho: Despacho) => void;
+  onDescargarPdf: (despacho: Despacho) => void;
+  descargandoPdf: boolean;
 }) {
   const tienePendientes = despacho.detalles.some((detalle) => Number(detalle.cantidadPendiente) > 0);
   const envioDomicilio = esEnvioDomicilio(despacho.modalidad);
+  const recojoTienda = esRecojoTienda(despacho.modalidad);
   const tieneAsignacion = Boolean(despacho.conductorEmpleadoId && despacho.vehiculoId);
   const puedeSalir = tieneAsignacion;
+  const puedeDescargarPdf =
+    (recojoTienda && despacho.estado === 3) || (envioDomicilio && (despacho.estado === 2 || despacho.estado === 3));
 
   return (
     <Paper variant="outlined" sx={{ overflow: "hidden", borderRadius: 2 }}>
@@ -191,16 +196,22 @@ function DespachoCard({
 
         <Divider sx={{ my: 2 }} />
         <Stack direction="row" sx={{ justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
-          <Tooltip title="Imprimir ticket de despacho">
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<LocalPrintshopOutlinedIcon />}
-              onClick={() => onImprimir(despacho)}
-            >
-              Ticket
-            </Button>
-          </Tooltip>
+          {puedeDescargarPdf && (
+            <Tooltip title="Descargar acta de entrega en PDF">
+              <Button
+                size="small"
+                variant="outlined"
+                color="error"
+                disabled={descargandoPdf}
+                startIcon={
+                  descargandoPdf ? <CircularProgress size={16} color="inherit" /> : <PictureAsPdfOutlinedIcon />
+                }
+                onClick={() => onDescargarPdf(despacho)}
+              >
+                {descargandoPdf ? "Descargando..." : "Descargar PDF"}
+              </Button>
+            </Tooltip>
+          )}
           {!tienePendientes && (
             <Chip size="small" color="success" icon={<CheckCircleOutlineIcon />} label="Despacho completo" />
           )}
@@ -274,6 +285,7 @@ export default function ListarDespachos() {
   const enRutaMutation = useMarcarDespachoEnRuta(ventaId);
   const despacharMutation = useDespacharEnTienda(ventaId);
   const completarMutation = useCompletarDespacho(ventaId);
+  const pdfDespachoMutation = useDescargarPdfDespacho();
   const [despachoAsignar, setDespachoAsignar] = useState<Despacho | null>(null);
   const [despachoEnRuta, setDespachoEnRuta] = useState<Despacho | null>(null);
   const [cantidadesEnRuta, setCantidadesEnRuta] = useState<Record<number, string>>({});
@@ -285,29 +297,16 @@ export default function ListarDespachos() {
   const estadoNombre = (estado: number) =>
     estados.find((item) => item.id === estado)?.nombre ?? estadoFallback[estado] ?? `#${estado}`;
 
-  const imprimirDespacho = (despacho: Despacho) => {
-    const pendientes = new Map<number, ProductoPendienteDespacho>();
-
-    despachos
-      .filter((item) => item.id !== despacho.id)
-      .forEach((item) => {
-        item.detalles.forEach((detalle) => {
-          const cantidad = Number(detalle.cantidadPendiente);
-          if (cantidad <= 0) return;
-
-          const key = detalle.detalleVentaId || detalle.productoId;
-          const actual = pendientes.get(key);
-          if (!actual || cantidad > actual.cantidad) {
-            pendientes.set(key, {
-              productoCodigo: detalle.productoCodigo,
-              productoNombre: detalle.productoNombre,
-              cantidad,
-            });
-          }
-        });
+  const descargarPdf = async (despacho: Despacho) => {
+    try {
+      await toastPromise(pdfDespachoMutation.descargar(despacho), {
+        loading: "Generando acta de entrega...",
+        success: "Acta de entrega descargada",
+        error: (error) => error.message || "No se pudo descargar el PDF",
       });
-
-    void imprimirTicketDespacho(despacho, Array.from(pendientes.values()));
+    } catch {
+      return;
+    }
   };
 
   const abrirAsignacion = (despacho: Despacho) => {
@@ -499,7 +498,8 @@ export default function ListarDespachos() {
               onAsignar={abrirAsignacion}
               onEnRuta={abrirEnRuta}
               onCompletar={(value) => void completarDespacho(value)}
-              onImprimir={imprimirDespacho}
+              onDescargarPdf={(value) => void descargarPdf(value)}
+              descargandoPdf={pdfDespachoMutation.descargandoId === despacho.id}
             />
           ))}
         </Stack>

@@ -4,6 +4,7 @@ import { CatalogoItem } from "@/features/dashboard/catalogo/catalogo.type";
 import {
   asignarConductorVehiculo,
   completarDespacho,
+  descargarPdfDespacho,
   despacharEnTienda,
   listarConductoresDespacho,
   listarDespachosPorVenta,
@@ -106,6 +107,18 @@ export function useCompletarDespacho(ventaId: number | null) {
     completar: mutation.mutateAsync,
     completandoId: mutation.isPending ? (mutation.variables?.despacho.id ?? null) : null,
     loading: mutation.isPending,
+    error: mutation.error instanceof Error ? mutation.error.message : null,
+  };
+}
+
+export function useDescargarPdfDespacho() {
+  const mutation = useMutation({
+    mutationFn: (despacho: Despacho) => descargarPdfDespacho(despacho),
+  });
+
+  return {
+    descargar: mutation.mutateAsync,
+    descargandoId: mutation.isPending ? (mutation.variables?.id ?? null) : null,
     error: mutation.error instanceof Error ? mutation.error.message : null,
   };
 }
